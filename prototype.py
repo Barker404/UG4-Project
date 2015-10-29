@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import networkx as nx
+import itertools
 from collections import Counter
 from random import random
 import matplotlib.pyplot as plt
@@ -15,49 +16,69 @@ def ShareAlg(shown):
     SHARE_PROB = 0.3
     return [x for x in shown if random() > SHARE_PROB]
 
+def drawGraph(g, pos, roundNo):
+    # Draw this round's sharing
+    seenColours = [len(g.node[nodeIndex]['seen'][roundNo]) for 
+        nodeIndex in g.nodes_iter()]
+
+    sharedColours = [int(
+        (len(g.node[edge[0]]['shared'][roundNo]) > 0 or
+         len(g.node[edge[1]]['shared'][roundNo]) > 0))
+        for edge in g.edges()]
+
+    nx.draw(g, pos, node_color=seenColours, edge_color=sharedColours, 
+        width=2.0, vmin=0.0, vmax=1.0, with_labels=False)
+    plt.savefig("output/round{0}.png".format(roundNo), dpi=200, 
+        facecolor='black')
+    plt.clf()
+
+
 print "start"
 
-NODE_COUNT = 30
+ROWS = 10
+COLUMNS = 10
 ROUND_COUNT = 10
 MESSAGE_COUNT = 1
 
 # Create graph
-g = nx.erdos_renyi_graph(NODE_COUNT, 0.2)
-pos = nx.spring_layout(g)
+g = nx.grid_2d_graph(COLUMNS, ROWS)
+# Use node labels as positions
+pos = dict(zip(g,g))
 print "made graph"
 
-# Create message starting points
-shared = []
-for i in range(0, MESSAGE_COUNT):
-    shared.append([[i]])
-for i in range(MESSAGE_COUNT, NODE_COUNT):
-    shared.append([[]])
-print "setup messages"
+# Set up node attributes
+for i in g.nodes_iter():
+    g.node[i]['seen'] = [[]]
+    g.node[i]['shared'] = [[]]
 
+# Set message starting points
+# (uses the first k nodes)
+iterator = g.nodes_iter()
+for i in range(0, MESSAGE_COUNT):
+    nodeIndex = iterator.next()
+
+    # Assume starting node always shares
+    g.node[nodeIndex]['seen'][0].append(i)
+    g.node[nodeIndex]['shared'][0].append(i)
+
+# Draw initial config
+drawGraph(g, pos, 0)
 
 # Simulate rounds
-for roundNo in range(0, ROUND_COUNT):
+for roundNo in range(1, ROUND_COUNT + 1):
     print "ROUND {0}".format(roundNo)
-    for node in g.nodes_iter():
+    for nodeIndex in g.nodes_iter():
 
         # Get messages that could possiblu be shown
-        possible = [shared[neighbour][roundNo] for 
-            neighbour in g.neighbors_iter(node)]
-
+        possible = [g.node[n]['shared'][roundNo-1] for 
+            n in g.neighbors_iter(nodeIndex)]
         # Flatten possible
         possible = [item for sublist in possible for item in sublist]
 
         # Update messages
-        shown = ShowAlg(possible)
-        shared[node].append(ShareAlg(shown))
+        seen = ShowAlg(possible)
+        g.node[nodeIndex]['seen'].append(seen)
+        shared = ShareAlg(seen)
+        g.node[nodeIndex]['shared'].append(shared)
 
-    # Draw this round's sharing
-    colours = [len(shared[node][roundNo]) for node in g.nodes_iter()]
-    nx.draw(g, pos, node_color=colours, vmin=0.0, vmax=1.0, with_labels=False)
-    plt.savefig("round{0}.png".format(roundNo),dpi=75)
-    plt.clf()
-
-for roundShared in shared:
-    print roundShared
-
-raw_input("Press Enter to continue...\n")
+    drawGraph(g, pos, roundNo)
