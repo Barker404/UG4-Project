@@ -14,8 +14,8 @@ def ShowAlg(possible):
 
 
 def ShareAlg(shown):
-    SHARE_PROB = 0.3
-    return [x for x in shown if random() > SHARE_PROB]
+    SHARE_PROB = 0.7
+    return [x for x in shown if random() < SHARE_PROB]
 
 
 def drawGraph(g, pos, roundNo):
