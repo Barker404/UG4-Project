@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import networkx as nx
-import itertools
 from collections import Counter
 from random import random
 import matplotlib.pyplot as plt
+
 
 def ShowAlg(possible):
     counts = Counter(possible)
@@ -12,24 +12,26 @@ def ShowAlg(possible):
 
     return [t[0] for t in top]
 
+
 def ShareAlg(shown):
     SHARE_PROB = 0.3
     return [x for x in shown if random() > SHARE_PROB]
 
+
 def drawGraph(g, pos, roundNo):
     # Draw this round's sharing
-    seenColours = [len(g.node[nodeIndex]['seen'][roundNo]) for 
-        nodeIndex in g.nodes_iter()]
+    seenColours = [len(g.node[nodeIndex]['seen'][roundNo]) for
+                   nodeIndex in g.nodes_iter()]
 
     sharedColours = [int(
         (len(g.node[edge[0]]['shared'][roundNo]) > 0 or
          len(g.node[edge[1]]['shared'][roundNo]) > 0))
         for edge in g.edges()]
 
-    nx.draw(g, pos, node_color=seenColours, edge_color=sharedColours, 
-        width=2.0, vmin=0.0, vmax=1.0, with_labels=False)
-    plt.savefig("output/round{0}.png".format(roundNo), dpi=200, 
-        facecolor='black')
+    nx.draw(g, pos, node_color=seenColours, edge_color=sharedColours,
+            width=2.0, vmin=0.0, vmax=1.0, with_labels=False)
+    plt.savefig("output/round{0}.png".format(roundNo), dpi=200,
+                facecolor='black')
     plt.clf()
 
 
@@ -43,7 +45,7 @@ MESSAGE_COUNT = 1
 # Create graph
 g = nx.grid_2d_graph(COLUMNS, ROWS)
 # Use node labels as positions
-pos = dict(zip(g,g))
+pos = dict(zip(g, g))
 print "made graph"
 
 # Set up node attributes
@@ -70,8 +72,8 @@ for roundNo in range(1, ROUND_COUNT + 1):
     for nodeIndex in g.nodes_iter():
 
         # Get messages that could possiblu be shown
-        possible = [g.node[n]['shared'][roundNo-1] for 
-            n in g.neighbors_iter(nodeIndex)]
+        possible = [g.node[n]['shared'][roundNo-1] for
+                    n in g.neighbors_iter(nodeIndex)]
         # Flatten possible
         possible = [item for sublist in possible for item in sublist]
 
