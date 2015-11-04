@@ -7,7 +7,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-def drawGraph(g, pos, round_no, watched):
+def draw_graph(g, pos, round_no, watched):
     # Draw this round's sharing
     seen_colours = []
     for node_index in g.nodes_iter():
