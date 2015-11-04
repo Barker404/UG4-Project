@@ -3,7 +3,7 @@
 from collections import Counter
 
 
-def ShowAlg(possible):
+def show_alg(possible):
     counts = Counter(possible)
     top = counts.most_common(3)
 

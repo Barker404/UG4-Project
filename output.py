@@ -7,43 +7,44 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-def drawGraph(g, pos, roundNo, watched):
+def drawGraph(g, pos, round_no, watched):
     # Draw this round's sharing
-    seenColours = []
-    for nodeIndex in g.nodes_iter():
+    seen_colours = []
+    for node_index in g.nodes_iter():
         if watched is None or any(
-                msg in g.node[nodeIndex]['seen'][roundNo] for msg in watched):
-            seenColours.append(1)
+                msg in g.node[node_index]['seen'][round_no]
+                for msg in watched):
+            seen_colours.append(1)
         else:
-            seenColours.append(0)
+            seen_colours.append(0)
 
-    sharedColours = []
+    shared_colours = []
     for edge in g.edges():
         if watched is None or any(
-                (msg in g.node[edge[0]]['shared'][roundNo]) or
-                (msg in g.node[edge[1]]['shared'][roundNo])
+                (msg in g.node[edge[0]]['shared'][round_no]) or
+                (msg in g.node[edge[1]]['shared'][round_no])
                 for msg in watched):
-            sharedColours.append(1)
+            shared_colours.append(1)
         else:
-            sharedColours.append(0)
+            shared_colours.append(0)
 
     labels = {}
-    for nodeIndex in g.nodes_iter():
-        sharedSet = set(g.node[nodeIndex]['shared'][roundNo])
-        seenSet = set(g.node[nodeIndex]['seen'][roundNo]) - sharedSet
+    for node_index in g.nodes_iter():
+        shared_set = set(g.node[node_index]['shared'][round_no])
+        seen_set = set(g.node[node_index]['seen'][round_no]) - shared_set
 
-        label = " ".join(map(str, sharedSet))
-        if seenSet:
+        label = " ".join(map(str, shared_set))
+        if seen_set:
             label += "("
-            label += ") (".join(map(str, seenSet))
+            label += ") (".join(map(str, seen_set))
             label += ")"
 
-        labels[nodeIndex] = label
+        labels[node_index] = label
 
-    nx.draw(g, pos, node_color=seenColours, edge_color=sharedColours,
+    nx.draw(g, pos, node_color=seen_colours, edge_color=shared_colours,
             width=2.0, vmin=0.0, vmax=1.0, with_labels=True,
             labels=labels, font_color='white')
 
-    plt.savefig("output/round{0}.png".format(roundNo), dpi=200,
+    plt.savefig("output/round{0}.png".format(round_no), dpi=200,
                 facecolor='black')
     plt.clf()

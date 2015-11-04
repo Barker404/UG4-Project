@@ -2,9 +2,9 @@
 
 import networkx as nx
 
-from showing import ShowAlg
-from sharing import ShareAlg
-from output import drawGraph
+from showing import show_alg
+from sharing import share_alg
+from output import draw_graph
 
 print "start"
 
@@ -33,30 +33,30 @@ else:
     iterator = iter(MESSAGE_STARTS)
 
 for i in range(0, MESSAGE_COUNT):
-    nodeIndex = iterator.next()
+    node_index = iterator.next()
 
     # Assume starting node always shares
-    g.node[nodeIndex]['seen'][0].append(i)
-    g.node[nodeIndex]['shared'][0].append(i)
+    g.node[node_index]['seen'][0].append(i)
+    g.node[node_index]['shared'][0].append(i)
 
 # Draw initial config
-drawGraph(g, pos, 0, WATCHED_MESSAGES)
+draw_graph(g, pos, 0, WATCHED_MESSAGES)
 
 # Simulate rounds
-for roundNo in range(1, ROUND_COUNT + 1):
-    print "ROUND {0}".format(roundNo)
-    for nodeIndex in g.nodes_iter():
+for round_no in range(1, ROUND_COUNT + 1):
+    print "ROUND {0}".format(round_no)
+    for node_index in g.nodes_iter():
 
         # Get messages that could possibly be shown
-        possible = [g.node[n]['shared'][roundNo - 1] for
-                    n in g.neighbors_iter(nodeIndex)]
+        possible = [g.node[n]['shared'][round_no - 1] for
+                    n in g.neighbors_iter(node_index)]
         # Flatten possible
         possible = [item for sublist in possible for item in sublist]
 
         # Update messages
-        seen = ShowAlg(possible)
-        g.node[nodeIndex]['seen'].append(seen)
-        shared = ShareAlg(seen)
-        g.node[nodeIndex]['shared'].append(shared)
+        seen = show_alg(possible)
+        g.node[node_index]['seen'].append(seen)
+        shared = share_alg(seen)
+        g.node[node_index]['shared'].append(shared)
 
-    drawGraph(g, pos, roundNo, WATCHED_MESSAGES)
+    draw_graph(g, pos, round_no, WATCHED_MESSAGES)
