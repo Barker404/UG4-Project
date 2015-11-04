@@ -15,30 +15,40 @@ MESSAGE_COUNT = 1
 MESSAGE_STARTS = None
 WATCHED_MESSAGES = [0]
 
-# Create graph
-g = nx.grid_2d_graph(COLUMNS, ROWS)
-# Use node labels as positions
-pos = dict(zip(g, g))
-print "made graph"
 
-# Set up node attributes
-for i in g.nodes_iter():
-    g.node[i]['seen'] = [[]]
-    g.node[i]['shared'] = [[]]
+def create_graph():
+    # Create graph
+    g = nx.grid_2d_graph(COLUMNS, ROWS)
+    # Use node labels as positions
+    pos = dict(zip(g, g))
+    print "made graph"
 
-# Set message starting points
-if MESSAGE_STARTS is None:
-    iterator = g.nodes_iter()
-else:
-    iterator = iter(MESSAGE_STARTS)
+    # Set up node attributes
+    for i in g.nodes_iter():
+        g.node[i]['seen'] = [[]]
+        g.node[i]['shared'] = [[]]
 
-for i in range(0, MESSAGE_COUNT):
-    node_index = iterator.next()
+    return (g, pos)
 
-    # Assume starting node always shares
-    g.node[node_index]['seen'][0].append(i)
-    g.node[node_index]['shared'][0].append(i)
 
+def create_messages(g):
+    # Set message starting points
+    if MESSAGE_STARTS is None:
+        iterator = g.nodes_iter()
+    else:
+        # If not given, just choose first n nodes
+        iterator = iter(MESSAGE_STARTS)
+
+    for i in range(0, MESSAGE_COUNT):
+        node_index = iterator.next()
+
+        # Assume starting node always shares
+        g.node[node_index]['seen'][0].append(i)
+        g.node[node_index]['shared'][0].append(i)
+
+
+g, pos = create_graph()
+create_messages(g)
 # Draw initial config
 draw_graph(g, pos, 0, WATCHED_MESSAGES)
 
