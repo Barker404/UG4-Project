@@ -4,6 +4,15 @@ venv/
 # Image output
 output/
 
+# SFTP transfer config
+sftp-config.json
+
+# LaTeX output files
+*.aux
+*.log
+*.synctex.gz
+*.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -63,4 +72,3 @@ docs/_build/
 
 # PyBuilder
 target/
-sftp-config.json
