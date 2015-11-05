@@ -1,0 +1,36 @@
+\documentclass{article}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+\begin{document}
+\author{Lewis Barker}
+\title{Project model}
+\date{November 2015}
+\maketitle
+
+\section{Input}
+We are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$.
+
+\section{Rounds}
+The system progresses in a series of \textbf{rounds}. For any round $t$, and for some node $v \in V$, the \textbf{shared set} $S_{t}(v)$ is the set of messages which were shared by $v$ in that round.
+
+Initially, at round 0, for each $v \in V$ the shared set is defined as:
+
+\begin{equation}
+S_{0}(v) = \{m_{x} ~|~ x \in [0, k] \wedge s_{x} = v\}
+\end{equation}
+
+That is, the set of messages for which $v$ is the source.
+
+We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as follows:
+
+\begin{equation}
+P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
+\end{equation}
+
+Where $N(v)$ is the set of neighbouring nodes of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
+
+The possible set of $v$ therefore consists of all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ can see at this point.
+
+\end{document}
