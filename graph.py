@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import networkx as nx
-from random import random, uniform
+from random import uniform
 from math import floor
 
 
@@ -24,15 +24,6 @@ def kleinberg(cols, rows, k, q):
 
 def kleinberg2(cols, rows, k, q):
     g = nx.grid_2d_graph(cols, rows)
-    for node_index in g.nodes_iter():
-        for i in range(k):
-            v_index = choose_random_node2(g, node_index, q)
-            g.add_edge(node_index, v_index)
-    return g
-
-
-def kleinberg3(cols, rows, k, q):
-    g = nx.grid_2d_graph(cols, rows)
 
     norm_node = (floor(cols/2), floor(rows/2))
 
@@ -40,29 +31,13 @@ def kleinberg3(cols, rows, k, q):
 
     for node_index in g.nodes_iter():
         for i in range(k):
-            v_index = choose_random_node3(g, node_index, q, constant)
+            v_index = choose_random_node2(g, node_index, q, constant)
             if v_index is not None:
                 g.add_edge(node_index, v_index)
     return g
 
 
 def choose_random_node(g, node_index, q):
-    # calculate normalisation constant to get actual probabilities
-    norm_const = get_norm_const(g, node_index, q)
-    inv_norm_const = 1.0/norm_const
-
-    rand = random()
-    for v_index in g.nodes_iter():
-        if v_index == node_index:
-            continue
-
-        d = grid_distance(node_index, v_index)
-        rand -= inv_norm_const * pow(d, -q)
-        if (rand < 0):
-            return v_index
-
-
-def choose_random_node2(g, node_index, q):
     # calculate normalisation constant to get actual probabilities
     norm_const = get_norm_const(g, node_index, q)
 
@@ -77,7 +52,7 @@ def choose_random_node2(g, node_index, q):
             return v_index
 
 
-def choose_random_node3(g, node_index, q, norm_const):
+def choose_random_node2(g, node_index, q, norm_const):
     rand = uniform(0, norm_const)
     for v_index in g.nodes_iter():
         if v_index == node_index:
