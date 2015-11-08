@@ -19,8 +19,7 @@ WATCHED_MESSAGES = [0]
 def create_graph():
     # Create graph
     g = nx.grid_2d_graph(COLUMNS, ROWS)
-    # Use node labels as positions
-    pos = dict(zip(g, g))
+    pos = dict((zip(g, g)))
     print "made graph"
 
     # Set up node attributes
