@@ -5,21 +5,25 @@ import networkx as nx
 from showing import show_alg
 from sharing import share_alg
 from output import draw_graph
+from graph import kleinberg
+from random import choice
+from message import Message
+
 
 print "start"
 
 ROWS = 10
 COLUMNS = 10
-ROUND_COUNT = 10
-MESSAGE_COUNT = 1
+ROUND_COUNT = 20
+MESSAGE_COUNT = 10
 MESSAGE_STARTS = None
 WATCHED_MESSAGES = [0]
 
 
 def create_graph():
     # Create graph
-    g = nx.grid_2d_graph(COLUMNS, ROWS)
-    pos = dict((zip(g, g)))
+    g = kleinberg(20, 20, 1, 2)
+    pos = dict(zip(g, map((lambda (x, y): (x * 2, y * 2)), g)))
     print "made graph"
 
     # Set up node attributes
@@ -31,25 +35,27 @@ def create_graph():
 
 
 def create_messages(g):
-    # Set message starting points
-    if MESSAGE_STARTS is None:
-        iterator = g.nodes_iter()
-    else:
-        # If not given, just choose first n nodes
-        iterator = iter(MESSAGE_STARTS)
+
+    messages = []
 
     for i in range(0, MESSAGE_COUNT):
-        node_index = iterator.next()
+        source_index = choice(g.nodes())
+        destination_index = choice(g.nodes())
+        message = Message(i, source_index, destination_index)
+        messages.append(message)
 
         # Assume starting node always shares
-        g.node[node_index]['seen'][0].append(i)
-        g.node[node_index]['shared'][0].append(i)
+        g.node[source_index]['seen'][0].append(message)
+        g.node[source_index]['shared'][0].append(message)
+
+    return (messages)
 
 
 g, pos = create_graph()
-create_messages(g)
+messages = create_messages(g)
+
 # Draw initial config
-draw_graph(g, pos, 0, WATCHED_MESSAGES)
+draw_graph(g, pos, 0, messages, WATCHED_MESSAGES)
 
 # Simulate rounds
 for round_no in range(1, ROUND_COUNT + 1):
@@ -57,15 +63,20 @@ for round_no in range(1, ROUND_COUNT + 1):
     for node_index in g.nodes_iter():
 
         # Get messages that could possibly be shown
-        possible = [g.node[n]['shared'][round_no - 1] for
-                    n in g.neighbors_iter(node_index)]
-        # Flatten possible
-        possible = [item for sublist in possible for item in sublist]
+        # possible, seen, and shared have format (message, previous_node)
+        possible = [(message, neighbour)
+                    for neighbour in g.neighbors_iter(node_index)
+                    for message in g.node[neighbour]['shared'][round_no - 1]]
 
         # Update messages
         seen = show_alg(possible)
-        g.node[node_index]['seen'].append(seen)
-        shared = share_alg(seen)
-        g.node[node_index]['shared'].append(shared)
+        g.node[node_index]['seen'].append([s[0] for s in seen])
+        for (message, prev_node) in seen:
+            if message.destination == node_index and not message.delivered:
+                message.delivered = True
+                print str(message.id) + " delivered!"
 
-    draw_graph(g, pos, round_no, WATCHED_MESSAGES)
+        shared = share_alg(seen)
+        g.node[node_index]['shared'].append([s[0] for s in shared])
+
+    draw_graph(g, pos, round_no, messages, WATCHED_MESSAGES)
