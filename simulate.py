@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import networkx as nx
-
 from showing import show_alg
 from sharing import share_alg
 from output import draw_graph
@@ -86,3 +84,7 @@ for round_no in range(1, ROUND_COUNT + 1):
 
     if DRAW:
         draw_graph(g, pos, round_no, messages, WATCHED_MESSAGE, DRAW_LABELS)
+
+
+print "{0} out of {1} message were delivered".format(
+    len([x for x in messages if x.delivered]), len(messages))
