@@ -13,13 +13,18 @@ def draw_graph(g, pos, round_no, messages, watched, draw_labels):
     #
 
     cmap = plt.get_cmap("Blues_r")
-    cmap.set_under('red')
+    # Under: shared
+    cmap.set_under('orange')
+    # Over: seen but not shared
+    cmap.set_over('red')
 
     seen_colours = []
     for node_index in g.nodes_iter():
         # Only draw watched message as specific colour
-        if (messages[watched] in g.node[node_index]['seen'][round_no]):
+        if (messages[watched] in g.node[node_index]['shared'][round_no]):
             seen_colours.append(-1)
+        elif (messages[watched] in g.node[node_index]['seen'][round_no]):
+            seen_colours.append(len(messages) + 1)
         else:
             # Gradient based on no of messages seen
             seen_colours.append(len(g.node[node_index]['seen'][round_no]))
