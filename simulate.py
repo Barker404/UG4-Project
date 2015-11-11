@@ -17,7 +17,8 @@ COLUMNS = 10
 ROUND_COUNT = 20
 MESSAGE_COUNT = 10
 MESSAGE_STARTS = None
-WATCHED_MESSAGES = [0]
+WATCHED_MESSAGE = 0
+DRAW_LABELS = False
 
 
 def create_graph():
@@ -55,7 +56,7 @@ g, pos = create_graph()
 messages = create_messages(g)
 
 # Draw initial config
-draw_graph(g, pos, 0, messages, WATCHED_MESSAGES)
+draw_graph(g, pos, 0, messages, WATCHED_MESSAGE, DRAW_LABELS)
 
 # Simulate rounds
 for round_no in range(1, ROUND_COUNT + 1):
@@ -70,7 +71,8 @@ for round_no in range(1, ROUND_COUNT + 1):
 
         # Update messages
         seen = show_alg(possible)
-        g.node[node_index]['seen'].append([s[0] for s in seen])
+
+        g.node[node_index]['seen'].append(list(set([s[0] for s in seen])))
         for (message, prev_node) in seen:
             if message.destination == node_index and not message.delivered:
                 message.delivered = True
@@ -79,4 +81,4 @@ for round_no in range(1, ROUND_COUNT + 1):
         shared = share_alg(seen)
         g.node[node_index]['shared'].append([s[0] for s in shared])
 
-    draw_graph(g, pos, round_no, messages, WATCHED_MESSAGES)
+    draw_graph(g, pos, round_no, messages, WATCHED_MESSAGE, DRAW_LABELS)
