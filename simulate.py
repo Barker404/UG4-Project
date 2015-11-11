@@ -16,7 +16,8 @@ ROWS = 10
 COLUMNS = 10
 ROUND_COUNT = 20
 MESSAGE_COUNT = 10
-MESSAGE_STARTS = None
+
+DRAW = True
 WATCHED_MESSAGE = 0
 DRAW_LABELS = False
 
@@ -55,8 +56,9 @@ def create_messages(g):
 g, pos = create_graph()
 messages = create_messages(g)
 
-# Draw initial config
-draw_graph(g, pos, 0, messages, WATCHED_MESSAGE, DRAW_LABELS)
+if DRAW:
+    # Draw initial config
+    draw_graph(g, pos, 0, messages, WATCHED_MESSAGE, DRAW_LABELS)
 
 # Simulate rounds
 for round_no in range(1, ROUND_COUNT + 1):
@@ -81,4 +83,5 @@ for round_no in range(1, ROUND_COUNT + 1):
         shared = share_alg(seen)
         g.node[node_index]['shared'].append([s[0] for s in shared])
 
-    draw_graph(g, pos, round_no, messages, WATCHED_MESSAGE, DRAW_LABELS)
+    if DRAW:
+        draw_graph(g, pos, round_no, messages, WATCHED_MESSAGE, DRAW_LABELS)

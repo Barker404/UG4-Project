@@ -50,10 +50,10 @@ def draw_graph(g, pos, round_no, messages, watched, draw_labels):
             labels[node_index] = label
 
     fig = plt.figure(figsize=(15, 15))
-    nx.draw(g, pos, node_color=seen_colours, edge_color=shared_colours,
-            width=2.0, vmin=0, vmax=len(messages), with_labels=draw_labels,
-            labels=labels, font_color='orange', cmap=cmap)
+    nx.draw(g, pos, node_size=150, width=2.0,  with_labels=draw_labels,
+            node_color=seen_colours, edge_color=shared_colours, labels=labels,
+            vmin=0, vmax=len(messages), cmap=cmap, font_color='orange')
 
-    plt.savefig("output/round{0}.png".format(round_no), dpi=200,
+    plt.savefig("output/round{0}.png".format(round_no), dpi=80,
                 facecolor='black')
     plt.close(fig)
