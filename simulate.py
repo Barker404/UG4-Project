@@ -71,7 +71,7 @@ for round_no in range(1, ROUND_COUNT + 1):
                     for message in g.node[neighbour]['shared'][round_no - 1]]
 
         # Update messages
-        seen = show_alg(possible)
+        seen = show_alg(g, node_index, possible)
 
         g.node[node_index]['seen'].append(seen)
         for message in seen:
