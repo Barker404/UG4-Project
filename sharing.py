@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 
-from random import random
+import random
+
+SHARE_AMOUNT = 5
 
 
 def share_alg(shown):
-    SHARE_PROB = 0.3
-    return [x for x in shown if random() < SHARE_PROB]
+    shared = set()
+
+    while len(shared) < SHARE_AMOUNT and len(shown) > 0:
+        item = random.choice(shown)
+        shown.remove(item)
+        shared.add(item[0])
+
+    return list(shared)

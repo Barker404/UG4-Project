@@ -12,8 +12,8 @@ print "start"
 
 ROWS = 10
 COLUMNS = 10
-ROUND_COUNT = 20
-MESSAGE_COUNT = 10
+ROUND_COUNT = 5
+MESSAGE_COUNT = 50
 
 DRAW = True
 WATCHED_MESSAGE = 0
@@ -64,23 +64,24 @@ for round_no in range(1, ROUND_COUNT + 1):
     for node_index in g.nodes_iter():
 
         # Get messages that could possibly be shown
-        # possible has format [(message, previous_node)]
-        # seen and shared are simply format [message]
+        # possible, seen and shared have format [(message, previous_node)]
         possible = [(message, neighbour)
                     for neighbour in g.neighbors_iter(node_index)
                     for message in g.node[neighbour]['shared'][round_no - 1]]
 
         # Update messages
-        seen = show_alg(g, node_index, possible)
+        showResults = show_alg(g, node_index, possible)
+        seen = list(set([s[0] for s in showResults]))
 
         g.node[node_index]['seen'].append(seen)
-        for message in seen:
+        for message in g.node[node_index]['seen'][round_no]:
             if message.destination == node_index and not message.delivered:
                 message.delivered = True
                 print str(message.id) + " delivered!"
 
-        shared = share_alg(seen)
-        g.node[node_index]['shared'].append(shared)
+        shareResult = share_alg(showResults)
+
+        g.node[node_index]['shared'].append(shareResult)
 
     if DRAW:
         draw_graph(g, pos, round_no, messages, WATCHED_MESSAGE, DRAW_LABELS)
