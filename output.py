@@ -7,7 +7,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-def draw_graph(g, pos, round_no, messages, watched, draw_labels):
+def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
     # Draw this round's sharing
     # Draw what was seen and shared this round on the nodes
     #
@@ -58,7 +58,7 @@ def draw_graph(g, pos, round_no, messages, watched, draw_labels):
     nodes = nx.draw_networkx_nodes(g, pos, node_size=150, font_color='orange',
                                    labels=labels, with_labels=draw_labels,
                                    node_color=seen_colours, vmin=0,
-                                   vmax=len(messages), cmap=cmap,)
+                                   vmax=max_seen, cmap=cmap,)
 
     nx.draw_networkx_edges(g, pos, width=2.0,
                            edge_color=shared_colours)

@@ -2,35 +2,58 @@
 
 from collections import Counter
 from graph import grid_distance
+import random
 
-MAX_SHOWN = 20
-
-
-def show_alg(g, node_index, possible):
-    # Receives (node, message)
-    candidates = select_candidates(g, node_index, possible)
-    return select_final(g, node_index, candidates)
+from abc import ABCMeta, abstractmethod
 
 
-def select_candidates(g, node_index, possible):
-    return candidates_any_closer(g, node_index, possible)
+class ShowModel(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def show_alg(self, g, node_index, possible):
+        pass
 
 
-def candidates_any_closer(g, node_index, possible):
-    return [p for p in possible if (
-        grid_distance(p[1], p[0].destination) >
-        grid_distance(node_index, p[0].destination))]
+class AnyCloserShowModel(ShowModel):
+
+    def __init__(self, max_shown=20):
+        self.max_shown = max_shown
+
+    def show_alg(self, node_index, possible):
+        candidates = self.select_candidates(node_index, possible)
+        return self.select_final(candidates)
+
+    def select_candidates(self, node_index, possible):
+        # return any that are closer
+        # possible is (message, node_index) pairs
+        return [p for p in possible if (
+            grid_distance(p[1], p[0].destination) >
+            grid_distance(node_index, p[0].destination))]
+
+    def select_final(self, candidates):
+        # Select the correct amount randomly
+        return random.sample(candidates, min(self.max_shown, len(candidates)))
 
 
-def candidates_distance_prob(g, node_index, possible):
-    pass
+class FurtherProbShowModel(ShowModel):
 
+    def __init__(self, max_shown=20, not_closer_prob=0.5):
+        self.not_closer_prob = not_closer_prob
 
-def select_final(g, node_index, candidates):
-    messages = [x[0] for x in candidates if not x[0].delivered]
+    def show_alg(self, node_index, possible):
+        candidates = self.select_candidates(node_index, possible)
+        return self.select_final(candidates)
 
-    counts = Counter(messages)
-    top = counts.most_common(MAX_SHOWN)
-    top_messages = [t for t in top]
+    def candidates_closer_prob_others(self, node_index, possible):
+        # If closer, return always
+        # If not closer, return with given probability
+        return [p for p in possible if (
+            grid_distance(p[1], p[0].destination) >
+            grid_distance(node_index, p[0].destination))
+            or
+            random.random() > self.not_closer_prob]
 
-    return top_messages
+    def select_final(self, candidates):
+        # Select the correct amount randomly
+        return random.sample(candidates, min(self.max_shown, len(candidates)))

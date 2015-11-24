@@ -1,16 +1,28 @@
 #!/usr/bin/env python
 
 import random
+from abc import ABCMeta, abstractmethod
 
-SHARE_AMOUNT = 5
+
+class ShareModel(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def share_alg(self, shown):
+        pass
 
 
-def share_alg(shown):
-    shared = set()
+class BasicShareModel(ShareModel):
 
-    while len(shared) < SHARE_AMOUNT and len(shown) > 0:
-        item = random.choice(shown)
-        shown.remove(item)
-        shared.add(item[0])
+    def __init__(self, share_amount=5):
+        self.share_amount = share_amount
 
-    return list(shared)
+    def share_alg(self, shown):
+        shared = set()
+
+        while len(shared) < self.share_amount and len(shown) > 0:
+            item = random.choice(shown)
+            shown.remove(item)
+            shared.add(item[0])
+
+        return list(shared)
