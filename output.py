@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 
+import os
 import networkx as nx
 import matplotlib
+from matplotlib.colors import rgb2hex
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
+SHARED_COLOUR = '#FF8000'
+SEEN_COLOUR = '#FF0000'
+TARGET_COLOUR = '#FF00FF'
+
+
 def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
     # Draw this round's sharing
     # Draw what was seen and shared this round on the nodes
-    #
 
     cmap = plt.get_cmap("Blues_r")
     # Under: shared
@@ -18,16 +24,28 @@ def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
     # Over: seen but not shared
     cmap.set_over('red')
 
-    seen_colours = []
+    gradient_nodelist = []
+    gradient_colours = []
+
+    specific_nodelist = []
+    specific_colours = []
+
     for node_index in g.nodes_iter():
-        # Only draw watched message as specific colour
+        # Draw watched message as specific colour
         if (messages[watched] in g.node[node_index]['shared'][round_no]):
-            seen_colours.append(-1)
+            specific_nodelist.append(node_index)
+            specific_colours.append(SHARED_COLOUR)
         elif (messages[watched] in g.node[node_index]['seen'][round_no]):
-            seen_colours.append(len(messages) + 1)
+            specific_nodelist.append(node_index)
+            specific_colours.append(SEEN_COLOUR)
+        elif (messages[watched].destination == node_index):
+            specific_nodelist.append(node_index)
+            specific_colours.append(TARGET_COLOUR)
         else:
             # Gradient based on no of messages seen
-            seen_colours.append(len(g.node[node_index]['seen'][round_no]))
+            cmapValue = float(len(g.node[node_index]['seen'][round_no]))
+            gradient_nodelist.append(node_index)
+            gradient_colours.append(cmapValue)
 
     # Draw where the "seen" messages were shared from (last round) on the edges
     shared_colours = []
@@ -55,10 +73,15 @@ def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
             labels[node_index] = label
 
     fig = plt.figure(figsize=(20, 15))
-    nodes = nx.draw_networkx_nodes(g, pos, node_size=150, font_color='orange',
-                                   labels=labels, with_labels=draw_labels,
-                                   node_color=seen_colours, vmin=0,
-                                   vmax=max_seen, cmap=cmap,)
+    nx.draw_networkx_nodes(g, pos, nodelist=specific_nodelist, node_size=150,
+                           font_color='orange', with_labels=draw_labels,
+                           labels=labels, node_color=specific_colours)
+
+    nodes = nx.draw_networkx_nodes(g, pos, nodelist=gradient_nodelist,
+                                   node_size=150, font_color='orange',
+                                   with_labels=draw_labels, labels=labels,
+                                   node_color=gradient_colours, vmin=0,
+                                   vmax=max_seen, cmap=cmap)
 
     nx.draw_networkx_edges(g, pos, width=2.0,
                            edge_color=shared_colours)
@@ -68,6 +91,12 @@ def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
     cbar.ax.tick_params(axis='y', colors='white')
 
     plt.axis('off')
+
+    try:
+        os.makedirs("output")
+    except OSError:
+        if not os.path.isdir("output"):
+            raise
 
     plt.savefig("output/round{0}.png".format(round_no), dpi=80,
                 facecolor='black')
