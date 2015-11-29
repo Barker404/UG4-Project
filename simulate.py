@@ -110,6 +110,41 @@ class Simulation(object):
 
         return len([x for x in self.messages if x.delivered])
 
+    def repeat_simulation(self, count, regenerate_graph=True,
+                          regenerate_messages=True):
+        total = 0
+        total_delivered = 0
+        min_delivered = float('inf')
+        max_delivered = 0
+        for i in range(count):
+            self.clear_simulation()
+            if regenerate_graph or i == 0:
+                self.generate_graph()
+            if regenerate_messages or i == 0:
+                self.generate_messages()
+
+            delivered = self.run_simulation(False, None, False)
+
+            total += self.message_count
+            total_delivered += delivered
+            if delivered < min_delivered:
+                min_delivered = delivered
+            if delivered > max_delivered:
+                max_delivered = delivered
+
+            print "Finished simulation {} of {}".format(i + 1, count)
+
+        print "Delivered a total of {} out of {} - {}%".format(
+            total_delivered, total, 100*float(total_delivered) / float(total))
+        print "Min: {} out of {} - {}%".format(
+            min_delivered, self.message_count,
+            100*float(min_delivered) / float(self.message_count))
+        print "Max: {} out of {} - {}%".format(
+            max_delivered, self.message_count,
+            100*float(max_delivered) / float(self.message_count))
+
+        return (total_delivered, min_delivered, max_delivered)
+
 
 def main():
     show_model = showing.AnyCloserShowModel(20)
