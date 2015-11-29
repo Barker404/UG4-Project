@@ -28,6 +28,7 @@ class AnyCloserShowModel(ShowModel):
         # return any that are closer
         # possible is (message, node_index) pairs
         return [p for p in possible if (
+            not p[0].delivered and
             grid_distance(p[1], p[0].destination) >
             grid_distance(node_index, p[0].destination))]
 
@@ -40,19 +41,20 @@ class FurtherProbShowModel(ShowModel):
 
     def __init__(self, max_shown=20, not_closer_prob=0.5):
         self.not_closer_prob = not_closer_prob
+        self.max_shown = max_shown
 
     def show_alg(self, node_index, possible):
-        candidates = self.select_candidates(node_index, possible)
+        candidates = self.candidates_closer_prob_others(node_index, possible)
         return self.select_final(candidates)
 
     def candidates_closer_prob_others(self, node_index, possible):
         # If closer, return always
         # If not closer, return with given probability
         return [p for p in possible if (
-            grid_distance(p[1], p[0].destination) >
-            grid_distance(node_index, p[0].destination))
-            or
-            random.random() > self.not_closer_prob]
+            not p[0].delivered and
+            (grid_distance(p[1], p[0].destination) >
+             grid_distance(node_index, p[0].destination) or
+             random.random() > self.not_closer_prob))]
 
     def select_final(self, candidates):
         # Select the correct amount randomly
