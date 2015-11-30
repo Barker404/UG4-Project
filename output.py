@@ -13,12 +13,19 @@ SHARED_COLOUR = '#FF8000'
 SEEN_COLOUR = '#FF0000'
 DESTINATION_COLOUR = '#FF0080'
 
+# Multiply the number of nodes along one axis by this to get the figure size
+# along that axis
+FIGSIZE_NODE_RATIO = 1.0/3.0
+# Multiply the figure size width by this to make space for the colorbar
+COLORBAR_FIGSIZE_RATIO = 4.0/3.0
 
-def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
 NODE_SIZE = 50
 DEST_NODE_SIZE = 100
 EDGE_WIDTH = 2
 
+
+def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels,
+               width, height):
     # Draw this round's sharing
     # Draw what was seen and shared this round on the nodes
 
@@ -78,6 +85,11 @@ EDGE_WIDTH = 2
                 label += ")"
 
             labels[node_index] = label
+
+    # Set the size of the figure based on the number of nodes in each direction
+    # Also take into account additional space for colourbar
+    fig = plt.figure(figsize=(width*COLORBAR_FIGSIZE_RATIO*FIGSIZE_NODE_RATIO,
+                              height*FIGSIZE_NODE_RATIO))
 
     # Draw the nodes with the watched message, the destination node, and all
     # other nodes seperately
