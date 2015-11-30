@@ -11,10 +11,14 @@ import matplotlib.pyplot as plt
 
 SHARED_COLOUR = '#FF8000'
 SEEN_COLOUR = '#FF0000'
-TARGET_COLOUR = '#FF00FF'
+DESTINATION_COLOUR = '#FF0080'
 
 
 def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
+NODE_SIZE = 50
+DEST_NODE_SIZE = 100
+EDGE_WIDTH = 2
+
     # Draw this round's sharing
     # Draw what was seen and shared this round on the nodes
 
@@ -24,28 +28,31 @@ def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
     # Over: seen but not shared
     cmap.set_over('red')
 
-    gradient_nodelist = []
-    gradient_colours = []
+    cmap_nodelist = []
+    cmap_colours = []
 
-    specific_nodelist = []
-    specific_colours = []
+    watched_nodelist = []
+    watched_colours = []
+
+    dest_nodelist = []
+    dest_colours = []
 
     for node_index in g.nodes_iter():
         # Draw watched message as specific colour
         if (messages[watched] in g.node[node_index]['shared'][round_no]):
-            specific_nodelist.append(node_index)
-            specific_colours.append(SHARED_COLOUR)
+            watched_nodelist.append(node_index)
+            watched_colours.append(SHARED_COLOUR)
         elif (messages[watched] in g.node[node_index]['seen'][round_no]):
-            specific_nodelist.append(node_index)
-            specific_colours.append(SEEN_COLOUR)
+            watched_nodelist.append(node_index)
+            watched_colours.append(SEEN_COLOUR)
         elif (messages[watched].destination == node_index):
-            specific_nodelist.append(node_index)
-            specific_colours.append(TARGET_COLOUR)
+            dest_nodelist.append(node_index)
+            dest_colours.append(DESTINATION_COLOUR)
         else:
             # Gradient based on no of messages seen
             cmapValue = float(len(g.node[node_index]['seen'][round_no]))
-            gradient_nodelist.append(node_index)
-            gradient_colours.append(cmapValue)
+            cmap_nodelist.append(node_index)
+            cmap_colours.append(cmapValue)
 
     # Draw where the "seen" messages were shared from (last round) on the edges
     shared_colours = []
@@ -72,21 +79,28 @@ def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels):
 
             labels[node_index] = label
 
-    fig = plt.figure(figsize=(20, 15))
-    nx.draw_networkx_nodes(g, pos, nodelist=specific_nodelist, node_size=150,
-                           font_color='orange', with_labels=draw_labels,
-                           labels=labels, node_color=specific_colours)
+    # Draw the nodes with the watched message, the destination node, and all
+    # other nodes seperately
+    nx.draw_networkx_nodes(g, pos, nodelist=watched_nodelist,
+                           node_size=NODE_SIZE, node_color=watched_colours,
+                           with_labels=draw_labels, labels=labels,
+                           font_color='orange')
 
-    nodes = nx.draw_networkx_nodes(g, pos, nodelist=gradient_nodelist,
-                                   node_size=150, font_color='orange',
-                                   with_labels=draw_labels, labels=labels,
-                                   node_color=gradient_colours, vmin=0,
-                                   vmax=max_seen, cmap=cmap)
+    nx.draw_networkx_nodes(g, pos, nodelist=dest_nodelist,
+                           node_size=DEST_NODE_SIZE, node_color=dest_colours,
+                           with_labels=draw_labels, labels=labels,
+                           font_color='orange')
 
-    nx.draw_networkx_edges(g, pos, width=2.0,
+    n = nx.draw_networkx_nodes(g, pos, nodelist=cmap_nodelist,
+                               node_size=NODE_SIZE, node_color=cmap_colours,
+                               cmap=cmap, vmin=0, vmax=max_seen,
+                               with_labels=draw_labels, labels=labels,
+                               font_color='orange')
+
+    nx.draw_networkx_edges(g, pos, width=EDGE_WIDTH,
                            edge_color=shared_colours)
 
-    cbar = plt.colorbar(nodes)
+    cbar = plt.colorbar(n)
     cbar.ax.tick_params(axis='x', colors='white')
     cbar.ax.tick_params(axis='y', colors='white')
 
