@@ -73,42 +73,48 @@ class Simulation(object):
         if draw_output:
             # Draw initial config
             draw_graph(self.g, self.pos, 0, self.messages,
-                       self.show_model.max_shown, watched_message, draw_labels)
+                       self.show_model.max_shown, watched_message, draw_labels,
+                       self.columns, self.rows)
 
         # Simulate rounds
         for round_no in range(1, self.round_count + 1):
-            print "ROUND {0}".format(round_no)
-            for node_index in self.g.nodes_iter():
-
-                # Get messages that could possibly be shown
-                # possible, seen and shared have format
-                # [(message, previous_node)]
-                possible = [(message, neighbour)
-                            for neighbour in self.g.neighbors_iter(node_index)
-                            for message in self.g.node[neighbour]['shared']
-                            [round_no - 1]]
-
-                # Update messages
-                showResults = self.show_model.show_alg(node_index, possible)
-                seen = list(set([s[0] for s in showResults]))
-
-                self.g.node[node_index]['seen'].append(seen)
-                for message in self.g.node[node_index]['seen'][round_no]:
-                    if (message.destination == node_index and
-                            not message.delivered):
-                        message.delivered = True
-                        print str(message.id) + " delivered!"
-
-                shareResult = self.share_model.share_alg(showResults)
-
-                self.g.node[node_index]['shared'].append(shareResult)
-
-            if draw_output:
-                draw_graph(self.g, self.pos, round_no, self.messages,
-                           self.show_model.max_shown, watched_message,
-                           draw_labels)
+            self.simulate_round(round_no, draw_output, watched_message,
+                                draw_labels)
 
         return len([x for x in self.messages if x.delivered])
+
+    def simulate_round(self, round_no, draw_output, watched_message,
+                       draw_labels):
+        print "ROUND {0}".format(round_no)
+        for node_index in self.g.nodes_iter():
+
+            # Get messages that could possibly be shown
+            # possible, seen and shared have format
+            # [(message, previous_node)]
+            possible = [(message, neighbour)
+                        for neighbour in self.g.neighbors_iter(node_index)
+                        for message in self.g.node[neighbour]['shared']
+                        [round_no - 1]]
+
+            # Update messages
+            showResults = self.show_model.show_alg(node_index, possible)
+            seen = list(set([s[0] for s in showResults]))
+
+            self.g.node[node_index]['seen'].append(seen)
+            for message in self.g.node[node_index]['seen'][round_no]:
+                if (message.destination == node_index and
+                        not message.delivered):
+                    message.delivered = True
+                    print str(message.id) + " delivered!"
+
+            shareResult = self.share_model.share_alg(showResults)
+
+            self.g.node[node_index]['shared'].append(shareResult)
+
+        if draw_output:
+            draw_graph(self.g, self.pos, round_no, self.messages,
+                       self.show_model.max_shown, watched_message,
+                       draw_labels, self.columns, self.rows)
 
     def repeat_simulation(self, count, regenerate_graph=True,
                           regenerate_messages=True):
