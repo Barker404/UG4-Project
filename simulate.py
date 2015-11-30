@@ -96,19 +96,21 @@ class Simulation(object):
                         for message in self.g.node[neighbour]['shared']
                         [round_no - 1]]
 
-            # Update messages
+            # Update seen messages
             showResults = self.show_model.show_alg(node_index, possible)
             seen = list(set([s[0] for s in showResults]))
-
             self.g.node[node_index]['seen'].append(seen)
+
+            # Check if messages have reached destinations
             for message in self.g.node[node_index]['seen'][round_no]:
                 if (message.destination == node_index and
                         not message.delivered):
                     message.delivered = True
+                    message.delivery_turn = round_no
                     print str(message.id) + " delivered!"
 
+            # Update shared messages
             shareResult = self.share_model.share_alg(showResults)
-
             self.g.node[node_index]['shared'].append(shareResult)
 
         if draw_output:
