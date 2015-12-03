@@ -105,7 +105,8 @@ class Simulation(object):
                         [round_no - 1]]
 
             # Update seen messages
-            showResults = self.show_model.show_alg(node_index, possible)
+            showResults = self.show_model.show_alg(
+                self.g, node_index, possible)
             seen = list(set([s[0] for s in showResults]))
             self.g.node[node_index]['seen'].append(seen)
 

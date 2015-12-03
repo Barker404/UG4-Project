@@ -20,7 +20,7 @@ class AnyCloserShowModel(ShowModel):
     def __init__(self, max_shown=20):
         self.max_shown = max_shown
 
-    def show_alg(self, node_index, possible):
+    def show_alg(self, g, node_index, possible):
         candidates = self.select_candidates(node_index, possible)
         return self.select_final(candidates)
 
@@ -43,7 +43,7 @@ class FurtherProbShowModel(ShowModel):
         self.not_closer_prob = not_closer_prob
         self.max_shown = max_shown
 
-    def show_alg(self, node_index, possible):
+    def show_alg(self, g, node_index, possible):
         candidates = self.select_candidates(node_index, possible)
         return self.select_final(candidates)
 
