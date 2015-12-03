@@ -3,7 +3,7 @@
 import os
 import networkx as nx
 import matplotlib
-from matplotlib.colors import rgb2hex
+from matplotlib import animation
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -24,59 +24,149 @@ DEST_NODE_SIZE = 100
 EDGE_WIDTH = 2
 
 
-def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels,
-               width, height):
-    # Draw this round's sharing
-    # Draw what was seen and shared this round on the nodes
+class Visualiser(object):
 
-    cmap = plt.get_cmap("Blues_r")
-    # Under: shared
-    cmap.set_under('orange')
-    # Over: seen but not shared
-    cmap.set_over('red')
+    def __init__(self, columns, rows):
+        # Set the size of the figure based on the number of nodes in each
+        # direction
+        # Also take into account additional space for colourbar
+        self.fig = plt.figure(figsize=(
+                columns*COLORBAR_FIGSIZE_RATIO*FIGSIZE_NODE_RATIO,
+                rows*FIGSIZE_NODE_RATIO))
+        self.cbar_drawn = False
 
-    cmap_nodelist = []
-    cmap_colours = []
+        plt.axis('off')
+        ax = plt.gca()
+        ax.set_axis_bgcolor('black')
 
-    watched_nodelist = []
-    watched_colours = []
+    def draw_image(self, g, pos, round_no, messages, max_seen, watched,
+                   draw_labels):
+        self._draw_frame(g, pos, round_no, messages, max_seen, watched,
+                         draw_labels)
+        try:
+            os.makedirs("output")
+        except OSError:
+            if not os.path.isdir("output"):
+                raise
 
-    dest_nodelist = []
-    dest_colours = []
+        plt.savefig("output/round{0}.png".format(round_no), dpi=150,
+                    facecolor='black')
 
-    for node_index in g.nodes_iter():
-        # Draw watched message as specific colour
-        if (messages[watched] in g.node[node_index]['shared'][round_no]):
-            watched_nodelist.append(node_index)
-            watched_colours.append(SHARED_COLOUR)
-        elif (messages[watched] in g.node[node_index]['seen'][round_no]):
-            watched_nodelist.append(node_index)
-            watched_colours.append(SEEN_COLOUR)
-        elif (messages[watched].destination == node_index):
-            dest_nodelist.append(node_index)
-            dest_colours.append(DESTINATION_COLOUR)
-        else:
-            # Gradient based on no of messages seen
-            cmapValue = float(len(g.node[node_index]['seen'][round_no]))
-            cmap_nodelist.append(node_index)
-            cmap_colours.append(cmapValue)
+    def create_video(self, g, pos, round_count, messages, max_seen, watched,
+                     draw_labels):
+        anim = animation.FuncAnimation(
+                    self.fig,
+                    lambda i: self._draw_frame(
+                        g, pos, i, messages,
+                        max_seen, watched,
+                        draw_labels),
+                    frames=round_count, interval=1000, blit=True)
 
-    # Draw where the "seen" messages were shared from (last round) on the edges
-    shared_colours = []
-    for edge in g.edges():
-        if ((messages[watched] in
-                g.node[edge[0]]['shared'][round_no - 1]) or
-            (messages[watched] in
-                g.node[edge[1]]['shared'][round_no - 1])):
-            shared_colours.append(1)
-        else:
-            shared_colours.append(0)
+        FFwriter = animation.FFMpegWriter(fps=1)
+        try:
+            os.makedirs("output")
+        except OSError:
+            if not os.path.isdir("output"):
+                raise
+        anim.save('output/animation.mp4', writer=FFwriter,  dpi=150,
+                  codec="libx264", bitrate=-1,
+                  savefig_kwargs={'facecolor': 'black'})
 
-    labels = {}
-    if (draw_labels):
+    def _draw_frame(self, g, pos, round_no, messages, max_seen, watched,
+                    draw_labels):
+        # Draw this round's sharing
+        # Draw what was seen and shared this round on the nodes
+        self.fig.clear()
+
+        cmap = plt.get_cmap("Blues_r")
+        cmap_nodelist = []
+        cmap_colours = []
+
+        watched_nodelist = []
+        watched_colours = []
+
+        dest_nodelist = []
+        dest_colours = []
+
+        for node_index in g.nodes_iter():
+            dest_node = False
+            # Draw destination node up to and including delivery round
+            if (messages[watched].destination == node_index and
+                (not messages[watched].delivered or
+                    messages[watched].delivery_turn == round_no)):
+                dest_nodelist.append(node_index)
+                dest_colours.append(DESTINATION_COLOUR)
+                dest_node = True
+
+            # Draw watched message as specific colour
+            if (messages[watched] in g.node[node_index]['shared'][round_no]):
+                watched_nodelist.append(node_index)
+                watched_colours.append(SHARED_COLOUR)
+            elif (messages[watched] in g.node[node_index]['seen'][round_no]):
+                watched_nodelist.append(node_index)
+                watched_colours.append(SEEN_COLOUR)
+            elif not dest_node:
+                # Don't draw normal cmap if destination node -
+                # Should already have been added to that list
+                # Gradient based on no of messages seen
+                cmapValue = float(len(g.node[node_index]['seen'][round_no]))
+                cmap_nodelist.append(node_index)
+                cmap_colours.append(cmapValue)
+
+        # Draw where the "seen" messages were shared from (last round) on the
+        # edges
+        shared_colours = []
+        for edge in g.edges():
+            if ((messages[watched] in
+                    g.node[edge[0]]['shared'][round_no - 1]) or
+                (messages[watched] in
+                    g.node[edge[1]]['shared'][round_no - 1])):
+                shared_colours.append(1)
+            else:
+                shared_colours.append(0)
+
+        labels = {}
+        if (draw_labels):
+            labels = self.get_labels(g, round_no)
+
+        # Draw the destination node, the nodes with the watched message, and
+        # all other nodes seperately
+        print dest_nodelist
+        print dest_colours
+        
+        nodes_d = nx.draw_networkx_nodes(
+            g, pos, nodelist=dest_nodelist, node_size=DEST_NODE_SIZE,
+            node_color=dest_colours,
+            with_labels=draw_labels, labels=labels, font_color='orange')
+
+        nodes_w = nx.draw_networkx_nodes(
+            g, pos, nodelist=watched_nodelist, node_size=NODE_SIZE,
+            node_color=watched_colours,
+            with_labels=draw_labels, labels=labels, font_color='orange')
+
+        nodes_c = nx.draw_networkx_nodes(
+            g, pos, nodelist=cmap_nodelist, node_size=NODE_SIZE,
+            node_color=cmap_colours, cmap=cmap, vmin=0, vmax=max_seen,
+            with_labels=draw_labels, labels=labels, font_color='orange')
+
+        edges = nx.draw_networkx_edges(g, pos, width=EDGE_WIDTH,
+                                       edge_color=shared_colours)
+
+        cbar = plt.colorbar(nodes_c)
+        cbar.ax.tick_params(axis='x', colors='white')
+        cbar.ax.tick_params(axis='y', colors='white')
+        plt.axis('off')
+        ax = plt.gca()
+        ax.set_axis_bgcolor('black')
+
+        return edges, nodes_w, nodes_d, nodes_c
+
+    def get_labels(self, g, round_no):
+        labels = {}
         for node_index in g.nodes_iter():
             shared_set = set(g.node[node_index]['shared'][round_no])
-            seen_set = set(g.node[node_index]['seen'][round_no]) - shared_set
+            seen_set = set(g.node[node_index]['seen'][round_no]) - \
+                shared_set
 
             label = " ".join(map(lambda x: str(x.id), shared_set))
             if seen_set:
@@ -85,45 +175,4 @@ def draw_graph(g, pos, round_no, messages, max_seen, watched, draw_labels,
                 label += ")"
 
             labels[node_index] = label
-
-    # Set the size of the figure based on the number of nodes in each direction
-    # Also take into account additional space for colourbar
-    fig = plt.figure(figsize=(width*COLORBAR_FIGSIZE_RATIO*FIGSIZE_NODE_RATIO,
-                              height*FIGSIZE_NODE_RATIO))
-
-    # Draw the nodes with the watched message, the destination node, and all
-    # other nodes seperately
-    nx.draw_networkx_nodes(g, pos, nodelist=watched_nodelist,
-                           node_size=NODE_SIZE, node_color=watched_colours,
-                           with_labels=draw_labels, labels=labels,
-                           font_color='orange')
-
-    nx.draw_networkx_nodes(g, pos, nodelist=dest_nodelist,
-                           node_size=DEST_NODE_SIZE, node_color=dest_colours,
-                           with_labels=draw_labels, labels=labels,
-                           font_color='orange')
-
-    n = nx.draw_networkx_nodes(g, pos, nodelist=cmap_nodelist,
-                               node_size=NODE_SIZE, node_color=cmap_colours,
-                               cmap=cmap, vmin=0, vmax=max_seen,
-                               with_labels=draw_labels, labels=labels,
-                               font_color='orange')
-
-    nx.draw_networkx_edges(g, pos, width=EDGE_WIDTH,
-                           edge_color=shared_colours)
-
-    cbar = plt.colorbar(n)
-    cbar.ax.tick_params(axis='x', colors='white')
-    cbar.ax.tick_params(axis='y', colors='white')
-
-    plt.axis('off')
-
-    try:
-        os.makedirs("output")
-    except OSError:
-        if not os.path.isdir("output"):
-            raise
-
-    plt.savefig("output/round{0}.png".format(round_no), dpi=80,
-                facecolor='black')
-    plt.close(fig)
+        return labels

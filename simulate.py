@@ -2,7 +2,7 @@
 
 import showing
 import sharing
-from output import draw_graph
+from output import Visualiser
 from graph import kleinberg
 from message import Message
 import random
@@ -33,6 +33,8 @@ class Simulation(object):
         self.q = q
         self.round_count = round_count
         self.message_count = message_count
+
+        self.visualiser = Visualiser(columns, rows)
 
         self.generate_graph()
         self.generate_messages()
@@ -68,22 +70,28 @@ class Simulation(object):
             self.g.node[i]['seen'] = [[]]
             self.g.node[i]['shared'] = [[]]
 
-    def run_simulation(self, draw_output, watched_message, draw_labels):
+    def run_simulation(self, output_images, output_video, watched_message,
+                       draw_labels):
 
-        if draw_output:
-            # Draw initial config
-            draw_graph(self.g, self.pos, 0, self.messages,
-                       self.show_model.max_shown, watched_message, draw_labels,
-                       self.columns, self.rows)
+        if output_images:
+            # Draw round 0
+            self.visualiser.draw_image(
+                self.g, self.pos, 0, self.messages, self.show_model.max_shown,
+                watched_message, draw_labels)
 
         # Simulate rounds
         for round_no in range(1, self.round_count + 1):
-            self.simulate_round(round_no, draw_output, watched_message,
-                                draw_labels)
+            self.simulate_round(round_no, output_images,
+                                watched_message, draw_labels)
+
+        if output_video:
+            self.visualiser.create_video(
+                self.g, self.pos, self.round_count, self.messages,
+                self.show_model.max_shown, watched_message, draw_labels)
 
         return len([x for x in self.messages if x.delivered])
 
-    def simulate_round(self, round_no, draw_output, watched_message,
+    def simulate_round(self, round_no, output_images, watched_message,
                        draw_labels):
         print "ROUND {0}".format(round_no)
         for node_index in self.g.nodes_iter():
@@ -113,10 +121,10 @@ class Simulation(object):
             shareResult = self.share_model.share_alg(showResults)
             self.g.node[node_index]['shared'].append(shareResult)
 
-        if draw_output:
-            draw_graph(self.g, self.pos, round_no, self.messages,
-                       self.show_model.max_shown, watched_message,
-                       draw_labels, self.columns, self.rows)
+        if output_images:
+            self.visualiser.draw_image(
+                self.g, self.pos, round_no, self.messages,
+                self.show_model.max_shown, watched_message, draw_labels)
 
     def repeat_simulation(self, count, regenerate_graph=True,
                           regenerate_messages=True):
@@ -131,7 +139,7 @@ class Simulation(object):
             if regenerate_messages or i == 0:
                 self.generate_messages()
 
-            delivered = self.run_simulation(False, None, False)
+            delivered = self.run_simulation(False, False, None, False)
 
             total += self.message_count
             total_delivered += delivered
