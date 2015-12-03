@@ -44,10 +44,10 @@ class FurtherProbShowModel(ShowModel):
         self.max_shown = max_shown
 
     def show_alg(self, node_index, possible):
-        candidates = self.candidates_closer_prob_others(node_index, possible)
+        candidates = self.select_candidates(node_index, possible)
         return self.select_final(candidates)
 
-    def candidates_closer_prob_others(self, node_index, possible):
+    def select_candidates(self, node_index, possible):
         # If closer, return always
         # If not closer, return with given probability
         return [p for p in possible if (
