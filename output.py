@@ -131,9 +131,7 @@ class Visualiser(object):
 
         # Draw the destination node, the nodes with the watched message, and
         # all other nodes seperately
-        print dest_nodelist
-        print dest_colours
-        
+
         nodes_d = nx.draw_networkx_nodes(
             g, pos, nodelist=dest_nodelist, node_size=DEST_NODE_SIZE,
             node_color=dest_colours,

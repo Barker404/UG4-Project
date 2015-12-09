@@ -39,7 +39,7 @@ class ProbShareModel(ShareModel):
 
         for item in shown:
             # Messages shown more than once are more likely to be picked
-            if random.random < self.share_prob:
+            if random.random() < self.share_prob:
                 shared.add(item[0])
 
         return list(shared)
