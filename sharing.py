@@ -26,3 +26,20 @@ class BasicShareModel(ShareModel):
             shared.add(item[0])
 
         return list(shared)
+
+
+class ProbShareModel(ShareModel):
+
+    def __init__(self, share_prob=0.5):
+        self.share_prob = share_prob
+
+    def share_alg(self, shown):
+
+        shared = set()
+
+        for item in shown:
+            # Messages shown more than once are more likely to be picked
+            if random.random < self.share_prob:
+                shared.add(item[0])
+
+        return list(shared)
