@@ -6,3 +6,4 @@ class Message:
         self.source = source
         self.destination = destination
         self.delivered = False
+        self.delivery_turn = -1

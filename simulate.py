@@ -2,7 +2,7 @@
 
 import showing
 import sharing
-from output import draw_graph
+from output import Visualiser
 from graph import kleinberg
 from message import Message
 import random
@@ -33,6 +33,8 @@ class Simulation(object):
         self.q = q
         self.round_count = round_count
         self.message_count = message_count
+
+        self.visualiser = Visualiser(columns, rows)
 
         self.generate_graph()
         self.generate_messages()
@@ -68,47 +70,97 @@ class Simulation(object):
             self.g.node[i]['seen'] = [[]]
             self.g.node[i]['shared'] = [[]]
 
-    def run_simulation(self, draw_output, watched_message, draw_labels):
+    def run_simulation(self, output_images, output_video, watched_message,
+                       draw_labels):
 
-        if draw_output:
-            # Draw initial config
-            draw_graph(self.g, self.pos, 0, self.messages,
-                       self.show_model.max_shown, watched_message, draw_labels)
+        if output_images:
+            # Draw round 0
+            self.visualiser.draw_image(
+                self.g, self.pos, 0, self.messages, self.show_model.max_shown,
+                watched_message, draw_labels)
 
         # Simulate rounds
         for round_no in range(1, self.round_count + 1):
-            print "ROUND {0}".format(round_no)
-            for node_index in self.g.nodes_iter():
+            self.simulate_round(round_no, output_images,
+                                watched_message, draw_labels)
 
-                # Get messages that could possibly be shown
-                # possible, seen and shared have format
-                # [(message, previous_node)]
-                possible = [(message, neighbour)
-                            for neighbour in self.g.neighbors_iter(node_index)
-                            for message in self.g.node[neighbour]['shared']
-                            [round_no - 1]]
-
-                # Update messages
-                showResults = self.show_model.show_alg(node_index, possible)
-                seen = list(set([s[0] for s in showResults]))
-
-                self.g.node[node_index]['seen'].append(seen)
-                for message in self.g.node[node_index]['seen'][round_no]:
-                    if (message.destination == node_index and
-                            not message.delivered):
-                        message.delivered = True
-                        print str(message.id) + " delivered!"
-
-                shareResult = self.share_model.share_alg(showResults)
-
-                self.g.node[node_index]['shared'].append(shareResult)
-
-            if draw_output:
-                draw_graph(self.g, self.pos, round_no, self.messages,
-                           self.show_model.max_shown, watched_message,
-                           draw_labels)
+        if output_video:
+            self.visualiser.create_video(
+                self.g, self.pos, self.round_count, self.messages,
+                self.show_model.max_shown, watched_message, draw_labels)
 
         return len([x for x in self.messages if x.delivered])
+
+    def simulate_round(self, round_no, output_images, watched_message,
+                       draw_labels):
+        print "ROUND {0}".format(round_no)
+        for node_index in self.g.nodes_iter():
+
+            # Get messages that could possibly be shown
+            # possible, seen and shared have format
+            # [(message, previous_node)]
+            possible = [(message, neighbour)
+                        for neighbour in self.g.neighbors_iter(node_index)
+                        for message in self.g.node[neighbour]['shared']
+                        [round_no - 1]]
+
+            # Update seen messages
+            showResults = self.show_model.show_alg(
+                self.g, node_index, possible)
+            seen = list(set([s[0] for s in showResults]))
+            self.g.node[node_index]['seen'].append(seen)
+
+            # Check if messages have reached destinations
+            for message in self.g.node[node_index]['seen'][round_no]:
+                if (message.destination == node_index and
+                        not message.delivered):
+                    message.delivered = True
+                    message.delivery_turn = round_no
+                    print str(message.id) + " delivered!"
+
+            # Update shared messages
+            shareResult = self.share_model.share_alg(showResults)
+            self.g.node[node_index]['shared'].append(shareResult)
+
+        if output_images:
+            self.visualiser.draw_image(
+                self.g, self.pos, round_no, self.messages,
+                self.show_model.max_shown, watched_message, draw_labels)
+
+    def repeat_simulation(self, count, regenerate_graph=True,
+                          regenerate_messages=True):
+        total = 0
+        total_delivered = 0
+        min_delivered = float('inf')
+        max_delivered = 0
+        for i in range(count):
+            self.clear_simulation()
+            if regenerate_graph or i == 0:
+                self.generate_graph()
+            if regenerate_messages or i == 0:
+                self.generate_messages()
+
+            delivered = self.run_simulation(False, False, None, False)
+
+            total += self.message_count
+            total_delivered += delivered
+            if delivered < min_delivered:
+                min_delivered = delivered
+            if delivered > max_delivered:
+                max_delivered = delivered
+
+            print "Finished simulation {} of {}".format(i + 1, count)
+
+        print "Delivered a total of {} out of {} - {}%".format(
+            total_delivered, total, 100*float(total_delivered) / float(total))
+        print "Min: {} out of {} - {}%".format(
+            min_delivered, self.message_count,
+            100*float(min_delivered) / float(self.message_count))
+        print "Max: {} out of {} - {}%".format(
+            max_delivered, self.message_count,
+            100*float(max_delivered) / float(self.message_count))
+
+        return (total_delivered, min_delivered, max_delivered)
 
 
 def main():
