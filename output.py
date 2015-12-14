@@ -174,3 +174,23 @@ class Visualiser(object):
 
             labels[node_index] = label
         return labels
+
+
+def plot_simulations(simulations, x_values, x_label, repeats):
+
+    averages, mins, maxs = map(
+        list, zip(*[
+            sim.repeat_simulation(repeats, as_percent=True)
+            for sim in simulations]))
+
+    # Might want to do something with mins/maxes in future
+    fig = plt.figure(figsize=(10, 10))
+    plt.plot(x_values, averages, 'bo')
+
+    x1, x2, y1, y2 = plt.axis()
+    plt.axis((0, x2, 0, 100))
+    plt.xlabel(x_label)
+    plt.ylabel('Average % of messages delivered')
+
+    plt.savefig("output/plot.png", dpi=150)
+    print "plot saved"
