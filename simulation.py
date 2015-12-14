@@ -1,23 +1,9 @@
 #!/usr/bin/env python
 
-import showing
-import sharing
 from output import Visualiser
 from graph import kleinberg
 from message import Message
 import random
-
-ROWS = 30
-COLUMNS = 30
-K = 1
-Q = 2
-
-ROUND_COUNT = 10
-MESSAGE_COUNT = 200
-
-DRAW = True
-WATCHED_MESSAGE = 0
-DRAW_LABELS = False
 
 
 class Simulation(object):
@@ -172,19 +158,3 @@ class Simulation(object):
                     100 * float(max_delivered) / float(self.message_count))
         else:
             return (total_delivered, min_delivered, max_delivered)
-
-
-def main():
-    show_model = showing.AnyCloserShowModel(20)
-    share_model = sharing.BasicShareModel(5)
-
-    simulation = Simulation(show_model, share_model,
-                            ROWS, COLUMNS, K, Q,
-                            ROUND_COUNT, MESSAGE_COUNT)
-
-    delivered = simulation.run_simulation(DRAW, WATCHED_MESSAGE, DRAW_LABELS)
-
-    print "{0} delivered out of {1}".format(delivered, MESSAGE_COUNT)
-
-if __name__ == "__main__":
-    main()
