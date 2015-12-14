@@ -15,9 +15,9 @@ DESTINATION_COLOUR = '#FF0080'
 
 # Multiply the number of nodes along one axis by this to get the figure size
 # along that axis
-FIGSIZE_NODE_RATIO = 1.0/3.0
+FIGSIZE_NODE_RATIO = 1.0 / 3.0
 # Multiply the figure size width by this to make space for the colorbar
-COLORBAR_FIGSIZE_RATIO = 4.0/3.0
+COLORBAR_FIGSIZE_RATIO = 4.0 / 3.0
 
 NODE_SIZE = 50
 DEST_NODE_SIZE = 100
@@ -31,8 +31,8 @@ class Visualiser(object):
         # direction
         # Also take into account additional space for colourbar
         self.fig = plt.figure(figsize=(
-                columns*COLORBAR_FIGSIZE_RATIO*FIGSIZE_NODE_RATIO,
-                rows*FIGSIZE_NODE_RATIO))
+            columns * COLORBAR_FIGSIZE_RATIO * FIGSIZE_NODE_RATIO,
+            rows * FIGSIZE_NODE_RATIO))
         self.cbar_drawn = False
 
         plt.axis('off')
@@ -55,12 +55,12 @@ class Visualiser(object):
     def create_video(self, g, pos, round_count, messages, max_seen, watched,
                      draw_labels):
         anim = animation.FuncAnimation(
-                    self.fig,
-                    lambda i: self._draw_frame(
-                        g, pos, i, messages,
-                        max_seen, watched,
-                        draw_labels),
-                    frames=round_count, interval=1000, blit=True)
+            self.fig,
+            lambda i: self._draw_frame(
+                g, pos, i, messages,
+                max_seen, watched,
+                draw_labels),
+            frames=round_count, interval=1000, blit=True)
 
         FFwriter = animation.FFMpegWriter(fps=1)
         try:
