@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 class Message:
     """A message to be passed around the network"""
 

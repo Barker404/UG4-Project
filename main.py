@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import showing
 import sharing
 from output import plot_simulations
