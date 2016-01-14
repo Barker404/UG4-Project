@@ -20,8 +20,6 @@ class Simulation(object):
         self.round_count = round_count
         self.message_count = message_count
 
-        self.visualiser = Visualiser(columns, rows)
-
         self.generate_graph()
         self.generate_messages()
 
@@ -58,6 +56,8 @@ class Simulation(object):
 
     def run_simulation(self, output_images, output_video, watched_message,
                        draw_labels, as_percent=False):
+
+        self.visualiser = Visualiser(self.columns, self.rows)
 
         if output_images:
             # Draw round 0
