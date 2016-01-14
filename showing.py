@@ -73,6 +73,7 @@ class OnlyBestShowModel(ShowModel):
     def select_candidates(self, g, node_index, possible):
         # Return only those messages for which this node is best
         return [p for p in possible if (
+            not p[0].delivered and
             self.best_node(g, p[0], p[1]) == node_index)]
 
     def best_node(self, g, message, current_node_index):
