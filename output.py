@@ -26,7 +26,7 @@ EDGE_WIDTH = 2
 
 class Visualiser(object):
 
-    def __init__(self, columns, rows):
+    def __init__(self, columns, rows, output_path='output'):
         # Set the size of the figure based on the number of nodes in each
         # direction
         # Also take into account additional space for colourbar
@@ -34,6 +34,7 @@ class Visualiser(object):
             columns * COLORBAR_FIGSIZE_RATIO * FIGSIZE_NODE_RATIO,
             rows * FIGSIZE_NODE_RATIO))
         self.cbar_drawn = False
+        self.output_path = output_path
 
         plt.axis('off')
         ax = plt.gca()
@@ -44,13 +45,14 @@ class Visualiser(object):
         self._draw_frame(g, pos, round_no, messages, max_seen, watched,
                          draw_labels)
         try:
-            os.makedirs("output")
+            os.makedirs(self.output_path)
         except OSError:
-            if not os.path.isdir("output"):
+            if not os.path.isdir(self.output_path):
                 raise
 
-        plt.savefig("output/round{0}.png".format(round_no), dpi=150,
-                    facecolor='black')
+        plt.savefig(
+            os.path.join(self.output_path, "round{0}.png".format(round_no)),
+            dpi=150, facecolor='black')
 
     def create_video(self, g, pos, round_count, messages, max_seen, watched,
                      draw_labels):
@@ -64,12 +66,12 @@ class Visualiser(object):
 
         FFwriter = animation.FFMpegWriter(fps=1)
         try:
-            os.makedirs("output")
+            os.makedirs(self.output_path)
         except OSError:
-            if not os.path.isdir("output"):
+            if not os.path.isdir(self.output_path):
                 raise
-        anim.save('output/animation.mp4', writer=FFwriter,  dpi=150,
-                  codec="libx264", bitrate=-1,
+        anim.save(os.path.join(self.output_path, 'animation.mp4'),
+                  writer=FFwriter, dpi=150, codec="libx264", bitrate=-1,
                   savefig_kwargs={'facecolor': 'black'})
 
     def _draw_frame(self, g, pos, round_no, messages, max_seen, watched,
@@ -134,17 +136,18 @@ class Visualiser(object):
 
         nodes_d = nx.draw_networkx_nodes(
             g, pos, nodelist=dest_nodelist, node_size=DEST_NODE_SIZE,
-            node_color=dest_colours,
+            node_shape='s', node_color=dest_colours,
             with_labels=draw_labels, labels=labels, font_color='orange')
 
         nodes_w = nx.draw_networkx_nodes(
             g, pos, nodelist=watched_nodelist, node_size=NODE_SIZE,
-            node_color=watched_colours,
+            node_shape='^', node_color=watched_colours,
             with_labels=draw_labels, labels=labels, font_color='orange')
 
         nodes_c = nx.draw_networkx_nodes(
             g, pos, nodelist=cmap_nodelist, node_size=NODE_SIZE,
-            node_color=cmap_colours, cmap=cmap, vmin=0, vmax=max_seen,
+            node_shape='o', node_color=cmap_colours,
+            cmap=cmap, vmin=0, vmax=max_seen,
             with_labels=draw_labels, labels=labels, font_color='orange')
 
         edges = nx.draw_networkx_edges(g, pos, width=EDGE_WIDTH,
@@ -176,7 +179,8 @@ class Visualiser(object):
         return labels
 
 
-def plot_simulations(simulations, x_values, x_label, repeats):
+def plot_simulations(simulations, x_values, x_label, repeats,
+                     output_path='output'):
 
     averages, mins, maxs = map(
         list, zip(*[
@@ -192,5 +196,10 @@ def plot_simulations(simulations, x_values, x_label, repeats):
     plt.xlabel(x_label)
     plt.ylabel('Average % of messages delivered')
 
-    plt.savefig("output/plot.png", dpi=150)
+    try:
+        os.makedirs(output_path)
+    except OSError:
+        if not os.path.isdir(output_path):
+            raise
+    plt.savefig(os.path.join(output_path, "plot.png"), dpi=150)
     print "plot saved"
