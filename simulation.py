@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from output import Visualiser
-from graph import kleinberg
+from graph import kleinberg, graph_diameter
 from message import Message
 import random
 
@@ -26,6 +26,7 @@ class Simulation(object):
     def generate_graph(self):
         # Create graph
         self.g = kleinberg(self.rows, self.columns, self.k, self.q)
+        self.graph_diameter = graph_diameter(self.g)
         self.pos = dict(zip(self.g, self.g))
         print "made graph"
 

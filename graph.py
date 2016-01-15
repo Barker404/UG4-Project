@@ -118,3 +118,7 @@ def grid_distance(u, v):
     # u, v must be 2-tuples of x, y coords in grid
     # Just take manhatten distance
     return abs(u[0] - v[0]) + abs(u[1] - v[1])
+
+
+def graph_diameter(g):
+    return nx.diameter(g)
