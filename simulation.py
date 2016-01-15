@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from output import Visualiser
 from graph import kleinberg, graph_diameter
 from message import Message
@@ -55,10 +56,10 @@ class Simulation(object):
             self.g.node[i]['seen'] = [[]]
             self.g.node[i]['shared'] = [[]]
 
-    def run_simulation(self, output_images, output_video, watched_message,
-                       draw_labels, as_percent=False):
+    def run_simulation(self, output_images, output_video, output_path='output',
+                       watched_message=0, draw_labels=False, as_percent=False):
 
-        self.visualiser = Visualiser(self.columns, self.rows)
+        self.visualiser = Visualiser(self.columns, self.rows, output_path)
 
         if output_images:
             # Draw round 0
@@ -119,7 +120,10 @@ class Simulation(object):
                 self.show_model.max_shown, watched_message, draw_labels)
 
     def repeat_simulation(self, count, regenerate_graph=True,
-                          regenerate_messages=True, as_percent=False):
+                          regenerate_messages=True, as_percent=False,
+                          output_graphs=False, output_videos=False,
+                          output_path='output', watched_message=0,
+                          draw_labels=False):
         total = 0
         total_delivered = 0
         min_delivered = float('inf')
@@ -131,7 +135,9 @@ class Simulation(object):
             if regenerate_messages or i == 0:
                 self.generate_messages()
 
-            delivered = self.run_simulation(False, False, None, False)
+            delivered = self.run_simulation(output_graphs, output_videos,
+                                            os.path.join(output_path, str(i)),
+                                            watched_message, draw_labels)
 
             total += self.message_count
             total_delivered += delivered
