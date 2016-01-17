@@ -32,12 +32,20 @@ We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible se
 P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
 \end{equation}
 
-In the above equation, $N(v)$ is the set of neighbouring nodes of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
+In the above equation, $N(v)$ is the set of neighbouring vertices of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
 
-Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$ as the result of this algorithm - this will be a subset of the possible set for that user and round:
+Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$, $T_{t}(v)$, as the result of this algorithm - this will be a subset of the possible set for that user and round:
 
 \begin{equation}
 T_{t}(v) \subseteq P_{t}(v)
 \end{equation}
+
+Finally, from the messages that are shown to a user, the user will share some of them. This is decided by the user model algorithm. The result of this form the \textbf{shared set} of that user for this round - all messages in the user's shared set must have been part of their shown set for that round:
+
+\begin{equation}
+\forall m \in S_{t}(v) . \exists (u, n) \in T_{t}(v) . m = n
+\end{equation}
+
+This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the sharing and user model algorithms to be able to simulate the spread of messages throughout the network.
 
 \end{document}
