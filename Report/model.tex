@@ -34,7 +34,7 @@ P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
 
 In the above equation, $N(v)$ is the set of neighbouring nodes of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
 
-Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define this as a function which given a user $v$ and a round $t$ returns a subset of their possible set at that time:
+Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$ as the result of this algorithm - this will be a subset of the possible set for that user and round:
 
 \begin{equation}
 T_{t}(v) \subseteq P_{t}(v)
