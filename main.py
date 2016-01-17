@@ -2,6 +2,7 @@
 
 import showing
 import sharing
+from graph import KleinbergGenerator
 from output import plot_simulations
 from simulation import Simulation
 
@@ -21,19 +22,11 @@ DRAW_LABELS = False
 def main():
     show_model = showing.OnlyBestShowModel(20)
     share_model = sharing.BasicShareModel(5)
+    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
-    sims = []
-    x_vals = []
-
-    for i in range(1, 7):
-        message_count = 250 * i
-        simulation = Simulation(show_model, share_model,
-                                ROWS, COLUMNS, K, Q,
-                                ROUND_COUNT, message_count)
-        sims.append(simulation)
-        x_vals.append(message_count)
-
-    plot_simulations(sims, x_vals, 'message count', 1)
+    simulation = Simulation(show_model, share_model, graph_generator,
+                            ROUND_COUNT, MESSAGE_COUNT)
+    simulation.repeat_simulation(3)
 
 if __name__ == "__main__":
     main()
