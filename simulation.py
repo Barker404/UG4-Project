@@ -1,22 +1,18 @@
 #!/usr/bin/env python
 
 from output import Visualiser
-from graph import kleinberg, graph_diameter
+from graph import graph_diameter
 from message import Message
 import random
 
 
 class Simulation(object):
 
-    def __init__(self, show_model, share_model,
-                 rows=30, columns=30, k=1, q=2,
+    def __init__(self, show_model, share_model, graph_generator,
                  round_count=10, message_count=50):
         self.show_model = show_model
         self.share_model = share_model
-        self.rows = rows
-        self.columns = columns
-        self.k = k
-        self.q = q
+        self.graph_generator = graph_generator
         self.round_count = round_count
         self.message_count = message_count
 
@@ -25,9 +21,13 @@ class Simulation(object):
 
     def generate_graph(self):
         # Create graph
-        self.g = kleinberg(self.rows, self.columns, self.k, self.q)
+        self.g = self.graph_generator.generate_graph()
+        self.pos = self.graph_generator.generate_positions(self.g)
+
+        self.width = self.graph_generator.get_width(self.g)
+        self.height = self.graph_generator.get_height(self.g)
+
         self.graph_diameter = graph_diameter(self.g)
-        self.pos = dict(zip(self.g, self.g))
         print "made graph"
 
         # Set up node attributes
@@ -58,7 +58,7 @@ class Simulation(object):
     def run_simulation(self, output_images, output_video, watched_message,
                        draw_labels, as_percent=False):
 
-        self.visualiser = Visualiser(self.columns, self.rows)
+        self.visualiser = Visualiser(self.width, self.height)
 
         if output_images:
             # Draw round 0
@@ -125,11 +125,12 @@ class Simulation(object):
         min_delivered = float('inf')
         max_delivered = 0
         for i in range(count):
-            self.clear_simulation()
-            if regenerate_graph or i == 0:
-                self.generate_graph()
-            if regenerate_messages or i == 0:
-                self.generate_messages()
+            if i != 0:
+                self.clear_simulation()
+                if regenerate_graph:
+                    self.generate_graph()
+                if regenerate_messages:
+                    self.generate_messages()
 
             delivered = self.run_simulation(False, False, None, False)
 
