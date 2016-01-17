@@ -97,13 +97,19 @@ Finally, from the messages that are shown to a user, the user will share some of
 \forall m \in S_{t}(v) . \exists (u, n) \in T_{t}(v) . m = n
 \end{equation}
 
-This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the sharing and user model algorithms to be able to simulate the spread of messages throughout the network.
+This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network.
+
+\section{Simulation Program}
+For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
+
+There is a \texttt{GraphGenerator} abstract base class, subclasses of which encapsulate the knowledge specific to the graph model being used - including how to create a graph of that type, and how the nodes should be positioned in the visualisation (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning that by simply using a different subclass the graph generation method can be modified completed - for example the graph could be loaded from a static file.
+
+The showing algorithms are contained within subclasses of the \texttt{ShowModel} class, the main method of which is \texttt{show\_alg} which given a user's possible set and some additional information about the state of the network, returns a subset of the messages to be shown to them. Similarly, the user models algorithms are represented by subclasses of the \texttt{ShareModel} class, which has a method \texttt{share\_alg} to take the shown set and return the messages which the user will share. Changing which of these subclasses is used in the simulation allows comparing the performance of different algorithms.
+
+These classes are brought together by the \texttt{Simulation} class, which is given an instance of each of \texttt{GraphGenerator}, \texttt{ShowModel}, and \texttt{ShareModel} on creation. The simulation can then be either run once or repeated multiple times, collating the results. When repeating the simulation, it can set to either use the exact same network graph or to regenerate the graph using the same generation method - in the case of randomly generated graphs, this allows for repeating the simulation to remove random differences caused by specific graphs. The simulation class can also create visualisations as outputs. It can output either images of the state at each round of the simulation, or a single video of the entire simulation. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole.
 
 
 \section{Network Graph}
-
-
-\section{Simulation Program}
 ToDo
 
 \section{User Models}
