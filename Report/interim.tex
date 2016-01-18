@@ -1,0 +1,133 @@
+% to choose your degree
+% please un-comment just one of the following
+\documentclass[bsc,frontabs,twoside,singlespacing,parskip,deptreport]{infthesis}     % for BSc, BEng etc.
+% \documentclass[minf,frontabs,twoside,singlespacing,parskip,deptreport]{infthesis}  % for MInf
+
+\begin{document}
+
+\title{Targeted Influence in Social Networks}
+
+\author{Lewis Barker}
+
+% to choose your course
+% please un-comment just one of the following
+%\course{Artificial Intelligence and Computer Science}
+%\course{Artificial Intelligence and Software Engineering}
+%\course{Artificial Intelligence and Mathematics}
+%\course{Artificial Intelligence and Psychology }   
+%\course{Artificial Intelligence with Psychology }   
+%\course{Linguistics and Artificial Intelligence}    
+\course{Computer Science}
+%\course{Software Engineering}
+%\course{Computer Science and Electronics}    
+%\course{Electronics and Software Engineering}    
+%\course{Computer Science and Management Science}    
+%\course{Computer Science and Mathematics}
+%\course{Computer Science and Physics}  
+%\course{Computer Science and Statistics}    
+
+% to choose your report type
+% please un-comment just one of the following
+%\project{Undergraduate Dissertation} % CS&E, E&SE, AI&L
+%\project{Undergraduate Thesis} % AI%Psy
+\project{4th Year Project Interim Report}
+
+\date{\today}
+
+\abstract{
+Abstract goes here.
+}
+
+\maketitle
+
+\section*{Acknowledgements}
+Acknowledgements go here. 
+
+\tableofcontents
+
+%\pagenumbering{arabic}
+
+
+\chapter{Introduction}
+
+
+\chapter{Background}
+\section{Concept}
+ToDo
+\section{Related Works}
+ToDo
+
+\chapter{Work Done and Results}
+\section{Formal Definitions}
+
+\subsection{Input}
+Initially we are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$. 
+
+The graph $G$ represents the social network, with vertices in $V$ being the users of the network and edges in $E$ being connections between users within the network. A connection between two users $a$ and $b$ means in our context that user $a$ may see some content shared by user $b$ - however whether they actually see it or not is decided by the social network's algorithm.
+
+\subsection{Rounds}
+The system progresses in a series of \textbf{rounds}, representing periods of time passing in which messages can be passed on to other users. This allows us to more easily reason about the flow of information and also simulate the process.
+
+For any round $t$, and for some vertex $v \in V$, the \textbf{shared set} $S_{t}(v)$ is the set of messages which were shared by $v$ in that round.
+
+We assume that the source of a message will invariably share it initially (otherwise it has no chance to propagate). Therefore initially, at round 0, for each $v \in V$ the shared set is defined as the set of messages for which $v$ is the source:
+
+\begin{equation}
+S_{0}(v) = \{m_{x} \; | \; x \in [0, k] \wedge s_{x} = v\}
+\end{equation}
+
+
+We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ may be able to see at this point:
+
+\begin{equation}
+P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
+\end{equation}
+
+In the above equation, $N(v)$ is the set of neighbouring vertices of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
+
+Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$, $T_{t}(v)$, as the result of this algorithm - this will be a subset of the possible set for that user and round:
+
+\begin{equation}
+T_{t}(v) \subseteq P_{t}(v)
+\end{equation}
+
+Finally, from the messages that are shown to a user, the user will share some of them. This is decided by the user model algorithm. The result of this form the \textbf{shared set} of that user for this round - all messages in the user's shared set must have been part of their shown set for that round:
+
+\begin{equation}
+\forall m \in S_{t}(v) . \exists (u, n) \in T_{t}(v) . m = n
+\end{equation}
+
+This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network.
+
+\section{Simulation Program}
+For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
+
+There is a \texttt{GraphGenerator} abstract base class, subclasses of which encapsulate the knowledge specific to the graph model being used - including how to create a graph of that type, and how the nodes should be positioned in the visualisation (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning that by simply using a different subclass the graph generation method can be modified completed - for example the graph could be loaded from a static file.
+
+The showing algorithms are contained within subclasses of the \texttt{ShowModel} class, the main method of which is \texttt{show\_alg} which given a user's possible set and some additional information about the state of the network, returns a subset of the messages to be shown to them. Similarly, the user models algorithms are represented by subclasses of the \texttt{ShareModel} class, which has a method \texttt{share\_alg} to take the shown set and return the messages which the user will share. Changing which of these subclasses is used in the simulation allows comparing the performance of different algorithms.
+
+These classes are brought together by the \texttt{Simulation} class, which is given an instance of each of \texttt{GraphGenerator}, \texttt{ShowModel}, and \texttt{ShareModel} on creation. The simulation can then be either run once or repeated multiple times, collating the results. When repeating the simulation, it can set to either use the exact same network graph or to regenerate the graph using the same generation method - in the case of randomly generated graphs, this allows for repeating the simulation to remove random differences caused by specific graphs. The simulation class can also create visualisations as outputs. It can output either images of the state at each round of the simulation, or a single video of the entire simulation. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole.
+
+
+\section{Network Graph}
+ToDo
+
+\section{User Models}
+ToDo
+\section{Showing Models With Results}
+ToDo
+
+\chapter{Future Plan}
+\section{Further Work}
+ToDo
+\section{Plan for Semester 2}
+ToDo
+\chapter{Conclusion}
+ToDo
+% use the following and \cite{} as above if you use BibTeX
+% otherwise generate bibtem entries
+\bibliographystyle{plain}
+\bibliography{mybibfile}
+
+
+\end{document}

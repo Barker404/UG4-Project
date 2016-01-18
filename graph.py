@@ -4,114 +4,153 @@ import networkx as nx
 from random import uniform
 from math import floor
 
-
-def kleinberg(cols, rows, k, q):
-    # k: no of random edges to generate
-    # q: clustering exponent
-    # Creates a grid of size rows * cols
-    # For each node in the grid, add k random edges
-    # Where the probability of a random edge from u to v is proportional to:
-    # d(u, v)^q
-    # Where d(u, v) is grid distance
-
-    # Start with grid
-    g = nx.grid_2d_graph(cols, rows)
-
-    # Add k extra edges for each node
-    for node_index in g.nodes_iter():
-        for i in range(k):
-            v_index = kleinberg_random_node(g, node_index, q)
-            g.add_edge(node_index, v_index)
-    return g
+from abc import ABCMeta, abstractmethod
 
 
-def kleinberg2(cols, rows, k, q):
-    # k: no of random edges to generate
-    # q: clustering exponent
-    # Creates a grid of size rows * cols
-    # For each node in the grid, add k random edges
-    # Where the probability of a random edge from u to v is proportional to:
-    # d(u, v)^q
-    # Where d(u, v) is grid distance
+class GraphGenerator(object):
+    __metaclass__ = ABCMeta
 
-    # Start with grid
-    g = nx.grid_2d_graph(cols, rows)
+    @abstractmethod
+    def generate_graph(self, g, node_index, possible):
+        pass
 
-    # Choose the center node as the one which will have the highest
-    # probability sum (normalisation constant)
-    norm_node = (floor(cols/2), floor(rows/2))
+    @abstractmethod
+    def generate_positions(self, g):
+        pass
 
-    # Take this normalisation constant and use it for all calculations
-    # Less calculations to perform, however nodes closer to the outside are
-    # more likely to have no long link (only the center node is gauranteed to
-    # have one)
-    constant = get_norm_const(g, norm_node, 2)
+    @abstractmethod
+    def get_width(self, g):
+        pass
 
-    # Add k extra edges for each node
-    for node_index in g.nodes_iter():
-        for i in range(k):
-            v_index = kleinberg_random_node2(g, node_index, q, constant)
-            if v_index is not None:
+    @abstractmethod
+    def get_height(self, g):
+        pass
+
+
+class KleinbergGenerator(GraphGenerator):
+
+    def __init__(self, cols, rows, k, q):
+        # k: no of random edges to generate
+        # q: clustering exponent
+        self.cols = cols
+        self.rows = rows
+        self.k = k
+        self. q = q
+
+    def generate_graph(self):
+        # Creates a grid of size rows * cols
+        # For each node in the grid, add k random edges
+        # Where the probability of an edge from u to v is proportional to:
+        # d(u, v)^q
+        # Where d(u, v) is grid distance
+
+        # Start with grid
+        g = nx.grid_2d_graph(self.cols, self.rows)
+
+        # Add k extra edges for each node
+        for node_index in g.nodes_iter():
+            for i in range(self.k):
+                v_index = self.kleinberg_random_node(g, node_index)
                 g.add_edge(node_index, v_index)
-    return g
+        return g
+
+    def generate_positions(self, g):
+        return dict(zip(g, g))
+
+    def get_width(self, g):
+        return self.cols
+
+    def get_height(self, g):
+        return self.rows
+
+    def kleinberg_random_node(self, g, node_index):
+        # Probability of choosing v given u is proportional to:
+        # d(u, v)^q
+        # Where d(u, v) is grid distance
+
+        # Calculate sum of probabilities to get actual probabilities
+        prob_sum = self.get_norm_const(g, node_index)
+
+        # Take random number in [0, prob_sum]
+        rand = uniform(0, prob_sum)
+        for v_index in g.nodes_iter():
+            # Skip the original node to avoid dividing by 0
+            if v_index == node_index:
+                continue
+
+            # subtract d(u, v)^q from the random number
+            # when it reaches 0, the current node is our randomly picked node
+            d = grid_distance(node_index, v_index)
+            rand -= pow(d, -self.q)
+            if (rand <= 0):
+                return v_index
+
+    def get_norm_const(self, g, node_index):
+        # normalisation constant = sum(d(u, v)^q) over all v != u
+        norm_const = 0
+        for v_index in g.nodes_iter():
+            # Skip the original node to avoid dividing by 0
+            if v_index == node_index:
+                continue
+
+            d = grid_distance(node_index, v_index)
+            norm_const += pow(d, -self.q)
+        return norm_const
 
 
-def kleinberg_random_node(g, node_index, q):
-    # Probability of choosing v given u is proportional to:
-    # d(u, v)^q
-    # Where d(u, v) is grid distance
+class KleinbergGeneratorSameNorm(KleinbergGenerator):
 
-    # Calculate sum of probabilities to get actual probabilities
-    prob_sum = get_norm_const(g, node_index, q)
+    def __init__(self, cols, rows, k, q):
+        KleinbergGenerator.__init__(self, cols, rows, k, q)
 
-    # Take random number in [0, prob_sum]
-    rand = uniform(0, prob_sum)
-    for v_index in g.nodes_iter():
-        # Skip the original node to avoid dividing by 0
-        if v_index == node_index:
-            continue
+    def generate_graph(self):
+        # Creates a grid of size rows * cols
+        # For each node in the grid, add k random edges
+        # Where the probability of an edge from u to v is proportional to:
+        # d(u, v)^q
+        # Where d(u, v) is grid distance
 
-        # subtract d(u, v)^q from the random number
-        # when it reaches 0, the current node is our randomly picked node
-        d = grid_distance(node_index, v_index)
-        rand -= pow(d, -q)
-        if (rand <= 0):
-            return v_index
+        # Start with grid
+        g = nx.grid_2d_graph(self.cols, self.rows)
 
+        # Choose the center node as the one which will have the highest
+        # probability sum (normalisation constant)
+        norm_node = (floor(self.cols/2), floor(self.rows/2))
 
-def kleinberg_random_node2(g, node_index, q, prob_sum):
-    # Probability of choosing v given u is proportional to:
-    # d(u, v)^q
-    # Where d(u, v) is grid distance
+        # Take this normalisation constant and use it for all calculations
+        # Less calculations to perform, however nodes closer to the outside are
+        # more likely to have no long link (only the center node is gauranteed
+        # to have one)
+        constant = self.get_norm_const(g, norm_node)
 
-    # Use the provided constant as out probability sum
-    # Take random number in [0, prob_sum]
-    rand = uniform(0, prob_sum)
-    for v_index in g.nodes_iter():
-        # Skip the original node to avoid dividing by 0
-        if v_index == node_index:
-            continue
+        # Add k extra edges for each node
+        for node_index in g.nodes_iter():
+            for i in range(self.k):
+                v_index = self.kleinberg_random_node(g, node_index, constant)
+                if v_index is not None:
+                    g.add_edge(node_index, v_index)
+        return g
 
-        # subtract d(u, v)^q from the random number
-        # when it reaches 0, the current node is our randomly picked node
-        d = grid_distance(node_index, v_index)
-        rand -= pow(d, -q)
-        if (rand <= 0):
-            return v_index
-    return None
+    def kleinberg_random_node(self, g, node_index, prob_sum):
+        # Probability of choosing v given u is proportional to:
+        # d(u, v)^q
+        # Where d(u, v) is grid distance
 
+        # Use the provided constant as out probability sum
+        # Take random number in [0, prob_sum]
+        rand = uniform(0, prob_sum)
+        for v_index in g.nodes_iter():
+            # Skip the original node to avoid dividing by 0
+            if v_index == node_index:
+                continue
 
-def get_norm_const(g, node_index, q):
-    # normalisation constant = sum(d(u, v)^q) over all v != u
-    norm_const = 0
-    for v_index in g.nodes_iter():
-        # Skip the original node to avoid dividing by 0
-        if v_index == node_index:
-            continue
-
-        d = grid_distance(node_index, v_index)
-        norm_const += pow(d, -q)
-    return norm_const
+            # subtract d(u, v)^q from the random number
+            # when it reaches 0, the current node is our randomly picked node
+            d = grid_distance(node_index, v_index)
+            rand -= pow(d, -self.q)
+            if (rand <= 0):
+                return v_index
+        return None
 
 
 def grid_distance(u, v):

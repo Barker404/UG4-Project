@@ -26,13 +26,13 @@ EDGE_WIDTH = 2
 
 class Visualiser(object):
 
-    def __init__(self, columns, rows, output_path='output'):
+    def __init__(self, width, height, output_path='output'):
         # Set the size of the figure based on the number of nodes in each
         # direction
         # Also take into account additional space for colourbar
         self.fig = plt.figure(figsize=(
-            columns * COLORBAR_FIGSIZE_RATIO * FIGSIZE_NODE_RATIO,
-            rows * FIGSIZE_NODE_RATIO))
+            width * COLORBAR_FIGSIZE_RATIO * FIGSIZE_NODE_RATIO,
+            height * FIGSIZE_NODE_RATIO))
         self.cbar_drawn = False
         self.output_path = output_path
 
