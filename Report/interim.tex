@@ -126,27 +126,28 @@ This can be related to real networks intuitively. Individuals are more likely to
 While Kleinberg's small world model has been used primarily up to this point, other graph types may provide additional interesting insights. For example, using a plain grid could provide a baseline for what can be expected, to see if the algorithm developed takes advantage of the long link properties of the network. Alternatively, an real social network dataset could be used to see if the algorithm also work in actual networks.
 
 \section{User Models}
-Significance of user model
+While the main focus of this project was on the effect of the social network's "showing" algorithm, the model used also requires an algorithm to represent the user's actions. This algorithm should decide which of the messages shown to a user they then share - it chooses $S_{t}(v)$ based on $T_{t}(v)$. Depending on how this decision is modelled, it can add an element of uncertainty or randomness to the system, affecting which "showing" algorithms perform well.
 
-Basic (random up to limit)
-Justification - problems
-Impact on messages
+\subsection{Basic User Model}
+Initially, a very basic random selection method was used to choose the $S_{t}(v)$. Firstly, the user only considers the top $a$ of the messages shown to them (or all of the messages if there is less than $a$), where $a$ is a global constant - this represents the user's "attention", being unable to look at every message shown to them [expand on this?][reference attention paper?]. In the implementations used, the value of $a$ is also known to the showing algorithm, which does not show more than this many messages. From these $a$ messages, $b$ are selected at random and shared (or all of them are shared if there are less than $b$), where $b$ is a global constant and $b \le a$.
 
-Prob (Each shown with certain prob)
-Justification
-Impact on messages
+This provides us with a degree of randomness - if there are more than $b$ messages shown to the user, we can't tell which ones will be passed on. However in the case where there are less than or equal to $b$ messages shown to the user, this model acts unrealistically - the user will share every message they see. A real social network user would likely be more predictable (unless there was some incentive to share messages), and may not share all of the messages in nay circumstances. As a result of this unnatural behaviour, showing each message to only a single user at each step was found to be a highly effective strategy - however in a real situation this would likely result in losing the message at an uncooperative user.
 
+\subsection{Probabilistic User Model}
+A more realistic user model can be created using more probabilistic methods. In this user model, the concept of a maximum attention of $a$ is retained, with the user considering up to $a$ messages. However from these $a$ messages, rather than choose a set amount at random each message is shared with a probability $p$, where $p$ is a global constant.
+
+This results in a situation where a user may share all the messages they see, or may share none. This emulates how a user will only share certain messages based on some criteria unknown to the network. With this model, if messages are not sent to enough users then they are likely to not be shared and be lost.
 
 \section{Showing Models With Results}
 ToDo
 
 \chapter{Future Plan}
 \section{Further Work}
-Analysis
+Analysis:
 - Network Flows
 - Multicommodity
 
-Experimentation
+Experimentation:
 - Other algorithms
 - Diffuse distance
 - other graph types (eg real network)
