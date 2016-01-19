@@ -20,13 +20,13 @@ DRAW_LABELS = False
 
 
 def main():
-    show_model = showing.OnlyBestShowModel(20)
-    share_model = sharing.BasicShareModel(5)
+    show_model = showing.AnyCloserShowModel(20)
+    share_model = sharing.BasicShareModel(20, 5)
     graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     simulation = Simulation(show_model, share_model, graph_generator,
                             ROUND_COUNT, MESSAGE_COUNT)
-    simulation.repeat_simulation(3)
+    simulation.repeat_simulation(1)
 
 if __name__ == "__main__":
     main()

@@ -14,10 +14,12 @@ class ShareModel(object):
 
 class BasicShareModel(ShareModel):
 
-    def __init__(self, share_amount=5):
+    def __init__(self, max_seen=20, share_amount=5):
+        self.max_seen = max_seen
         self.share_amount = share_amount
 
     def share_alg(self, shown):
+        shown = shown[:self.max_seen]
         shared = set()
 
         while len(shared) < self.share_amount and len(shown) > 0:
@@ -30,10 +32,12 @@ class BasicShareModel(ShareModel):
 
 class ProbShareModel(ShareModel):
 
-    def __init__(self, share_prob=0.5):
+    def __init__(self, max_seen=20, share_prob=0.5):
+        self.max_seen = max_seen
         self.share_prob = share_prob
 
     def share_alg(self, shown):
+        shown = shown[:self.max_seen]
 
         shared = set()
 
