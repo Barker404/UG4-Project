@@ -3,6 +3,9 @@
 \documentclass[bsc,frontabs,twoside,singlespacing,parskip,deptreport]{infthesis}     % for BSc, BEng etc.
 % \documentclass[minf,frontabs,twoside,singlespacing,parskip,deptreport]{infthesis}  % for MInf
 
+\usepackage{hyperref}
+\usepackage{cite}
+
 \begin{document}
 
 \title{Targeted Influence in Social Networks}
@@ -111,15 +114,15 @@ These classes are brought together by the \texttt{Simulation} class, which is gi
 \section{Network Graph}
 An important factor in how a message showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
 
-For the majority of this project, Kleinberg's model for small world graphs was used. This is a model which randomly creates a graph that fits certain properties. Initially, nodes are arranged in a grid layout, with a "grid distance" from each other. Each node is connected to its immediate neighbours (those a grid distance of 1 away). Each node is then connected to a constant number $q$ of other nodes. The probability of connecting node $u$ to node $v$ in this way is proportional to $d(u, v)^{-r}$ where $d(u, v)$ is the grid distance between $u$ and $v$, and $r$ is a constant affecting how likely the links are to be "far-reaching". If $q$ is 0, then the node will be linked to other nodes uniformly. If $q$ is high, the long links are more likely to connect closer nodes. [reference to Kleinberg's material]
+For the majority of this project, Kleinberg's model for small world graphs was used\cite{Kleinberg00}. This is a model which randomly creates a graph that fits certain properties. Initially, nodes are arranged in a grid layout, with a "grid distance" from each other. Each node is connected to its immediate neighbours (those a grid distance of 1 away). Each node is then connected to a constant number $q$ of other nodes. The probability of connecting node $u$ to node $v$ in this way is proportional to $d(u, v)^{-r}$ where $d(u, v)$ is the grid distance between $u$ and $v$, and $r$ is a constant affecting how likely the links are to be "far-reaching". If $q$ is 0, then the node will be linked to other nodes uniformly. If $q$ is high, the long links are more likely to connect closer nodes.
 
 [diagram of Kleinberg's model]
 
 This model provides several properties which make it suitable to use in place of a social network. Since it is randomly generated, we can run experiments using multiple different graphs to avoid results being skewed by peculiarities of individual networks. 
 
-Additionally it fits into a category of graphs know as "Small World" graphs. This is related to Milgram's famous "Six Degrees of Separation" experiment[reference], in which he randomly chose individuals and asked them to forward a message on to a certain "target" via people they knew. Of those messages that reached the target, the median number of "steps" required was 6, displaying the existence of short paths within social networks - a fact that has also been seen in other studies[references]. In addition to these paths existing, the experiment showed that it was possible for the intermediate individuals to find these paths without knowing the full structure of the network - they were able to conduct a distributed search. 
+Additionally it fits into a category of graphs know as "Small World" graphs. This is related to Milgram's famous "Six Degrees of Separation" experiment\cite{Milgram67}, in which he randomly chose individuals and asked them to forward a message on to a certain "target" via people they knew. Of those messages that reached the target, the median number of "steps" required was 6, displaying the existence of short paths within social networks - a fact that has also been seen in other studies\cite{MilgramBackup1,MilgramBackup2}. In addition to these paths existing, the experiment showed that it was possible for the intermediate individuals to find these paths without knowing the full structure of the network - they were able to conduct a distributed search. 
 
-Kleinberg's model replicates both of these properties. For $q \ge 1$ the expected diameter of a graph generated using this model is $\theta (logn)$ and a route between two nodes can be found in a distributed manner using $\theta (log^{2}n)$ steps[reference to Analysing Kleinberg]. This is achieved by sending the message as close as possible to the destination (in terms of grid distance) at each step.
+Kleinberg's model replicates both of these properties. For $q \ge 1$ the expected diameter of a graph generated using this model is $\theta (logn)$ and a route between two nodes can be found in a distributed manner using $\theta (log^{2}n)$ steps\cite{AnalyzingKleinberg}. This is achieved by sending the message as close as possible to the destination (in terms of grid distance) at each step.
 
 This can be related to real networks intuitively. Individuals are more likely to be connected to those "close" to them - which in turn forms clusters of connections - but there will also be some "long-distance" connections that can connect clusters. To send a message to a far away target, a reasonable strategy would be to send to the person you know who is "closest" to the target - they are more likely to be connected to them.
 
@@ -157,10 +160,11 @@ Experimentation:
 ToDo
 \chapter{Conclusion}
 ToDo
+
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
 \bibliographystyle{plain}
-\bibliography{mybibfile}
+\bibliography{interimBib}
 
 
 \end{document}
