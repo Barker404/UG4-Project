@@ -54,7 +54,7 @@ class FurtherProbShowModel(ShowModel):
             not p[0].delivered and
             (grid_distance(p[1], p[0].destination) >
              grid_distance(node_index, p[0].destination) or
-             random.random() > self.not_closer_prob))]
+             random.random() < self.not_closer_prob))]
 
     def select_final(self, candidates):
         # Select the correct amount randomly
