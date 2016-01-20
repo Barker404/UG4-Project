@@ -5,6 +5,7 @@
 
 \usepackage{hyperref}
 \usepackage{cite}
+\usepackage{amsmath}
 
 \begin{document}
 
@@ -141,8 +142,54 @@ A more realistic user model can be created using more probabilistic methods. In 
 
 This results in a situation where a user may share all the messages they see, or may share none. This emulates how a user will only share certain messages based on some criteria unknown to the network. With this model, if messages are not sent to enough users then they are likely to not be shared and be lost.
 
-\section{Showing Models With Results}
-ToDo
+\section{Showing Models}
+The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
+
+So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user.
+
+\subsection{Algorithm 1: Any Closer Node}
+In the first algorithm used, for each node we first select candidate messages that might be shown to them. A message is made a candidate if it has not already been delivered, and the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node was (the one that shared the message in the previous round, causing this message to be part of the possible set). After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
+
+\begin{equation}
+\begin{split}
+candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & D(v, d_{k}) < D(u, d_{k}) \: \wedge \\
+& m_{k} \mbox{ has not been delivered} \}
+\end{split}
+\end{equation}
+
+\begin{equation}
+T_{t}(v) = sample(candidates, max(|candidates|, a))
+\end{equation}
+
+Where $D(u, v)$ is the grid (Manhattan) distance between $u$ and $v$, $sample(x, n)$ randomly samples $n$ values from the collection $x$, and $a$ is the maximum messages that can be shown to any node (their attention span).
+
+Note that if a message is in the possible set multiple times (from different previous nodes), it may be shown to the user multiple times (once for each previous node). Depending on the user model, this may increase the probability of it being shared by them.
+
+\subsection{Algorithm 2: Further Nodes With Probability}
+The second algorithm is a modification of the first with the intention of allowing the messages to spread in other directions not necessarily towards their destination. This may help prevent the message from dying out if the "direct" route is very busy.
+
+In this algorithm, we again select candidates to be shown to each node. Again, messages are only made candidates if they have not been delivered. Of those undelivered messages, any for which the receiving node is closer to the destination than the previous node are made candidates, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
+
+\begin{equation}
+\begin{split}
+candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & (D(v, d_{k}) < D(u, d_{k}) \: \vee \: r < p) \: \wedge \\
+& m_{k} \mbox{ has not been delivered} \}
+\end{split}
+\end{equation}
+
+\begin{equation}
+T_{t}(v) = sample(candidates, max(|candidates|, a))
+\end{equation}
+
+Where $0 \leq p < 1$ is a globally constant probability and $0 \leq r < 1$ is a randomly chosen value.
+
+Note that if $p$ were to be set to 0, Algorithm 2 would behave the exact same as Algorithm 1.
+
+\subsection{Algorithm 3: Only Single Best Node}
+
+Only Best
+
+\section{Results}
 
 \chapter{Future Plan}
 \section{Further Work}
