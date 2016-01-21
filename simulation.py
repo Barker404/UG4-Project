@@ -10,15 +10,18 @@ import random
 class Simulation(object):
 
     def __init__(self, show_model, share_model, graph_generator,
-                 round_count=10, message_count=50):
+                 round_count=10, message_count=50, pregenerate_graph=False):
         self.show_model = show_model
         self.share_model = share_model
         self.graph_generator = graph_generator
         self.round_count = round_count
         self.message_count = message_count
 
-        self.generate_graph()
-        self.generate_messages()
+        if pregenerate_graph:
+            self.generate_graph()
+            self.generate_messages()
+        else:
+            self.g = None
 
     def generate_graph(self):
         # Create graph
@@ -52,9 +55,10 @@ class Simulation(object):
         return self.messages
 
     def clear_simulation(self):
-        for i in self.g.nodes_iter():
-            self.g.node[i]['seen'] = [[]]
-            self.g.node[i]['shared'] = [[]]
+        if self.g is not None:
+            for i in self.g.nodes_iter():
+                self.g.node[i]['seen'] = [[]]
+                self.g.node[i]['shared'] = [[]]
 
     def run_simulation(self, output_images, output_video, output_path='output',
                        watched_message=0, draw_labels=False, as_percent=False):
@@ -129,12 +133,11 @@ class Simulation(object):
         min_delivered = float('inf')
         max_delivered = 0
         for i in range(count):
-            if i != 0:
-                self.clear_simulation()
-                if regenerate_graph:
-                    self.generate_graph()
-                if regenerate_messages:
-                    self.generate_messages()
+            self.clear_simulation()
+            if regenerate_graph:
+                self.generate_graph()
+            if regenerate_messages:
+                self.generate_messages()
 
             delivered = self.run_simulation(output_graphs, output_videos,
                                             os.path.join(output_path, str(i)),
