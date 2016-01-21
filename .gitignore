@@ -73,3 +73,8 @@ docs/_build/
 # PyBuilder
 target/
 *.toc
+
+# BibTex generated files
+*.bbl
+*.blg
+*.out
