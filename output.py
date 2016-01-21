@@ -179,12 +179,12 @@ class Visualiser(object):
         return labels
 
 
-def plot_simulations(simulations, x_values, x_label, repeats,
-                     output_path='output'):
+def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
+                     output_path='output', output_filename='plot.png'):
 
     averages, mins, maxs = map(
         list, zip(*[
-            sim.repeat_simulation(repeats, as_percent=True)
+            sim.repeat_simulation(repeats, as_percent=as_percent)
             for sim in simulations]))
 
     # Might want to do something with mins/maxes in future
@@ -192,7 +192,9 @@ def plot_simulations(simulations, x_values, x_label, repeats,
     plt.plot(x_values, averages, 'bo')
 
     x1, x2, y1, y2 = plt.axis()
-    plt.axis((0, x2, 0, 100))
+    if (as_percent):
+        plt.axis((0, x2, 0, 100))
+
     plt.xlabel(x_label)
     plt.ylabel('Average % of messages delivered')
 
@@ -201,5 +203,5 @@ def plot_simulations(simulations, x_values, x_label, repeats,
     except OSError:
         if not os.path.isdir(output_path):
             raise
-    plt.savefig(os.path.join(output_path, "plot.png"), dpi=150)
+    plt.savefig(os.path.join(output_path, output_filename), dpi=150)
     print "plot saved"
