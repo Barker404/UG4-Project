@@ -186,21 +186,45 @@ Where $0 \leq p < 1$ is a globally constant probability and $0 \leq r < 1$ is a 
 Note that if $p$ were to be set to 0, Algorithm 2 would behave the exact same as Algorithm 1.
 
 \subsection{Algorithm 3: Only Single Best Node}
+The third algorithm tested uses a simpler concept - each message is passed on to at most one other node, the node which is determined to be the "best" next step. This provides a basis for comparison with the case where messages are never duplicated.
 
-Only Best
-
-\section{Results}
-
-\chapter{Future Plan}
-\section{Further Work}
-Analysis:
-- Network Flows
-- Multicommodity
-
+To be more precise, candidate messages are again selected for each node. In this algorithm a message is made a candidate if it has not yet been delivered, and if that node is the "best" next step for the message. We define the "best" next step as being the neighbour of the message's previous step which is closest to the target in grid distance, and in the case of a draw has the lowest node index (used only to ensure that the "best" next step is consistent). If there are too many candidates then the first candidates up to the limit are taken. Since 
 Experimentation:
 - Other algorithms
 - Diffuse distance
-- other graph types (eg real network)
+- other graph types (eg real network)we are no longer worried about spreading messages "fairly" since they do not duplicate, this doesn't need to be chosen this randomly. Formally:
+
+\begin{equation}
+\begin{split}
+candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \: \wedge \\
+& m_{k} \mbox{ has not been delivered} \}
+\end{split}
+\end{equation}
+
+\begin{equation}
+T_{t}(v) = candidates[:a]
+\end{equation}
+
+Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
+
+\section{Results}
+
+
+\chapter{Future Plan}
+\section{Further Work}
+
+\subsection{Further Algorithms}
+One of the main things to be expanded is the development of other message showing algorithms. By using slightly more sophisticated methods it may be possible to achieve improved performance compared to the basic methods tested so far. For example, the current algorithms differentiate between whether or not messages get closer to the destination, but not how much they get closer by. Since the long jumps play an important role in getting the message to the destination, it may be advantageous to prioritise these. Additionally 
+
+\subsection{Other Graph Types}
+Up to this point, algorithms have only been tested on Kleinberg's small world graph model. However it may provide useful results to test them on other graphs. 
+
+Simple graphs such trees or a grid may provide a baseline to compare the results received so far against, and may also provide useful opportunities to perform analysis on the process. Alternatively, other models that are used to describe social networks such as preferential attachment may provide an alternative perspective for testing the algorithms. Finally it would be interesting to use an actual social network, such as those in the SNAP library\cite{snapnets}, may show if the algorithms have potential in real-world settings, rather than being too heavily crafted for the model used in simulations.
+
+\subsection{Analysis}
+Beyond simply developing and testing various algorithms, it will be useful to perform analysis on the problem to conclude something more definite. Firstly, it may be possible to find an upper bound on how many messages it is possible to deliver in the best case. By working on this upper bound to lower it as much as possible, this will provide an idea of the optimal possible performance, which the algorithms developed can then be compared to.
+
+Additionally, it will useful to compare the performance of this message delivering system to network flow on the same graph. Although there are some differences, if there is a constant flow of messages coming into the system then this is somewhat similar to the idea of a multi-commodity network flow where there are multiple flows between source and sink nodes. The algorithms can be first compared to network flow experimentally, by measuring their performances. After this, if time allows, it may be possible to perform additional theoretical analysis comparing the two - by comparing the performance bounds of each.
 
 
 \section{Plan for Semester 2}
