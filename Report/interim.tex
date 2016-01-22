@@ -43,13 +43,10 @@
 \date{\today}
 
 \abstract{
-Abstract goes here.
+
 }
 
 \maketitle
-
-\section*{Acknowledgements}
-Acknowledgements go here. 
 
 \tableofcontents
 
@@ -110,12 +107,9 @@ This project aims to specify this problem in more detail, develop an algorithm w
 \section{Overview}
 
 
-\chapter{Background}
-\section{Related Works}
-ToDo
 
-\chapter{Work Done}
-\section{Formal Definitions}
+\chapter{Formal Definitions}
+\section{Problem Model}
 
 \subsection{Problem Statement}
 Initially we are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$. 
@@ -158,15 +152,6 @@ Finally, from the messages that are shown to a user, the user will share some of
 
 This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network.
 
-\section{Simulation Program}
-For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library [reference?] to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
-
-There is a \texttt{GraphGenerator} abstract base class, subclasses of which encapsulate the knowledge specific to the graph model being used - including how to create a graph of that type, and how the nodes should be positioned in the visualisation (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning that by simply using a different subclass the graph generation method can be modified completed - for example the graph could be loaded from a static file.
-
-The showing algorithms are contained within subclasses of the \texttt{ShowModel} class, the main method of which is \texttt{show\_alg} which given a user's possible set and some additional information about the state of the network, returns a subset of the messages to be shown to them. Similarly, the user models algorithms are represented by subclasses of the \texttt{ShareModel} class, which has a method \texttt{share\_alg} to take the shown set and return the messages which the user will share. Changing which of these subclasses is used in the simulation allows comparing the performance of different algorithms.
-
-These classes are brought together by the \texttt{Simulation} class, which is given an instance of each of \texttt{GraphGenerator}, \texttt{ShowModel}, and \texttt{ShareModel} on creation. The simulation can then be either run once or repeated multiple times, collating the results. When repeating the simulation, it can set to either use the exact same network graph or to regenerate the graph using the same generation method - in the case of randomly generated graphs, this allows for repeating the simulation to remove random differences caused by specific graphs. The simulation class can also create visualisations as outputs. It can output either images of the state at each round of the simulation, or a single video of the entire simulation. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole.
-
 \section{Network Graph}
 An important factor in how a message showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
 
@@ -201,7 +186,7 @@ A more realistic user model can be created using more probabilistic methods. In 
 
 This results in a situation where a user may share all the messages they see, or may share none. This emulates how a user will only share certain messages based on some criteria unknown to the network. With this model, if messages are not sent to enough users then they are likely to not be shared and be lost.
 
-\section{Showing Models}
+\section{Showing Algorithms}
 The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
 
 So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user.
@@ -263,9 +248,20 @@ T_{t}(v) = candidates[:a]
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
 
 
-\chapter{Results}
+\chapter{Experimentation}
+
+\section{Simulation Program}
+For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library [reference?] to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
+
+There is a \texttt{GraphGenerator} abstract base class, subclasses of which encapsulate the knowledge specific to the graph model being used - including how to create a graph of that type, and how the nodes should be positioned in the visualisation (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning that by simply using a different subclass the graph generation method can be modified completed - for example the graph could be loaded from a static file.
+
+The showing algorithms are contained within subclasses of the \texttt{ShowModel} class, the main method of which is \texttt{show\_alg} which given a user's possible set and some additional information about the state of the network, returns a subset of the messages to be shown to them. Similarly, the user models algorithms are represented by subclasses of the \texttt{ShareModel} class, which has a method \texttt{share\_alg} to take the shown set and return the messages which the user will share. Changing which of these subclasses is used in the simulation allows comparing the performance of different algorithms.
+
+These classes are brought together by the \texttt{Simulation} class, which is given an instance of each of \texttt{GraphGenerator}, \texttt{ShowModel}, and \texttt{ShareModel} on creation. The simulation can then be either run once or repeated multiple times, collating the results. When repeating the simulation, it can set to either use the exact same network graph or to regenerate the graph using the same generation method - in the case of randomly generated graphs, this allows for repeating the simulation to remove random differences caused by specific graphs. The simulation class can also create visualisations as outputs. It can output either images of the state at each round of the simulation, or a single video of the entire simulation. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole.
+
 After development of the algorithms, experiments were run to compare their performance. All simulations were run on a 20 by 20 graph generated using Kleinberg's model, with parameters $k = 1$ and $q = 2$. They were simulated for 25 rounds, which was found in all cases to be enough time for any activity to stop. 
 
+\section{Results}
 \begin{wrapfigure}{L}{0.65\textwidth}
   	\vspace{-25pt}
     \centering
@@ -302,8 +298,8 @@ After development of the algorithms, experiments were run to compare their perfo
   	\vspace{-15pt}
 \end{wrapfigure}
 
-\section{User Model Comparisons}
-First the two user models were compared. In Figure 3.1 the results using the basic user model are shown. For these tests the user model parameters were $a = 20$ (maximum seen) and $b = 5$ (maximum shared). The number of messages was increased from 25 to 375 in increments of 25, and each simulation was repeated 10 times and the average taken. The graphs show this user model with various showing algorithms. These are: a) Algorithm 1 - Any closer node; b) Algorithm 2 - Further nodes with probability 0.4; c) Algorithm 2 - Further nodes with probability 0.6; d) Algorithm 3 - Only single best node. We can see that as the probability of spreading messages away from the target increases, the percent of messages delivered decreases. This can be interpreted as the extra messages only clogging up the system. Of particular note is Figure 3.1d, where only sending each message a single node achieves extremely high performance with almost no decrease as message count increases.
+\subsection{User Model Comparisons}
+First the two user models were compared against each other. In Figure 3.1 the results using the basic user model are shown. For these tests the user model parameters were set as $a = 20$ (maximum messages seen - the users' attention) and $b = 5$ (maximum messages shared). The number of messages was increased from 25 to 375 in increments of 25, and each simulation was repeated 10 times with the average delivery percentage taken. The graphs in the figure show this user model being tested using various showing algorithms. These are: a) Algorithm 1 - Any closer node; b) Algorithm 2 - Further nodes with probability 0.4; c) Algorithm 2 - Further nodes with probability 0.6; d) Algorithm 3 - Only single best node. We can see that as the probability of spreading messages away from the target increases, the percent of messages that were delivered decreases. This can be interpreted as the extra messages only serving to clog up the system. Of particular note is Figure 4.1d, where it can be seen that only sending each message a single node achieves extremely high performance with almost no decrease as message count increases.
 
 \begin{wrapfigure}{L}{0.65\textwidth}
   	\vspace{-15pt}
@@ -346,7 +342,7 @@ Contrasting this in Figure 3.2 are results using the probabilistic user model, w
 These results taken together, particularly looking at Algorithm 3, suggest that the basic user model is not as accurate a model when the message count is low - even if users are shown few messages, they would be unlikely to share all of them. In the rest of the experiments, the probabilistic user model is used for this reason.
 
 
-\section{Algorithm 2 Further Node Probability}
+\subsection{Algorithm 2 Further Node Probability}
 The next tests run looked at how changing the probability of sending a message in a direction not closer to the target affects the delivery rate. These tests were again repeated 10 times each, and used the probabilistic user model with $a = 20$ and $p = 0.5$. Three sets of simulations were run, with message counts of 200, 400 and 800. In each of these, the probability parameter for showing algorithm 2 was increased from 0.1 to 1.0 in 0.1 increments. The results can be seen in Figure 3.3.
 
 \begin{figure}[h]
@@ -404,8 +400,8 @@ For these 4 weeks, the main focus will be on completing as much of the challengi
 During this period the time that can be spent on this project will likely be limited by other deadlines. Therefore this will be used mainly to write up a first rough draft of the report, and if time possibly work additionally on anything remaining from the first period.
 \subsection{Weeks 9 to 11}
 The final time period will be focused solely on ensuring that the report is fully finished and polished, and that all results are complete and correct. This is vital to the success of the project, as the report will be the primary source of information for the markers.
-\chapter{Conclusion}
-ToDo
+
+
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
