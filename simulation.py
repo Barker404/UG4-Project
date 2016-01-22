@@ -82,10 +82,14 @@ class Simulation(object):
                 self.show_model.max_shown, watched_message, draw_labels)
 
         num_delivered = len([x for x in self.messages if x.delivered])
+
+        self.visualiser.clear()
+
         if as_percent:
             return 100 * float(num_delivered) / float(self.message_count)
         else:
             return num_delivered
+
 
     def simulate_round(self, round_no, output_images, watched_message,
                        draw_labels):
@@ -168,4 +172,4 @@ class Simulation(object):
                     100 * float(min_delivered) / float(self.message_count),
                     100 * float(max_delivered) / float(self.message_count))
         else:
-            return (total_delivered, min_delivered, max_delivered)
+            return (total_delivered/count, min_delivered, max_delivered)

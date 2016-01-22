@@ -40,6 +40,9 @@ class Visualiser(object):
         ax = plt.gca()
         ax.set_axis_bgcolor('black')
 
+    def clear(self):
+        plt.close('all')
+
     def draw_image(self, g, pos, round_no, messages, max_seen, watched,
                    draw_labels):
         self._draw_frame(g, pos, round_no, messages, max_seen, watched,
@@ -205,7 +208,10 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
         plt.axis((0, x2, 0, 100))
 
     plt.xlabel(x_label)
-    plt.ylabel('Average % of messages delivered')
+    if as_percent:
+        plt.ylabel('Average % of messages delivered')
+    else:
+        plt.ylabel('Average number of messages delivered')
 
     try:
         os.makedirs(output_path)
