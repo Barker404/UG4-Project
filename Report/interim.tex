@@ -268,9 +268,8 @@ The showing algorithms are contained within subclasses of the \texttt{ShowModel}
 
 These classes are brought together by the \texttt{Simulation} class, which is given an instance of each of \texttt{GraphGenerator}, \texttt{ShowModel}, and \texttt{ShareModel} on creation. The simulation can then be either run once or repeated multiple times, collating the results. When repeating the simulation, it can set to either use the exact same network graph or to regenerate the graph using the same generation method - in the case of randomly generated graphs, this allows for repeating the simulation to remove random differences caused by specific graphs. The simulation class can also create visualisations as outputs. It can output either images of the state at each round of the simulation, or a single video of the entire simulation. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole.
 
-After development of the algorithms, experiments were run to compare their performance. All simulations were run on a 20 by 20 graph generated using Kleinberg's model, with parameters $k = 1$ and $q = 2$. They were simulated for 25 rounds, which was found in all cases to be enough time for any activity to stop. 
-
 \section{Results}
+After development of the algorithms, experiments were run to compare their performance. All simulations were run on a 20 by 20 graph generated using Kleinberg's model, with parameters $k = 1$ and $q = 2$. They were simulated for 25 rounds, which was found in all cases to be enough time for any activity to stop. 
 \begin{wrapfigure}{L}{0.65\textwidth}
   	\vspace{-25pt}
     \centering
