@@ -260,7 +260,7 @@ Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next s
 \chapter{Experimentation}
 
 \section{Simulation Program}
-For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library [reference?] to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
+For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
 
 There is a \texttt{GraphGenerator} abstract base class, subclasses of which encapsulate the knowledge specific to the graph model being used - including how to create a graph of that type, and how the nodes should be positioned in the visualisation (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning that by simply using a different subclass the graph generation method can be modified completed - for example the graph could be loaded from a static file.
 
