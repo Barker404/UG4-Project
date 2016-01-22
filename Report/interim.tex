@@ -119,7 +119,11 @@ An important factor in how a message showing algorithm performs is the network t
 
 For the majority of this project, Kleinberg's model for small world graphs was used\cite{Kleinberg00}. This is a model which randomly creates a graph that fits certain properties. Initially, nodes are arranged in a grid layout, with a "grid distance" from each other. Each node is connected to its immediate neighbours (those a grid distance of 1 away). Each node is then connected to a constant number $k$ of other nodes. The probability of connecting node $u$ to node $v$ in this way is proportional to $d(u, v)^{-q}$ where $d(u, v)$ is the grid distance between $u$ and $v$, and $q$ is a constant affecting how likely the links are to be "far-reaching". If $q$ is 0, then the node will be linked to other nodes uniformly. If $q$ is high, the long links are more likely to connect closer nodes.
 
-[diagram of Kleinberg's model]
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.5\textwidth]{Schabanel11_Kleinbergs_Network}
+  \caption{A Kleinberg Graph with an example of the distributed greedy search\cite{Schabanel11}}
+\end{figure}
 
 This model provides several properties which make it suitable to use in place of a social network. Since it is randomly generated, we can run experiments using multiple different graphs to avoid results being skewed by peculiarities of individual networks. 
 
