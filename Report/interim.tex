@@ -60,8 +60,6 @@ Acknowledgements go here.
 
 
 \chapter{Background}
-\section{Concept}
-ToDo
 \section{Related Works}
 ToDo
 
@@ -293,7 +291,36 @@ Contrasting this in Figure 3.2 are results using the probabilistic user model, w
 
 These results taken together, particularly looking at Algorithm 3, suggest that the basic user model is not as accurate a model when the message count is low - even if users are shown few messages, they would be unlikely to share all of them. In the rest of the experiments, the probabilistic user model is used for this reason.
 
+The next tests run looked at how changing the probability of sending a message in a direction not closer to the target affects the delivery rate. These tests were again repeated 10 times each, and used the probabilistic user model with $a = 20$ and $p = 0.5$. Three sets of simulations were run, with message counts of 200, 400 and 800. In each of these, the probability parameter for showing algorithm 2 was increased from 0.1 to 1.0 in 0.1 increments. The results can be seen in Figure 3.3.
 
+\begin{figure}[ht]
+  	\vspace{-10pt}
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{results/notCloserProb_200messages}
+        \caption{200 Messages}
+        \label{fig:results/notCloserProb_200messages}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{results/notCloserProb_400messages}
+        \caption{400 Messages}
+        \label{fig:results/notCloserProb_400messages}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+    %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{results/notCloserProb_800messages}
+        \caption{800 Messages}
+        \label{fig:results/notCloserProb_800messages}
+    \end{subfigure}
+  	\vspace{-5pt}
+    \caption{Not Closer Probability}\label{fig:NotCloserProbability}
+  	\vspace{-5pt}
+\end{figure}
+
+In these results it can be seen that, unsurprisingly, those with a higher number of messages had a generally lower delivery rate. More interesting is the point at which the delivery rates "peak" as the showing probability increases. All 3 cases show this peak, with it being at around 0.8 for 200 messages, 0.5 for 400 messages, and 0.3 for 800 messages. Also interesting is the fact that the delivery rates before the peak are quite similar. This suggests that depending on how many messages there are, spreading messages further increases the chance of delivery up to a point where there a simply too many messages in the system. Once this point is reached, the delivery rates fall faster if the messages are spread more. This is an observation that should prove useful when considering other algorithms in the future.
 
 \chapter{Future Plan}
 \section{Further Work}

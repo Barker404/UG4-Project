@@ -2,6 +2,7 @@
 
 import showing
 import sharing
+import numpy as np
 from graph import KleinbergGenerator
 from output import plot_simulations
 from simulation import Simulation
@@ -20,7 +21,7 @@ DRAW_LABELS = False
 
 
 def main():
-    compare_user_models()
+    not_closer_prob_graph()
 
 
 def test_messages_percent_absolute():
@@ -50,7 +51,6 @@ def test_messages_percent_absolute():
 
 
 def compare_user_models():
-    # Basic user model
     seen_limit = 20
     share_limit = 5
     share_prob_1 = 0.5
@@ -99,6 +99,38 @@ def compare_user_models():
 
             plot_simulations(sims, xs, "Message count", repeats, True,
                              "report_out/user_models", filenames_all[i][j])
+
+
+def not_closer_prob_graph():
+    # Probabilistic user model
+    seen_limit = 20
+    share_prob = 0.5
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
+
+    message_counts = [200, 400, 800]
+    filenames = [
+        "notCloserProb_200messages.png",
+        "notCloserProb_400messages.png",
+        "notCloserProb_800messages.png"
+    ]
+
+    repeats = 10
+
+    for i in range(0, 3):
+        xs = []
+        sims = []
+        for j in np.arange(0.1, 1.1, 0.1):
+            show_model = showing.FurtherProbShowModel(seen_limit, j)
+
+            xs.append(j)
+            simulation = Simulation(show_model, share_model,
+                                    graph_generator, ROUND_COUNT,
+                                    message_counts[i])
+            sims.append(simulation)
+
+        plot_simulations(sims, xs, "Not Closer Show Probability", repeats,
+                         True, "report_out/not_closer_prob", filenames[i])
 
 if __name__ == "__main__":
     main()
