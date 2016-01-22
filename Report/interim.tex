@@ -66,10 +66,12 @@ ToDo
 \chapter{Work Done}
 \section{Formal Definitions}
 
-\subsection{Input}
+\subsection{Problem Statement}
 Initially we are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$. 
 
 The graph $G$ represents the social network, with vertices in $V$ being the users of the network and edges in $E$ being connections between users within the network. A connection between two users $a$ and $b$ means in our context that user $a$ may see some content shared by user $b$ - however whether they actually see it or not is decided by the social network's algorithm.
+
+We wish to move these messages through the network so that as high a percentage as possible reach their final target.
 
 \subsection{Rounds}
 The system progresses in a series of \textbf{rounds}, representing periods of time passing in which messages can be passed on to other users. This allows us to more easily reason about the flow of information and also simulate the process.
