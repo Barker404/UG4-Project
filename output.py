@@ -206,6 +206,8 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
     x1, x2, y1, y2 = plt.axis()
     if (as_percent):
         plt.axis((0, x2, 0, 100))
+    else:
+        plt.axis((0, x2, 0, y2))
 
     plt.xlabel(x_label)
     if as_percent:
@@ -220,3 +222,5 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
             raise
     plt.savefig(os.path.join(output_path, output_filename), dpi=150)
     print "plot saved"
+
+    return averages, mins, maxs
