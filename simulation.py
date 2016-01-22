@@ -89,7 +89,7 @@ class Simulation(object):
 
     def simulate_round(self, round_no, output_images, watched_message,
                        draw_labels):
-        print "ROUND {0}".format(round_no)
+        # print "ROUND {0}".format(round_no)
         for node_index in self.g.nodes_iter():
 
             # Get messages that could possibly be shown
@@ -112,7 +112,7 @@ class Simulation(object):
                         not message.delivered):
                     message.delivered = True
                     message.delivery_turn = round_no
-                    print str(message.id) + " delivered!"
+                    # print str(message.id) + " delivered!"
 
             # Update shared messages
             shareResult = self.share_model.share_alg(showResults)
@@ -153,15 +153,15 @@ class Simulation(object):
             print "Finished simulation {} of {}".format(i + 1, count)
 
         total_messages = count * self.message_count
-        print "Delivered a total of {} out of {} - {}%".format(
-            total_delivered, total_messages,
-            100 * float(total_delivered) / float(total_messages))
-        print "Min: {} out of {} - {}%".format(
-            min_delivered, self.message_count,
-            100 * float(min_delivered) / float(self.message_count))
-        print "Max: {} out of {} - {}%".format(
-            max_delivered, self.message_count,
-            100 * float(max_delivered) / float(self.message_count))
+        # print "Delivered a total of {} out of {} - {}%".format(
+        #     total_delivered, total_messages,
+        #     100 * float(total_delivered) / float(total_messages))
+        # print "Min: {} out of {} - {}%".format(
+        #     min_delivered, self.message_count,
+        #     100 * float(min_delivered) / float(self.message_count))
+        # print "Max: {} out of {} - {}%".format(
+        #     max_delivered, self.message_count,
+        #     100 * float(max_delivered) / float(self.message_count))
 
         if as_percent:
             return (100 * float(total_delivered) / float(total_messages),
