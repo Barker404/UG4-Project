@@ -63,7 +63,7 @@ Acknowledgements go here.
 \section{Related Works}
 ToDo
 
-\chapter{Work Done and Results}
+\chapter{Work Done}
 \section{Formal Definitions}
 
 \subsection{Input}
@@ -205,10 +205,11 @@ T_{t}(v) = candidates[:a]
 
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
 
-\section{Results}
+
+\chapter{Results}
 After development of the algorithms, experiments were run to compare their performance. All simulations were run on a 20 by 20 graph generated using Kleinberg's model, with parameters $k = 1$ and $q = 2$. They were simulated for 25 rounds, which was found in all cases to be enough time for any activity to stop. 
 
-\begin{wrapfigure}{L}{0.64\textwidth}
+\begin{wrapfigure}{L}{0.65\textwidth}
   	\vspace{-25pt}
     \centering
     \begin{subfigure}[b]{0.3\textwidth}
@@ -244,12 +245,10 @@ After development of the algorithms, experiments were run to compare their perfo
   	\vspace{-15pt}
 \end{wrapfigure}
 
-\subsection{User Model Comparisons}
+\section{User Model Comparisons}
 First the two user models were compared. In Figure 3.1 the results using the basic user model are shown. For these tests the user model parameters were $a = 20$ (maximum seen) and $b = 5$ (maximum shared). The number of messages was increased from 25 to 375 in increments of 25, and each simulation was repeated 10 times and the average taken. The graphs show this user model with various showing algorithms. These are: a) Algorithm 1 - Any closer node; b) Algorithm 2 - Further nodes with probability 0.4; c) Algorithm 2 - Further nodes with probability 0.6; d) Algorithm 3 - Only single best node. We can see that as the probability of spreading messages away from the target increases, the percent of messages delivered decreases. This can be interpreted as the extra messages only clogging up the system. Of particular note is Figure 3.1d, where only sending each message a single node achieves extremely high performance with almost no decrease as message count increases.
 
-Contrasting this in Figure 3.2 are results using the probabilistic user model, with $a = 20$ (maximum seen) and $p = 0.5$ (probability of sharing). The same message counts and repetitions were used. Graphs a--d show this user model with the same respective showing algorithms as Figure 3.1. In this case we see almost the opposite - as the probability of sharing the message away from the target increases, so does the percentage of messages delivered. Figure 3.2d shows that Algorithm 3 does particularly badly in this case, delivering almost no messages. In general the message count has less of an effect than before, suggesting that messages not being passed on is now more of a problem than congestion.
-
-\begin{wrapfigure}{L}{0.64\textwidth}
+\begin{wrapfigure}{L}{0.65\textwidth}
   	\vspace{-15pt}
     \centering
     \begin{subfigure}[b]{0.3\textwidth}
@@ -282,12 +281,15 @@ Contrasting this in Figure 3.2 are results using the probabilistic user model, w
     \end{subfigure}
   	\vspace{-5pt}
     \caption{Probabilistic User Model}\label{fig:Prob50UserModel}
-  	\vspace{-25pt}
+  	\vspace{-15pt}
 \end{wrapfigure}
+
+Contrasting this in Figure 3.2 are results using the probabilistic user model, with $a = 20$ (maximum seen) and $p = 0.5$ (probability of sharing). The same message counts and repetitions were used. Graphs a--d show this user model with the same respective showing algorithms as Figure 3.1. In this case we see almost the opposite - as the probability of sharing the message away from the target increases, so does the percentage of messages delivered. Figure 3.2d shows that Algorithm 3 does particularly badly in this case, delivering almost no messages. In general the message count has less of an effect than before, suggesting that messages not being passed on is now more of a problem than congestion.
 
 These results taken together, particularly looking at Algorithm 3, suggest that the basic user model is not as accurate a model when the message count is low - even if users are shown few messages, they would be unlikely to share all of them. In the rest of the experiments, the probabilistic user model is used for this reason.
 
-\subsection{Algorithm 2 Further Node Probability}
+
+\section{Algorithm 2 Further Node Probability}
 The next tests run looked at how changing the probability of sending a message in a direction not closer to the target affects the delivery rate. These tests were again repeated 10 times each, and used the probabilistic user model with $a = 20$ and $p = 0.5$. Three sets of simulations were run, with message counts of 200, 400 and 800. In each of these, the probability parameter for showing algorithm 2 was increased from 0.1 to 1.0 in 0.1 increments. The results can be seen in Figure 3.3.
 
 \begin{figure}[h]
