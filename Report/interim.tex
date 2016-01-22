@@ -211,7 +211,7 @@ candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & D(v, d_{k}) < D(u, d_{k}) 
 \end{equation}
 
 \begin{equation}
-T_{t}(v) = sample(candidates, max(|candidates|, a))
+T_{t}(v) = sample(candidates, max(||candidates||, a))
 \end{equation}
 
 Where $D(u, v)$ is the grid (Manhattan) distance between $u$ and $v$, $sample(x, n)$ randomly samples $n$ values from the collection $x$, and $a$ is the maximum messages that can be shown to any node (their attention span).
