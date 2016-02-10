@@ -98,7 +98,7 @@ class Visualiser(object):
             # Draw destination node up to and including delivery round
             if (messages[watched].destination == node_index and
                 (not messages[watched].delivered or
-                    messages[watched].delivery_turn == round_no)):
+                    messages[watched].delivery_turn >= round_no)):
                 dest_nodelist.append(node_index)
                 dest_colours.append(DESTINATION_COLOUR)
                 dest_node = True
