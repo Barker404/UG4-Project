@@ -21,7 +21,51 @@ DRAW_LABELS = False
 
 
 def main():
-    not_closer_prob_graph()
+
+    seen_limit = 20
+
+    sm_1 = showing.AnyCloserGridShowModel(seen_limit)
+    sm_2 = showing.FurtherProbGridShowModel(seen_limit, 0.4)
+    sm_3 = showing.FurtherProbGridShowModel(seen_limit, 0.6)
+    sm_4 = showing.OnlyBestGridShowModel(seen_limit)
+    sm_5 = showing.AnyCloserShowModel(seen_limit)
+    sm_6 = showing.FurtherProbShowModel(seen_limit, 0.4)
+    sm_7 = showing.FurtherProbShowModel(seen_limit, 0.6)
+    sm_8 = showing.OnlyBestShowModel(seen_limit)
+    show_models = [sm_1, sm_2, sm_3, sm_4, sm_5, sm_6, sm_7, sm_8]
+    filenames = ["AnyCloserGrid.png",
+                 "FurtherProbGrid40.png",
+                 "FurtherProbGrid60.png",
+                 "OnlyBestGrid.png",
+                 "AnyCloser.png",
+                 "FurtherProb40.png",
+                 "FurtherProb60.png",
+                 "OnlyBest.png"]
+
+    for i in range(len(show_models)):
+        standard_show_model_graph(
+            show_models[i], seen_limit, "output", filenames[i])
+
+
+def standard_show_model_graph(show_model, seen_limit,
+                              output_path, graph_filename):
+    share_prob = 0.5
+    repeats = 10
+
+    xs = []
+    sims = []
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+
+    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
+
+    for k in range(25, 400, 25):
+        xs.append(k)
+        simulation = Simulation(show_model, share_model,
+                                graph_generator, ROUND_COUNT, k)
+        sims.append(simulation)
+
+    plot_simulations(sims, xs, "Message count", repeats, True,
+                     output_path, graph_filename)
 
 
 def test_messages_percent_absolute():
@@ -29,7 +73,7 @@ def test_messages_percent_absolute():
     seen_limit = 20
     share_limit = 5
 
-    show_model = showing.AnyCloserShowModel(seen_limit)
+    show_model = showing.AnyCloserGridShowModel(seen_limit)
     share_model = sharing.BasicShareModel(seen_limit, share_limit)
     graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
@@ -60,10 +104,10 @@ def compare_user_models():
     share_model_c = sharing.ProbShareModel(seen_limit, share_prob_2)
     share_models = [share_model_a, share_model_b, share_model_c]
 
-    show_model_1 = showing.AnyCloserShowModel(seen_limit)
-    show_model_2 = showing.FurtherProbShowModel(seen_limit, 0.4)
-    show_model_3 = showing.FurtherProbShowModel(seen_limit, 0.6)
-    show_model_4 = showing.OnlyBestShowModel(seen_limit)
+    show_model_1 = showing.AnyCloserGridShowModel(seen_limit)
+    show_model_2 = showing.FurtherProbGridShowModel(seen_limit, 0.4)
+    show_model_3 = showing.FurtherProbGridShowModel(seen_limit, 0.6)
+    show_model_4 = showing.OnlyBestGridShowModel(seen_limit)
     show_models = [show_model_1, show_model_2, show_model_3, show_model_4]
     graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
@@ -121,7 +165,7 @@ def not_closer_prob_graph():
         xs = []
         sims = []
         for j in np.arange(0.1, 1.1, 0.1):
-            show_model = showing.FurtherProbShowModel(seen_limit, j)
+            show_model = showing.FurtherProbGridShowModel(seen_limit, j)
 
             xs.append(j)
             simulation = Simulation(show_model, share_model,

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from collections import Counter
 import random
 import heapq
 
@@ -29,12 +28,20 @@ class AnyCloserShowModel(ShowModel):
         # possible is (message, node_index) pairs
         return [p for p in possible if (
             not p[0].delivered and
-            g_info.grid_distance(p[1], p[0].destination) >
-            g_info.grid_distance(node_index, p[0].destination))]
+            self.distance(g_info, p[1], p[0].destination) >
+            self.distance(g_info, node_index, p[0].destination))]
 
     def select_final(self, candidates):
         # Select the correct amount randomly
         return random.sample(candidates, min(self.max_shown, len(candidates)))
+
+    def distance(self, g_info, u, v):
+        return g_info.graph_distance(u, v)
+
+
+class AnyCloserGridShowModel(AnyCloserShowModel):
+    def distance(self, g_info, u, v):
+        return g_info.grid_distance(u, v)
 
 
 class FurtherProbShowModel(ShowModel):
@@ -52,13 +59,21 @@ class FurtherProbShowModel(ShowModel):
         # If not closer, return with given probability
         return [p for p in possible if (
             not p[0].delivered and
-            (g_info.grid_distance(p[1], p[0].destination) >
-             g_info.grid_distance(node_index, p[0].destination) or
+            (self.distance(g_info, p[1], p[0].destination) >
+             self.distance(g_info, node_index, p[0].destination) or
              random.random() < self.not_closer_prob))]
 
     def select_final(self, candidates):
         # Select the correct amount randomly
         return random.sample(candidates, min(self.max_shown, len(candidates)))
+
+    def distance(self, g_info, u, v):
+        return g_info.graph_distance(u, v)
+
+
+class FurtherProbGridShowModel(FurtherProbShowModel):
+    def distance(self, g_info, u, v):
+        return g_info.grid_distance(u, v)
 
 
 class OnlyBestShowModel(ShowModel):
@@ -82,8 +97,8 @@ class OnlyBestShowModel(ShowModel):
         min_distance = float('inf')
 
         for neighbour_index in g.neighbors_iter(current_node_index):
-            distance = g_info.grid_distance(
-                neighbour_index, message.destination)
+            distance = self.distance(
+                g_info, neighbour_index, message.destination)
 
             # Ensure that we not only get the min, but always the same index
             # (in the case that distances are the same
@@ -95,8 +110,16 @@ class OnlyBestShowModel(ShowModel):
 
         return min_index
 
+    def distance(self, g_info, u, v):
+        return g_info.graph_distance(u, v)
 
-class DistancePriorityModel(ShowModel):
+
+class OnlyBestGridShowModel(OnlyBestShowModel):
+    def distance(self, g_info, u, v):
+        return g_info.grid_distance(u, v)
+
+
+class DistancePriorityShowModel(ShowModel):
 
     def __init__(self, max_shown=20):
         self.max_shown = max_shown
@@ -110,7 +133,7 @@ class DistancePriorityModel(ShowModel):
         for p in possible:
             if p[0].delivered:
                 continue
-            dist = g_info.grid_distance(node_index, p[0].destination)
+            dist = self.distance(g_info, node_index, p[0].destination)
             if len(h) < self.max_shown:
                 # Negate the distance to treat the heap as a max-heap
                 # Larger (further) items stay at top
@@ -120,3 +143,11 @@ class DistancePriorityModel(ShowModel):
                     heapq.heappushpop(h, (-dist, p))
 
         return [x[1] for x in h]
+
+    def distance(self, g_info, u, v):
+        return g_info.graph_distance(u, v)
+
+
+class DistancePriorityGridShowModel(DistancePriorityShowModel):
+    def distance(self, g_info, u, v):
+        return g_info.grid_distance(u, v)
