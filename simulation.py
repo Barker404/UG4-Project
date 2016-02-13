@@ -2,7 +2,6 @@
 
 import os
 from output import Visualiser
-from graph import graph_diameter
 from message import Message
 import random
 
@@ -22,13 +21,12 @@ class Simulation(object):
 
     def generate_graph(self):
         # Create graph
-        self.g = self.graph_generator.generate_graph()
+        self.g, self.g_info = self.graph_generator.generate_graph()
         self.pos = self.graph_generator.generate_positions(self.g)
 
         self.width = self.graph_generator.get_width(self.g)
         self.height = self.graph_generator.get_height(self.g)
 
-        self.graph_diameter = graph_diameter(self.g)
         print "made graph"
 
         # Set up node attributes
@@ -98,7 +96,7 @@ class Simulation(object):
 
             # Update seen messages
             showResults = self.show_model.show_alg(
-                self.g, node_index, possible)
+                self.g, self.g_info, node_index, possible)
             seen = list(set([s[0] for s in showResults]))
             self.g.node[node_index]['seen'].append(seen)
 

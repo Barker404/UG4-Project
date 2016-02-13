@@ -46,13 +46,14 @@ class KleinbergGenerator(GraphGenerator):
 
         # Start with grid
         g = nx.grid_2d_graph(self.cols, self.rows)
+        g_info = KleinbergGraphInfo(g)
 
         # Add k extra edges for each node
         for node_index in g.nodes_iter():
             for i in range(self.k):
-                v_index = self.kleinberg_random_node(g, node_index)
+                v_index = self.kleinberg_random_node(g, g_info, node_index)
                 g.add_edge(node_index, v_index)
-        return g
+        return g, g_info
 
     def generate_positions(self, g):
         return dict(zip(g, g))
@@ -63,13 +64,13 @@ class KleinbergGenerator(GraphGenerator):
     def get_height(self, g):
         return self.rows
 
-    def kleinberg_random_node(self, g, node_index):
+    def kleinberg_random_node(self, g, g_info, node_index):
         # Probability of choosing v given u is proportional to:
         # d(u, v)^q
         # Where d(u, v) is grid distance
 
         # Calculate sum of probabilities to get actual probabilities
-        prob_sum = self.get_norm_const(g, node_index)
+        prob_sum = self.get_norm_const(g, g_info, node_index)
 
         # Take random number in [0, prob_sum]
         rand = uniform(0, prob_sum)
@@ -80,12 +81,12 @@ class KleinbergGenerator(GraphGenerator):
 
             # subtract d(u, v)^q from the random number
             # when it reaches 0, the current node is our randomly picked node
-            d = grid_distance(node_index, v_index)
+            d = g_info.grid_distance(node_index, v_index)
             rand -= pow(d, -self.q)
             if (rand <= 0):
                 return v_index
 
-    def get_norm_const(self, g, node_index):
+    def get_norm_const(self, g, g_info, node_index):
         # normalisation constant = sum(d(u, v)^q) over all v != u
         norm_const = 0
         for v_index in g.nodes_iter():
@@ -93,7 +94,7 @@ class KleinbergGenerator(GraphGenerator):
             if v_index == node_index:
                 continue
 
-            d = grid_distance(node_index, v_index)
+            d = g_info.grid_distance(node_index, v_index)
             norm_const += pow(d, -self.q)
         return norm_const
 
@@ -112,6 +113,7 @@ class KleinbergGeneratorSameNorm(KleinbergGenerator):
 
         # Start with grid
         g = nx.grid_2d_graph(self.cols, self.rows)
+        g_info = KleinbergGraphInfo(g)
 
         # Choose the center node as the one which will have the highest
         # probability sum (normalisation constant)
@@ -121,17 +123,18 @@ class KleinbergGeneratorSameNorm(KleinbergGenerator):
         # Less calculations to perform, however nodes closer to the outside are
         # more likely to have no long link (only the center node is gauranteed
         # to have one)
-        constant = self.get_norm_const(g, norm_node)
+        constant = self.get_norm_const(g, g_info, norm_node)
 
         # Add k extra edges for each node
         for node_index in g.nodes_iter():
             for i in range(self.k):
-                v_index = self.kleinberg_random_node(g, node_index, constant)
+                v_index = self.kleinberg_random_node(g, g_info, node_index,
+                                                     constant)
                 if v_index is not None:
                     g.add_edge(node_index, v_index)
-        return g
+        return g, g_info
 
-    def kleinberg_random_node(self, g, node_index, prob_sum):
+    def kleinberg_random_node(self, g, g_info, node_index, prob_sum):
         # Probability of choosing v given u is proportional to:
         # d(u, v)^q
         # Where d(u, v) is grid distance
@@ -146,18 +149,21 @@ class KleinbergGeneratorSameNorm(KleinbergGenerator):
 
             # subtract d(u, v)^q from the random number
             # when it reaches 0, the current node is our randomly picked node
-            d = grid_distance(node_index, v_index)
+            d = g_info.grid_distance(node_index, v_index)
             rand -= pow(d, -self.q)
             if (rand <= 0):
                 return v_index
         return None
 
 
-def grid_distance(u, v):
-    # u, v must be 2-tuples of x, y coords in grid
-    # Just take manhatten distance
-    return abs(u[0] - v[0]) + abs(u[1] - v[1])
+class GraphInfo(object):
+    def __init__(self, g):
+        self.g = g
+        self.diameter = nx.diameter(g)
 
 
-def graph_diameter(g):
-    return nx.diameter(g)
+class KleinbergGraphInfo(GraphInfo):
+    def grid_distance(self, u, v):
+        # u, v must be 2-tuples of x, y coords in grid
+        # Just take manhatten distance
+        return abs(u[0] - v[0]) + abs(u[1] - v[1])
