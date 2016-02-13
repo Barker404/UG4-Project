@@ -101,7 +101,7 @@ class DistancePriorityModel(ShowModel):
     def __init__(self, max_shown=20):
         self.max_shown = max_shown
 
-    def show_alg(self, g, node_index, possible):
+    def show_alg(self, g, g_info, node_index, possible):
         # Store items in a heap based on distance
         # We want the closest items
         # have the furthest items at the "top" to easily swap with others
@@ -110,7 +110,7 @@ class DistancePriorityModel(ShowModel):
         for p in possible:
             if p[0].delivered:
                 continue
-            dist = grid_distance(node_index, p[0].destination)
+            dist = g_info.grid_distance(node_index, p[0].destination)
             if len(h) < self.max_shown:
                 # Negate the distance to treat the heap as a max-heap
                 # Larger (further) items stay at top
