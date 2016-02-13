@@ -160,6 +160,12 @@ class GraphInfo(object):
     def __init__(self, g):
         self.g = g
         self.diameter = nx.diameter(g)
+        self._distances = None
+
+    def graph_distance(self, u, v):
+        if self._distances is None:
+            self._distances = nx.all_pairs_shortest_path_length(self.g)
+        return self._distances[u][v]
 
 
 class KleinbergGraphInfo(GraphInfo):
