@@ -2,6 +2,7 @@
 
 from collections import Counter
 import random
+import heapq
 
 from abc import ABCMeta, abstractmethod
 
@@ -93,3 +94,29 @@ class OnlyBestShowModel(ShowModel):
                 min_index = neighbour_index
 
         return min_index
+
+
+class DistancePriorityModel(ShowModel):
+
+    def __init__(self, max_shown=20):
+        self.max_shown = max_shown
+
+    def show_alg(self, g, node_index, possible):
+        # Store items in a heap based on distance
+        # We want the closest items
+        # have the furthest items at the "top" to easily swap with others
+        h = []
+
+        for p in possible:
+            if p[0].delivered:
+                continue
+            dist = grid_distance(node_index, p[0].destination)
+            if len(h) < self.max_shown:
+                # Negate the distance to treat the heap as a max-heap
+                # Larger (further) items stay at top
+                heapq.heappush(h, (-dist, p))
+            else:
+                if (h[0][0] > dist):
+                    heapq.heappushpop(h, (-dist, p))
+
+        return [x[1] for x in h]

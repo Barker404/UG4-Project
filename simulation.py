@@ -9,15 +9,18 @@ import random
 class Simulation(object):
 
     def __init__(self, show_model, share_model, graph_generator,
-                 round_count=10, message_count=50):
+                 round_count=10, message_count=50, pregenerate_graph=False):
         self.show_model = show_model
         self.share_model = share_model
         self.graph_generator = graph_generator
         self.round_count = round_count
         self.message_count = message_count
 
-        self.generate_graph()
-        self.generate_messages()
+        if pregenerate_graph:
+            self.generate_graph()
+            self.generate_messages()
+        else:
+            self.g = None
 
     def generate_graph(self):
         # Create graph
@@ -50,9 +53,10 @@ class Simulation(object):
         return self.messages
 
     def clear_simulation(self):
-        for i in self.g.nodes_iter():
-            self.g.node[i]['seen'] = [[]]
-            self.g.node[i]['shared'] = [[]]
+        if self.g is not None:
+            for i in self.g.nodes_iter():
+                self.g.node[i]['seen'] = [[]]
+                self.g.node[i]['shared'] = [[]]
 
     def run_simulation(self, output_images, output_video, output_path='output',
                        watched_message=0, draw_labels=False, as_percent=False):
@@ -76,14 +80,18 @@ class Simulation(object):
                 self.show_model.max_shown, watched_message, draw_labels)
 
         num_delivered = len([x for x in self.messages if x.delivered])
+
+        self.visualiser.clear()
+
         if as_percent:
             return 100 * float(num_delivered) / float(self.message_count)
         else:
             return num_delivered
 
+
     def simulate_round(self, round_no, output_images, watched_message,
                        draw_labels):
-        print "ROUND {0}".format(round_no)
+        # print "ROUND {0}".format(round_no)
         for node_index in self.g.nodes_iter():
 
             # Get messages that could possibly be shown
@@ -106,7 +114,7 @@ class Simulation(object):
                         not message.delivered):
                     message.delivered = True
                     message.delivery_turn = round_no
-                    print str(message.id) + " delivered!"
+                    # print str(message.id) + " delivered!"
 
             # Update shared messages
             shareResult = self.share_model.share_alg(showResults)
@@ -127,12 +135,11 @@ class Simulation(object):
         min_delivered = float('inf')
         max_delivered = 0
         for i in range(count):
-            if i != 0:
-                self.clear_simulation()
-                if regenerate_graph:
-                    self.generate_graph()
-                if regenerate_messages:
-                    self.generate_messages()
+            self.clear_simulation()
+            if regenerate_graph:
+                self.generate_graph()
+            if regenerate_messages:
+                self.generate_messages()
 
             delivered = self.run_simulation(output_graphs, output_videos,
                                             os.path.join(output_path, str(i)),
@@ -148,19 +155,19 @@ class Simulation(object):
             print "Finished simulation {} of {}".format(i + 1, count)
 
         total_messages = count * self.message_count
-        print "Delivered a total of {} out of {} - {}%".format(
-            total_delivered, total_messages,
-            100 * float(total_delivered) / float(total_messages))
-        print "Min: {} out of {} - {}%".format(
-            min_delivered, self.message_count,
-            100 * float(min_delivered) / float(self.message_count))
-        print "Max: {} out of {} - {}%".format(
-            max_delivered, self.message_count,
-            100 * float(max_delivered) / float(self.message_count))
+        # print "Delivered a total of {} out of {} - {}%".format(
+        #     total_delivered, total_messages,
+        #     100 * float(total_delivered) / float(total_messages))
+        # print "Min: {} out of {} - {}%".format(
+        #     min_delivered, self.message_count,
+        #     100 * float(min_delivered) / float(self.message_count))
+        # print "Max: {} out of {} - {}%".format(
+        #     max_delivered, self.message_count,
+        #     100 * float(max_delivered) / float(self.message_count))
 
         if as_percent:
             return (100 * float(total_delivered) / float(total_messages),
                     100 * float(min_delivered) / float(self.message_count),
                     100 * float(max_delivered) / float(self.message_count))
         else:
-            return (total_delivered, min_delivered, max_delivered)
+            return (total_delivered/count, min_delivered, max_delivered)

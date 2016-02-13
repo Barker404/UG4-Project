@@ -40,6 +40,9 @@ class Visualiser(object):
         ax = plt.gca()
         ax.set_axis_bgcolor('black')
 
+    def clear(self):
+        plt.close('all')
+
     def draw_image(self, g, pos, round_no, messages, max_seen, watched,
                    draw_labels):
         self._draw_frame(g, pos, round_no, messages, max_seen, watched,
@@ -95,7 +98,7 @@ class Visualiser(object):
             # Draw destination node up to and including delivery round
             if (messages[watched].destination == node_index and
                 (not messages[watched].delivered or
-                    messages[watched].delivery_turn == round_no)):
+                    messages[watched].delivery_turn >= round_no)):
                 dest_nodelist.append(node_index)
                 dest_colours.append(DESTINATION_COLOUR)
                 dest_node = True
@@ -179,27 +182,45 @@ class Visualiser(object):
         return labels
 
 
-def plot_simulations(simulations, x_values, x_label, repeats,
-                     output_path='output'):
+def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
+                     output_path='output', output_filename='plot.png'):
 
-    averages, mins, maxs = map(
-        list, zip(*[
-            sim.repeat_simulation(repeats, as_percent=True)
-            for sim in simulations]))
+    averages = []
+    mins = []
+    maxs = []
+
+    i = 0
+    for sim in simulations:
+        av, mi, ma = sim.repeat_simulation(repeats, as_percent=as_percent)
+        averages.append(av)
+        mins.append(mi)
+        maxs.append(ma)
+
+        print "Finished simulation set with x value {}".format(x_values[i])
+        i += 1
 
     # Might want to do something with mins/maxes in future
     fig = plt.figure(figsize=(10, 10))
     plt.plot(x_values, averages, 'bo')
 
     x1, x2, y1, y2 = plt.axis()
-    plt.axis((0, x2, 0, 100))
+    if (as_percent):
+        plt.axis((0, x2, 0, 100))
+    else:
+        plt.axis((0, x2, 0, y2))
+
     plt.xlabel(x_label)
-    plt.ylabel('Average % of messages delivered')
+    if as_percent:
+        plt.ylabel('Average % of messages delivered')
+    else:
+        plt.ylabel('Average number of messages delivered')
 
     try:
         os.makedirs(output_path)
     except OSError:
         if not os.path.isdir(output_path):
             raise
-    plt.savefig(os.path.join(output_path, "plot.png"), dpi=150)
+    plt.savefig(os.path.join(output_path, output_filename), dpi=150)
     print "plot saved"
+
+    return averages, mins, maxs
