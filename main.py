@@ -3,7 +3,7 @@
 import showing
 import sharing
 import numpy as np
-from graph import KleinbergGenerator
+import graph
 from output import plot_simulations
 from simulation import Simulation
 
@@ -56,7 +56,7 @@ def standard_show_model_graph(show_model, seen_limit,
     sims = []
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
 
-    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     for k in range(25, 400, 25):
         xs.append(k)
@@ -75,7 +75,7 @@ def test_messages_percent_absolute():
 
     show_model = showing.AnyCloserGridShowModel(seen_limit)
     share_model = sharing.BasicShareModel(seen_limit, share_limit)
-    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     sims = []
     xs = []
@@ -109,7 +109,7 @@ def compare_user_models():
     show_model_3 = showing.FurtherProbGridShowModel(seen_limit, 0.6)
     show_model_4 = showing.OnlyBestGridShowModel(seen_limit)
     show_models = [show_model_1, show_model_2, show_model_3, show_model_4]
-    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     filenames_all = [
         [
@@ -150,7 +150,7 @@ def not_closer_prob_graph():
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
-    graph_generator = KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     message_counts = [200, 400, 800]
     filenames = [

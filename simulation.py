@@ -88,7 +88,6 @@ class Simulation(object):
         else:
             return num_delivered
 
-
     def simulate_round(self, round_no, output_images, watched_message,
                        draw_labels):
         # print "ROUND {0}".format(round_no)

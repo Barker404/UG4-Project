@@ -27,13 +27,40 @@ class GraphGenerator(object):
         pass
 
 
-class KleinbergGenerator(GraphGenerator):
+class GridGenerator(GraphGenerator):
+
+    def __init__(self, cols, rows):
+        self.cols = cols
+        self.rows = rows
+
+    def generate_graph(self):
+        # Creates a grid of size rows * cols
+        # For each node in the grid, add k random edges
+        # Where the probability of an edge from u to v is proportional to:
+        # d(u, v)^q
+        # Where d(u, v) is grid distance
+
+        # Start with grid
+        g = nx.grid_2d_graph(self.cols, self.rows)
+        g_info = GridGraphInfo(g)
+        return g, g_info
+
+    def generate_positions(self, g):
+        return dict(zip(g, g))
+
+    def get_width(self, g):
+        return self.cols
+
+    def get_height(self, g):
+        return self.rows
+
+
+class KleinbergGenerator(GridGenerator):
 
     def __init__(self, cols, rows, k, q):
         # k: no of random edges to generate
         # q: clustering exponent
-        self.cols = cols
-        self.rows = rows
+        GridGenerator.__init__(self, cols, rows)
         self.k = k
         self. q = q
 
@@ -46,7 +73,7 @@ class KleinbergGenerator(GraphGenerator):
 
         # Start with grid
         g = nx.grid_2d_graph(self.cols, self.rows)
-        g_info = KleinbergGraphInfo(g)
+        g_info = GridGraphInfo(g)
 
         # Add k extra edges for each node
         for node_index in g.nodes_iter():
@@ -54,15 +81,6 @@ class KleinbergGenerator(GraphGenerator):
                 v_index = self.kleinberg_random_node(g, g_info, node_index)
                 g.add_edge(node_index, v_index)
         return g, g_info
-
-    def generate_positions(self, g):
-        return dict(zip(g, g))
-
-    def get_width(self, g):
-        return self.cols
-
-    def get_height(self, g):
-        return self.rows
 
     def kleinberg_random_node(self, g, g_info, node_index):
         # Probability of choosing v given u is proportional to:
@@ -113,7 +131,7 @@ class KleinbergGeneratorSameNorm(KleinbergGenerator):
 
         # Start with grid
         g = nx.grid_2d_graph(self.cols, self.rows)
-        g_info = KleinbergGraphInfo(g)
+        g_info = GridGraphInfo(g)
 
         # Choose the center node as the one which will have the highest
         # probability sum (normalisation constant)
@@ -168,7 +186,7 @@ class GraphInfo(object):
         return self._distances[u][v]
 
 
-class KleinbergGraphInfo(GraphInfo):
+class GridGraphInfo(GraphInfo):
     def grid_distance(self, u, v):
         # u, v must be 2-tuples of x, y coords in grid
         # Just take manhatten distance
