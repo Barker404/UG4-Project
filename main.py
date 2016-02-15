@@ -44,7 +44,7 @@ def main():
 
     for i in range(len(show_models)):
         standard_show_model_graph(
-            show_models[i], seen_limit, "output", filenames[i])
+            show_models[i], seen_limit, "standard_output", filenames[i])
 
 
 def standard_show_model_graph(show_model, seen_limit,
