@@ -20,7 +20,8 @@ FIGSIZE_NODE_RATIO = 1.0 / 3.0
 COLORBAR_FIGSIZE_RATIO = 4.0 / 3.0
 
 NODE_SIZE = 50
-DEST_NODE_SIZE = 100
+CMAP_NODE_SIZE = 100
+DEST_NODE_SIZE = 50
 EDGE_WIDTH = 2
 
 
@@ -87,48 +88,48 @@ class Visualiser(object):
         cmap_nodelist = []
         cmap_colours = []
 
-        watched_nodelist = []
-        watched_colours = []
+        shared_nodelist = []
+        shared_colours = []
+
+        seen_nodelist = []
+        seen_colours = []
 
         dest_nodelist = []
         dest_colours = []
 
         for node_index in g.nodes_iter():
-            dest_node = False
+
             # Draw destination node up to and including delivery round
             if (messages[watched].destination == node_index and
                 (not messages[watched].delivered or
                     messages[watched].delivery_turn >= round_no)):
                 dest_nodelist.append(node_index)
                 dest_colours.append(DESTINATION_COLOUR)
-                dest_node = True
 
             # Draw watched message as specific colour
             if (messages[watched] in g.node[node_index]['shared'][round_no]):
-                watched_nodelist.append(node_index)
-                watched_colours.append(SHARED_COLOUR)
+                shared_nodelist.append(node_index)
+                shared_colours.append(SHARED_COLOUR)
             elif (messages[watched] in g.node[node_index]['seen'][round_no]):
-                watched_nodelist.append(node_index)
-                watched_colours.append(SEEN_COLOUR)
-            elif not dest_node:
-                # Don't draw normal cmap if destination node -
-                # Should already have been added to that list
-                # Gradient based on no of messages seen
-                cmapValue = float(len(g.node[node_index]['seen'][round_no]))
-                cmap_nodelist.append(node_index)
-                cmap_colours.append(cmapValue)
+                seen_nodelist.append(node_index)
+                seen_colours.append(SEEN_COLOUR)
+
+            # Gradient based on no of messages seen
+            cmapValue = float(len(g.node[node_index]['seen'][round_no]))
+            cmap_nodelist.append(node_index)
+            cmap_colours.append(cmapValue)
 
         # Draw where the "seen" messages were shared from (last round) on the
         # edges
-        shared_colours = []
+        shared_edge_colours = []
         for edge in g.edges():
             if ((messages[watched] in
                     g.node[edge[0]]['shared'][round_no - 1]) or
                 (messages[watched] in
                     g.node[edge[1]]['shared'][round_no - 1])):
-                shared_colours.append(1)
+                shared_edge_colours.append(1)
             else:
-                shared_colours.append(0)
+                shared_edge_colours.append(0)
 
         labels = {}
         if (draw_labels):
@@ -137,24 +138,29 @@ class Visualiser(object):
         # Draw the destination node, the nodes with the watched message, and
         # all other nodes seperately
 
+        nodes_c = nx.draw_networkx_nodes(
+            g, pos, nodelist=cmap_nodelist, node_size=CMAP_NODE_SIZE,
+            node_shape='o', node_color=cmap_colours,
+            cmap=cmap, vmin=0, vmax=max_seen,
+            with_labels=draw_labels, labels=labels, font_color='orange')
+
         nodes_d = nx.draw_networkx_nodes(
             g, pos, nodelist=dest_nodelist, node_size=DEST_NODE_SIZE,
             node_shape='s', node_color=dest_colours,
             with_labels=draw_labels, labels=labels, font_color='orange')
 
-        nodes_w = nx.draw_networkx_nodes(
-            g, pos, nodelist=watched_nodelist, node_size=NODE_SIZE,
-            node_shape='^', node_color=watched_colours,
+        nodes_sh = nx.draw_networkx_nodes(
+            g, pos, nodelist=shared_nodelist, node_size=NODE_SIZE,
+            node_shape='^', node_color=shared_colours,
             with_labels=draw_labels, labels=labels, font_color='orange')
 
-        nodes_c = nx.draw_networkx_nodes(
-            g, pos, nodelist=cmap_nodelist, node_size=NODE_SIZE,
-            node_shape='o', node_color=cmap_colours,
-            cmap=cmap, vmin=0, vmax=max_seen,
+        nodes_se = nx.draw_networkx_nodes(
+            g, pos, nodelist=seen_nodelist, node_size=NODE_SIZE,
+            node_shape='v', node_color=seen_colours,
             with_labels=draw_labels, labels=labels, font_color='orange')
 
         edges = nx.draw_networkx_edges(g, pos, width=EDGE_WIDTH,
-                                       edge_color=shared_colours)
+                                       edge_color=shared_edge_colours)
 
         cbar = plt.colorbar(nodes_c)
         cbar.ax.tick_params(axis='x', colors='white')
@@ -163,7 +169,7 @@ class Visualiser(object):
         ax = plt.gca()
         ax.set_axis_bgcolor('black')
 
-        return edges, nodes_w, nodes_d, nodes_c
+        return edges, nodes_sh, nodes_se, nodes_d, nodes_c
 
     def get_labels(self, g, round_no):
         labels = {}
