@@ -40,6 +40,7 @@ class AnyCloserShowModel(ShowModel):
 
 
 class AnyCloserGridShowModel(AnyCloserShowModel):
+
     def distance(self, g_info, u, v):
         return g_info.grid_distance(u, v)
 
@@ -72,6 +73,7 @@ class FurtherProbShowModel(ShowModel):
 
 
 class FurtherProbGridShowModel(FurtherProbShowModel):
+
     def distance(self, g_info, u, v):
         return g_info.grid_distance(u, v)
 
@@ -115,6 +117,7 @@ class OnlyBestShowModel(ShowModel):
 
 
 class OnlyBestGridShowModel(OnlyBestShowModel):
+
     def distance(self, g_info, u, v):
         return g_info.grid_distance(u, v)
 
@@ -139,7 +142,7 @@ class DistancePriorityShowModel(ShowModel):
                 # Larger (further) items stay at top
                 heapq.heappush(h, (-dist, p))
             else:
-                if (h[0][0] > dist):
+                if (-h[0][0] > dist):
                     heapq.heappushpop(h, (-dist, p))
 
         return [x[1] for x in h]
@@ -149,5 +152,63 @@ class DistancePriorityShowModel(ShowModel):
 
 
 class DistancePriorityGridShowModel(DistancePriorityShowModel):
+
+    def distance(self, g_info, u, v):
+        return g_info.grid_distance(u, v)
+
+
+class DistancePrioritySomeRandomShowModel(ShowModel):
+
+    def __init__(self, max_shown=20, extra_fraction=0.25):
+        self.max_shown = max_shown
+        self.extra_fraction = extra_fraction
+        self.priority_max = int(extra_fraction * float(max_shown))
+        self.extra_max = max_shown - self.priority_max
+
+    def show_alg(self, g, g_info, node_index, possible):
+        # Store items in a heap based on distance
+        # We want the closest items
+        # have the furthest items at the "top" to easily swap with others
+        h = []
+        # List of those not close enough to be in heap
+        # We choose some of these to occupy our "extra slots" in those shown
+        extra_candidates = []
+
+        for p in possible:
+            if p[0].delivered:
+                continue
+            dist = self.distance(g_info, node_index, p[0].destination)
+
+            if len(h) < self.priority_max:
+                # Negate the distance to treat the heap as a max-heap
+                # Larger (further) items stay at top
+                heapq.heappush(h, (-dist, p))
+            else:
+                if (-h[0][0] > dist):
+                    heapq.heappushpop(h, (-dist, p))
+                else:
+                    # Not close enough to go in heap
+                    # Add to list to be extra section candidate
+                    extra_candidates.append(p)
+
+        # From the candidates, choose those to be shown in the "extra slots"
+        extra = self.choose_extra(extra_candidates)
+
+        shown = [x[1] for x in h]
+        shown.extend(extra)
+        return shown
+
+    def choose_extra(self, candidates):
+        extra_size = min(len(candidates), self.extra_max)
+        chosen = random.sample(candidates, extra_size)
+        return chosen
+
+    def distance(self, g_info, u, v):
+        return g_info.graph_distance(u, v)
+
+
+class DistancePrioritySomeRandomGridShowModel(
+        DistancePrioritySomeRandomShowModel):
+
     def distance(self, g_info, u, v):
         return g_info.grid_distance(u, v)
