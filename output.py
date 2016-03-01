@@ -183,15 +183,19 @@ class Visualiser(object):
 
 
 def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
-                     output_path='output', output_filename='plot.png'):
+                     output_path='output', output_filename='plot.png',
+                     store_data=False):
 
     averages = []
     mins = []
     maxs = []
 
     i = 0
-    for sim in simulations:
-        av, mi, ma = sim.repeat_simulation(repeats, as_percent=as_percent)
+    for i in range(len(simulations)):
+        new_output_path = os.path.join(output_path, str(x_values[i]))
+        av, mi, ma = simulations[i].repeat_simulation(
+            repeats, as_percent=as_percent, output_path=new_output_path,
+            store_data=store_data)
         averages.append(av)
         mins.append(mi)
         maxs.append(ma)
