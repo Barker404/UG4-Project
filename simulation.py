@@ -4,6 +4,8 @@ import os
 from output import Visualiser
 from message import Message
 import random
+import data_storage
+from datetime import datetime
 
 
 class Simulation(object):
@@ -59,26 +61,38 @@ class Simulation(object):
                 self.g.node[i]['shared'] = [[]]
 
     def run_simulation(self, output_images, output_video, output_path='output',
-                       watched_message=0, draw_labels=False, as_percent=False):
+                       watched_message=0, draw_labels=False, as_percent=False,
+                       store_data=False):
+        if store_data:
+            data_storage.store_sim_info(output_path, self)
 
-        self.visualiser = Visualiser(self.width, self.height, output_path)
+        visualiser_path = os.path.join(output_path, "visualisation")
+        self.visualiser = Visualiser(self.width, self.height, visualiser_path)
 
         if output_images:
             # Draw round 0
             self.visualiser.draw_image(
                 self.g, self.pos, 0, self.messages, self.show_model.max_shown,
                 watched_message, draw_labels)
+        if store_data:
+            round_path = os.path.join(output_path, "round0")
+            data_storage.store_round_info(round_path, self, 0)
 
         # Simulate rounds
         for round_no in range(1, self.round_count + 1):
             self.simulate_round(round_no, output_images,
                                 watched_message, draw_labels)
+            if store_data:
+                round_path = os.path.join(output_path, "round" + str(round_no))
+                data_storage.store_round_info(round_path, self, round_no)
 
         if output_video:
             self.visualiser.create_video(
                 self.g, self.pos, self.round_count, self.messages,
                 self.show_model.max_shown, watched_message, draw_labels)
 
+        if store_data:
+            data_storage.store_post_sim_info(output_path, self)
         num_delivered = len([x for x in self.messages if x.delivered])
 
         self.visualiser.clear()
@@ -128,21 +142,29 @@ class Simulation(object):
                           regenerate_messages=True, as_percent=False,
                           output_graphs=False, output_videos=False,
                           output_path='output', watched_message=0,
-                          draw_labels=False):
+                          draw_labels=False, store_data=False):
         total = 0
         total_delivered = 0
         min_delivered = float('inf')
         max_delivered = 0
         for i in range(count):
+
             self.clear_simulation()
             if regenerate_graph:
                 self.generate_graph()
             if regenerate_messages:
                 self.generate_messages()
 
+            timestamp = datetime.now().strftime("%d%m%y-%H%M%S-%f")
+            new_output_path = os.path.join(output_path, timestamp)
             delivered = self.run_simulation(output_graphs, output_videos,
-                                            os.path.join(output_path, str(i)),
-                                            watched_message, draw_labels)
+                                            new_output_path, watched_message,
+                                            draw_labels, as_percent=False,
+                                            store_data=store_data)
+
+            if store_data:
+                data_storage.write_repeat_result(
+                    output_path, self.message_count, delivered)
 
             total += self.message_count
             total_delivered += delivered
@@ -154,15 +176,6 @@ class Simulation(object):
             print "Finished simulation {} of {}".format(i + 1, count)
 
         total_messages = count * self.message_count
-        # print "Delivered a total of {} out of {} - {}%".format(
-        #     total_delivered, total_messages,
-        #     100 * float(total_delivered) / float(total_messages))
-        # print "Min: {} out of {} - {}%".format(
-        #     min_delivered, self.message_count,
-        #     100 * float(min_delivered) / float(self.message_count))
-        # print "Max: {} out of {} - {}%".format(
-        #     max_delivered, self.message_count,
-        #     100 * float(max_delivered) / float(self.message_count))
 
         if as_percent:
             return (100 * float(total_delivered) / float(total_messages),
