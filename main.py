@@ -48,7 +48,8 @@ def main():
 
 
 def standard_show_model_graph(show_model, seen_limit,
-                              output_path, graph_filename):
+                              output_path, graph_filename,
+                              max_messages=400, message_step=25):
     share_prob = 0.5
     repeats = 10
 
@@ -58,7 +59,7 @@ def standard_show_model_graph(show_model, seen_limit,
 
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
-    for k in range(25, 400, 25):
+    for k in range(message_step, max_messages + message_step, message_step):
         xs.append(k)
         simulation = Simulation(show_model, share_model,
                                 graph_generator, ROUND_COUNT, k)
