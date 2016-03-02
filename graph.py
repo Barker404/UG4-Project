@@ -3,6 +3,7 @@
 import networkx as nx
 from random import uniform
 from math import floor
+import numpy as np
 
 from abc import ABCMeta, abstractmethod
 
@@ -135,7 +136,7 @@ class KleinbergGeneratorSameNorm(KleinbergGenerator):
 
         # Choose the center node as the one which will have the highest
         # probability sum (normalisation constant)
-        norm_node = (floor(self.cols/2), floor(self.rows/2))
+        norm_node = (floor(self.cols / 2), floor(self.rows / 2))
 
         # Take this normalisation constant and use it for all calculations
         # Less calculations to perform, however nodes closer to the outside are
@@ -178,12 +179,40 @@ class GraphInfo(object):
     def __init__(self, g):
         self.g = g
         self.diameter = nx.diameter(g)
-        self._distances = None
+        self._graph_distances = None
+        self._diffusion_distances = {}
 
     def graph_distance(self, u, v):
-        if self._distances is None:
-            self._distances = nx.all_pairs_shortest_path_length(self.g)
-        return self._distances[u][v]
+        if self._graph_distances is None:
+            self._graph_distances = nx.all_pairs_shortest_path_length(self.g)
+        return self._graph_distances[u][v]
+
+    def diffusion_distance(self, u, v, t):
+        if t not in self._diffusion_distances:
+            # Calculate Z: the (lazy) random walk transition probabilities
+            a = nx.adjacency_matrix(self.g)
+            d = np.matrix(np.diag(
+                [self.g.degree(n) for n in self.g.nodes_iter()]))
+            i = np.matrix(np.identity(self.g.number_of_nodes()))
+            z = 0.5 * (i + d.I * a)
+            # Z^t gives the probability of walking from one node to another in
+            # t steps
+            zt = z**t
+            diff_mat = [
+                [np.linalg.norm(zt[i] - zt[j])
+                    for i in range(zt.shape[0])]
+                for j in range(zt.shape[0])]
+
+            self._diffusion_distances[t] = {}
+            for i, ilabel in zip(range(self.g.number_of_nodes()),
+                                 self.g.nodes_iter()):
+                self._diffusion_distances[t][i] = {}
+                for j, jlabel in zip(range(self.g.number_of_nodes()),
+                                     self.g.nodes_iter()):
+                    self._diffusion_distances[t][ilabel][jlabel] = \
+                        diff_mat[i][j]
+
+        return self._diffusion_distances[t][u][v]
 
 
 class GridGraphInfo(GraphInfo):
