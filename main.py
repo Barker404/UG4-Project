@@ -25,7 +25,9 @@ def main():
     seen_limit = 20
     share_prob = 0.5
 
-    show_model = showing.FurtherProbGridShowModel(seen_limit, 0.6)
+    distance_measure = showing.DiffusionDistanceMeasure(20)
+    show_model = showing.FurtherProbShowModel(
+        seen_limit, 0.6, distance_measure)
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
     graph_generator = graph.GridGenerator(COLUMNS, ROWS)
 
@@ -39,7 +41,7 @@ def main():
 
     plot_simulations(sims, xs, "Message count", 5, as_percent=True,
                      output_path="test", output_filename="grid.png",
-                     store_data=True)
+                     store_data=False)
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -69,7 +71,9 @@ def test_messages_percent_absolute():
     seen_limit = 20
     share_limit = 5
 
-    show_model = showing.AnyCloserGridShowModel(seen_limit)
+    grid_distance = showing.GraphDistanceMeasure()
+
+    show_model = showing.AnyCloserShowModel(seen_limit, grid_distance)
     share_model = sharing.BasicShareModel(seen_limit, share_limit)
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
@@ -100,10 +104,12 @@ def compare_user_models():
     share_model_c = sharing.ProbShareModel(seen_limit, share_prob_2)
     share_models = [share_model_a, share_model_b, share_model_c]
 
-    show_model_1 = showing.AnyCloserGridShowModel(seen_limit)
-    show_model_2 = showing.FurtherProbGridShowModel(seen_limit, 0.4)
-    show_model_3 = showing.FurtherProbGridShowModel(seen_limit, 0.6)
-    show_model_4 = showing.OnlyBestGridShowModel(seen_limit)
+    grid_distance = showing.GraphDistanceMeasure()
+
+    show_model_1 = showing.AnyCloserShowModel(seen_limit, grid_distance)
+    show_model_2 = showing.FurtherProbShowModel(seen_limit, 0.4, grid_distance)
+    show_model_3 = showing.FurtherProbShowModel(seen_limit, 0.6, grid_distance)
+    show_model_4 = showing.OnlyBestShowModel(seen_limit, grid_distance)
     show_models = [show_model_1, show_model_2, show_model_3, show_model_4]
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
@@ -156,12 +162,14 @@ def not_closer_prob_graph():
     ]
 
     repeats = 10
+    grid_distance = showing.GraphDistanceMeasure()
 
     for i in range(0, 3):
         xs = []
         sims = []
         for j in np.arange(0.1, 1.1, 0.1):
-            show_model = showing.FurtherProbGridShowModel(seen_limit, j)
+            show_model = showing.FurtherProbShowModel(
+                seen_limit, j, grid_distance)
 
             xs.append(j)
             simulation = Simulation(show_model, share_model,

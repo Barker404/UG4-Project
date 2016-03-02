@@ -6,6 +6,7 @@ REPEAT_RESULT_FILENAME = "repeat_results.csv"
 
 SIMULATION_INFO_FILENAME = "sim_info.json"
 SHOW_MODEL_INFO_FILENAME = "show_info.json"
+DISTANCE_MEASURE_INFO_FILENAME = "distance_measure.json"
 SHARE_MODEL_INFO_FILENAME = "share_info.json"
 GRAPH_GENERATOR_INFO_FILENAME = "graph_gen_info.json"
 GRAPH_EDGES_FILENAME = "graph.txt"
@@ -51,7 +52,13 @@ def store_sim_info(path, sim):
 
     # show_model
     with open(os.path.join(path, SHOW_MODEL_INFO_FILENAME), 'w') as f_show:
-        f_show.write(json.dumps(sim.show_model.__dict__))
+        # Deal with distance_measure
+        d = dict(sim.show_model.__dict__)
+        d["distance_measure"] = type(sim.show_model.distance_measure).__name__
+        f_show.write(json.dumps(d))
+    # distance_measure
+    with open(os.path.join(path, DISTANCE_MEASURE_INFO_FILENAME), 'w') as f_d:
+        f_d.write(json.dumps(sim.show_model.distance_measure.__dict__))
     # share_model
     with open(os.path.join(path, SHARE_MODEL_INFO_FILENAME), 'w') as f_share:
         f_share.write(json.dumps(sim.share_model.__dict__))
@@ -69,7 +76,6 @@ def store_sim_info(path, sim):
         for m in sim.messages:
             f_msgs.write("{}:{}:{}\n".format(
                 m.id, m.source, m.destination))
-
 
 
 def store_post_sim_info(path, sim):

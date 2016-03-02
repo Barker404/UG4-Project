@@ -16,8 +16,11 @@ class ShowModel(object):
 
 class AnyCloserShowModel(ShowModel):
 
-    def __init__(self, max_shown=20):
+    def __init__(self, max_shown=20, distance_measure=None):
         self.max_shown = max_shown
+        if distance_measure is None:
+            distance_measure = GraphDistanceMeasure()
+        self.distance_measure = distance_measure
 
     def show_alg(self, g, g_info, node_index, possible):
         candidates = self.select_candidates(g_info, node_index, possible)
@@ -28,28 +31,24 @@ class AnyCloserShowModel(ShowModel):
         # possible is (message, node_index) pairs
         return [p for p in possible if (
             not p[0].delivered and
-            self.distance(g_info, p[1], p[0].destination) >
-            self.distance(g_info, node_index, p[0].destination))]
+            self.distance_measure.distance(g_info, p[1], p[0].destination) >
+            self.distance_measure.distance(
+                g_info, node_index, p[0].destination))]
 
     def select_final(self, candidates):
         # Select the correct amount randomly
         return random.sample(candidates, min(self.max_shown, len(candidates)))
 
-    def distance(self, g_info, u, v):
-        return g_info.graph_distance(u, v)
-
-
-class AnyCloserGridShowModel(AnyCloserShowModel):
-
-    def distance(self, g_info, u, v):
-        return g_info.grid_distance(u, v)
-
 
 class FurtherProbShowModel(ShowModel):
 
-    def __init__(self, max_shown=20, not_closer_prob=0.5):
+    def __init__(self, max_shown=20, not_closer_prob=0.5,
+                 distance_measure=None):
         self.not_closer_prob = not_closer_prob
         self.max_shown = max_shown
+        if distance_measure is None:
+            distance_measure = GraphDistanceMeasure()
+        self.distance_measure = distance_measure
 
     def show_alg(self, g, g_info, node_index, possible):
         candidates = self.select_candidates(g_info, node_index, possible)
@@ -60,28 +59,23 @@ class FurtherProbShowModel(ShowModel):
         # If not closer, return with given probability
         return [p for p in possible if (
             not p[0].delivered and
-            (self.distance(g_info, p[1], p[0].destination) >
-             self.distance(g_info, node_index, p[0].destination) or
+            (self.distance_measure.distance(g_info, p[1], p[0].destination) >
+             self.distance_measure.distance(
+                g_info, node_index, p[0].destination) or
              random.random() < self.not_closer_prob))]
 
     def select_final(self, candidates):
         # Select the correct amount randomly
         return random.sample(candidates, min(self.max_shown, len(candidates)))
 
-    def distance(self, g_info, u, v):
-        return g_info.graph_distance(u, v)
-
-
-class FurtherProbGridShowModel(FurtherProbShowModel):
-
-    def distance(self, g_info, u, v):
-        return g_info.grid_distance(u, v)
-
 
 class OnlyBestShowModel(ShowModel):
 
-    def __init__(self, max_shown=20):
+    def __init__(self, max_shown=20, distance_measure=None):
         self.max_shown = max_shown
+        if distance_measure is None:
+            distance_measure = GraphDistanceMeasure()
+        self.distance_measure = distance_measure
 
     def show_alg(self, g, g_info, node_index, possible):
         # The first candidates
@@ -99,7 +93,7 @@ class OnlyBestShowModel(ShowModel):
         min_distance = float('inf')
 
         for neighbour_index in g.neighbors_iter(current_node_index):
-            distance = self.distance(
+            distance = self.distance_measure.distance(
                 g_info, neighbour_index, message.destination)
 
             # Ensure that we not only get the min, but always the same index
@@ -112,20 +106,14 @@ class OnlyBestShowModel(ShowModel):
 
         return min_index
 
-    def distance(self, g_info, u, v):
-        return g_info.graph_distance(u, v)
-
-
-class OnlyBestGridShowModel(OnlyBestShowModel):
-
-    def distance(self, g_info, u, v):
-        return g_info.grid_distance(u, v)
-
 
 class DistancePriorityShowModel(ShowModel):
 
-    def __init__(self, max_shown=20):
+    def __init__(self, max_shown=20, distance_measure=None):
         self.max_shown = max_shown
+        if distance_measure is None:
+            distance_measure = GraphDistanceMeasure()
+        self.distance_measure = distance_measure
 
     def show_alg(self, g, g_info, node_index, possible):
         # Store items in a heap based on distance
@@ -136,7 +124,8 @@ class DistancePriorityShowModel(ShowModel):
         for p in possible:
             if p[0].delivered:
                 continue
-            dist = self.distance(g_info, node_index, p[0].destination)
+            dist = self.distance_measure.distance(
+                g_info, node_index, p[0].destination)
             if len(h) < self.max_shown:
                 # Negate the distance to treat the heap as a max-heap
                 # Larger (further) items stay at top
@@ -147,23 +136,18 @@ class DistancePriorityShowModel(ShowModel):
 
         return [x[1] for x in h]
 
-    def distance(self, g_info, u, v):
-        return g_info.graph_distance(u, v)
-
-
-class DistancePriorityGridShowModel(DistancePriorityShowModel):
-
-    def distance(self, g_info, u, v):
-        return g_info.grid_distance(u, v)
-
 
 class DistancePrioritySomeRandomShowModel(ShowModel):
 
-    def __init__(self, max_shown=20, extra_fraction=0.25):
+    def __init__(self, max_shown=20, extra_fraction=0.25,
+                 distance_measure=None):
         self.max_shown = max_shown
         self.extra_fraction = extra_fraction
         self.priority_max = int(extra_fraction * float(max_shown))
         self.extra_max = max_shown - self.priority_max
+        if distance_measure is None:
+            distance_measure = GraphDistanceMeasure()
+        self.distance_measure = distance_measure
 
     def show_alg(self, g, g_info, node_index, possible):
         # Store items in a heap based on distance
@@ -177,7 +161,8 @@ class DistancePrioritySomeRandomShowModel(ShowModel):
         for p in possible:
             if p[0].delivered:
                 continue
-            dist = self.distance(g_info, node_index, p[0].destination)
+            dist = self.distance_measure.distance(
+                g_info, node_index, p[0].destination)
 
             if len(h) < self.priority_max:
                 # Negate the distance to treat the heap as a max-heap
@@ -203,12 +188,28 @@ class DistancePrioritySomeRandomShowModel(ShowModel):
         chosen = random.sample(candidates, extra_size)
         return chosen
 
+
+class DistanceMeasure(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def distance(self, g_info, u, v):
+        pass
+
+
+class GridDistanceMeasure(DistanceMeasure):
+    def distance(self, g_info, u, v):
+        return g_info.grid_distance(u, v)
+
+
+class GraphDistanceMeasure(DistanceMeasure):
     def distance(self, g_info, u, v):
         return g_info.graph_distance(u, v)
 
 
-class DistancePrioritySomeRandomGridShowModel(
-        DistancePrioritySomeRandomShowModel):
+class DiffusionDistanceMeasure(DistanceMeasure):
+    def __init__(self, t):
+        self.t = t
 
     def distance(self, g_info, u, v):
-        return g_info.grid_distance(u, v)
+        return g_info.diffusion_distance(u, v, self.t)
