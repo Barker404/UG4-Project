@@ -206,7 +206,7 @@ class GraphInfo(object):
             self._diffusion_distances[t] = {}
             for i, ilabel in zip(range(self.g.number_of_nodes()),
                                  self.g.nodes_iter()):
-                self._diffusion_distances[t][i] = {}
+                self._diffusion_distances[t][ilabel] = {}
                 for j, jlabel in zip(range(self.g.number_of_nodes()),
                                      self.g.nodes_iter()):
                     self._diffusion_distances[t][ilabel][jlabel] = \
