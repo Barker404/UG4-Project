@@ -23,28 +23,23 @@ DRAW_LABELS = False
 def main():
 
     seen_limit = 20
+    share_prob = 0.5
 
-    sm_1 = showing.AnyCloserGridShowModel(seen_limit)
-    sm_2 = showing.FurtherProbGridShowModel(seen_limit, 0.4)
-    sm_3 = showing.FurtherProbGridShowModel(seen_limit, 0.6)
-    sm_4 = showing.OnlyBestGridShowModel(seen_limit)
-    sm_5 = showing.AnyCloserShowModel(seen_limit)
-    sm_6 = showing.FurtherProbShowModel(seen_limit, 0.4)
-    sm_7 = showing.FurtherProbShowModel(seen_limit, 0.6)
-    sm_8 = showing.OnlyBestShowModel(seen_limit)
-    show_models = [sm_1, sm_2, sm_3, sm_4, sm_5, sm_6, sm_7, sm_8]
-    filenames = ["AnyCloserGrid.png",
-                 "FurtherProbGrid40.png",
-                 "FurtherProbGrid60.png",
-                 "OnlyBestGrid.png",
-                 "AnyCloser.png",
-                 "FurtherProb40.png",
-                 "FurtherProb60.png",
-                 "OnlyBest.png"]
+    show_model = showing.FurtherProbGridShowModel(seen_limit, 0.6)
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    graph_generator = graph.GridGenerator(COLUMNS, ROWS)
 
-    for i in range(len(show_models)):
-        standard_show_model_graph(
-            show_models[i], seen_limit, "standard_output", filenames[i])
+    xs = []
+    sims = []
+    for k in range(25, 225, 25):
+        xs.append(k)
+        simulation = Simulation(show_model, share_model,
+                                graph_generator, 70, k)
+        sims.append(simulation)
+
+    plot_simulations(sims, xs, "Message count", 5, as_percent=True,
+                     output_path="test", output_filename="grid.png",
+                     store_data=True)
 
 
 def standard_show_model_graph(show_model, seen_limit,
