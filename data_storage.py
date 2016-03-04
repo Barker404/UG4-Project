@@ -2,6 +2,8 @@ import os
 import json
 
 
+GRAPH_DATA_FILENAME = "graph_data.csv"
+
 REPEAT_RESULT_FILENAME = "repeat_results.csv"
 
 SIMULATION_INFO_FILENAME = "sim_info.json"
@@ -18,7 +20,26 @@ SHOWN_MESSAGES_FILENAME = "shown.txt"
 SHARED_MESSAGES_FILENAME = "shared.txt"
 
 
-def write_repeat_result(path, total, delivered):
+def store_graph_data(path, avgs, mins, maxs, x_values, x_label, as_percent):
+    try:
+        os.makedirs(path)
+    except OSError:
+        if not os.path.isdir(path):
+            raise
+    with open(os.path.join(path, GRAPH_DATA_FILENAME), 'w') as f:
+        if as_percent:
+            percent_str = "percent"
+        else:
+            percent_str = "absolute"
+
+        f.write("average delivered ({0}), min delivered ({0}),"
+                " max delivered ({0}), {1}\n".format(percent_str, x_label))
+
+        for avg, minv, maxv, xval in zip(avgs, mins, maxs, x_values):
+            f.write("{}, {}, {}, {}\n".format(avg, minv, maxv, xval))
+
+
+def store_repeat_result(path, total, delivered):
     try:
         os.makedirs(path)
     except OSError:
@@ -46,7 +67,7 @@ def store_sim_info(path, sim):
             "show_model": type(sim.show_model).__name__,
             "share_model": type(sim.share_model).__name__,
             "graph_generator": type(sim.graph_generator).__name__,
-            }
+        }
 
         f_sim.write(json.dumps(d))
 

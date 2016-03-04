@@ -2,6 +2,7 @@
 
 import os
 import networkx as nx
+import data_storage
 import matplotlib
 from matplotlib import animation
 # Force matplotlib to not use any Xwindows backend.
@@ -209,6 +210,71 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
         print "Finished simulation set with x value {}".format(x_values[i])
         i += 1
 
+    plot(averages, mins, maxs, x_values, x_label, as_percent, output_path,
+         output_filename, store_data)
+
+    return averages, mins, maxs
+
+
+def re_plot_results(x_label, x_vals_integers, as_percent=True,
+                    output_path='output', output_filename='plot.png',
+                    store_data=False):
+    averages = []
+    mins = []
+    maxs = []
+    x_values = []
+
+    for dir_name in os.listdir(output_path):
+        dir_path = os.path.join(output_path, dir_name)
+        if os.path.isdir(dir_path):
+            try:
+                with open(os.path.join(
+                        dir_path,
+                        data_storage.REPEAT_RESULT_FILENAME), "r") as f:
+                    # Read values
+                    total = 0
+                    total_delivered = 0
+                    min_delivered = float('inf')
+                    max_delivered = 0
+                    count = 0
+
+                    for line in f.readlines():
+                        line = line.strip()
+                        sim_total, delivered = line.split(",")
+                        sim_total = int(sim_total)
+                        delivered = int(delivered)
+
+                        total += sim_total
+                        total_delivered += delivered
+                        min_delivered = min(min_delivered, delivered/sim_total)
+                        max_delivered = max(max_delivered, delivered/sim_total)
+
+                        count += 1
+                    if as_percent:
+                        averages.append(100 * total_delivered/total)
+                        mins.append(min_delivered)
+                        maxs.append(max_delivered)
+                    else:
+                        averages.append(total_delivered/count)
+                        mins.append(min_delivered)
+                        maxs.append(max_delivered)
+
+                    if x_vals_integers:
+                        x_values.append(int(dir_name))
+                    else:
+                        x_values.append(dir_name)
+            except IOError:
+                continue
+
+    print averages
+    print x_values
+
+    plot(averages, mins, maxs, x_values, x_label, as_percent, output_path,
+         output_filename, store_data)
+
+
+def plot(averages, mins, maxs, x_values, x_label, as_percent, output_path,
+         output_filename, store_data):
     # Might want to do something with mins/maxes in future
     fig = plt.figure(figsize=(10, 10))
     plt.plot(x_values, averages, 'bo')
@@ -233,4 +299,6 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
     plt.savefig(os.path.join(output_path, output_filename), dpi=150)
     print "plot saved"
 
-    return averages, mins, maxs
+    if store_data:
+        data_storage.store_graph_data(
+            output_path, averages, mins, maxs, x_values, x_label, as_percent)

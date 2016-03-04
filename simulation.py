@@ -163,7 +163,7 @@ class Simulation(object):
                                             store_data=store_data)
 
             if store_data:
-                data_storage.write_repeat_result(
+                data_storage.store_repeat_result(
                     output_path, self.message_count, delivered)
 
             total += self.message_count
