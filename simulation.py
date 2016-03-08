@@ -79,16 +79,31 @@ class Simulation(object):
             data_storage.store_round_info(round_path, self, 0)
 
         # Simulate rounds
-        for round_no in range(1, self.round_count + 1):
+        round_no = 0
+        simulating = True
+        while simulating:
+            round_no += 1
             self.simulate_round(round_no, output_images,
                                 watched_message, draw_labels)
             if store_data:
                 round_path = os.path.join(output_path, "round" + str(round_no))
                 data_storage.store_round_info(round_path, self, round_no)
 
+            if self.round_count is not None:
+                simulating = not round_no >= self.round_count
+            else:
+                # Check if all message propogation has ended
+                any_seen = any([self.g.node[n]['seen'][round_no]
+                                for n in self.g.nodes_iter()])
+                simulating = (any_seen and
+                              round_no <= self.g.number_of_nodes() * 2)
+
+        # Will be the same as round_count if it is not None
+        self.rounds_simulated = round_no
+
         if output_video:
             self.visualiser.create_video(
-                self.g, self.pos, self.round_count, self.messages,
+                self.g, self.pos, self.rounds_simulated, self.messages,
                 self.show_model.max_shown, watched_message, draw_labels)
 
         if store_data:
@@ -182,4 +197,4 @@ class Simulation(object):
                     100 * float(min_delivered) / float(self.message_count),
                     100 * float(max_delivered) / float(self.message_count))
         else:
-            return (total_delivered/count, min_delivered, max_delivered)
+            return (total_delivered / count, min_delivered, max_delivered)

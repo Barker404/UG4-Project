@@ -107,6 +107,8 @@ def store_post_sim_info(path, sim):
             raise
     # messages
     with open(os.path.join(path, DELIVERED_FILENAME), 'w') as f_del:
+        f_del.write("Rounds simulated:{}\n".format(sim.rounds_simulated))
+        f_del.write("Messages delivered:\n")
         for m in sim.messages:
             if m.delivered:
                 f_del.write("{}:{}\n".format(m.id, m.delivery_turn))
