@@ -246,12 +246,17 @@ def re_plot_results(x_label, x_vals_integers, as_percent=True,
 
                         total += sim_total
                         total_delivered += delivered
-                        min_delivered = min(min_delivered, delivered/sim_total)
-                        max_delivered = max(max_delivered, delivered/sim_total)
+                        min_delivered = min(
+                            min_delivered,
+                            100 * float(delivered) / float(sim_total))
+                        max_delivered = max(
+                            max_delivered,
+                            100 * float(delivered) / float(sim_total))
 
                         count += 1
                     if as_percent:
-                        averages.append(100 * total_delivered/total)
+                        averages.append(
+                            100 * float(total_delivered) / float(total))
                         mins.append(min_delivered)
                         maxs.append(max_delivered)
                     else:
