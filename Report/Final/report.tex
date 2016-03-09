@@ -145,7 +145,7 @@ Finally, from the messages that are shown to a user, the user will share some of
 
 This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network.
 
-\section{Network Graph}
+\section{Network Graph} \label{sec:graph_def}
 An important factor in how a message showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
 
 For the majority of this project, Kleinberg's model for small world graphs was used\cite{Kleinberg00}. This is a model which randomly creates a graph that fits certain properties. Initially, nodes are arranged in a grid layout, with a "grid distance" from each other. Each node is connected to its immediate neighbours (those a grid distance of 1 away). Each node is then connected to a constant number $k$ of other nodes. The probability of connecting node $u$ to node $v$ in this way is proportional to $d(u, v)^{-q}$ where $d(u, v)$ is the grid distance between $u$ and $v$, and $q$ is a constant affecting how likely the links are to be "far-reaching". If $q$ is 0, then the node will be linked to other nodes uniformly. If $q$ is high, the long links are more likely to connect closer nodes.
@@ -166,7 +166,7 @@ This can be related to real networks intuitively. Individuals are more likely to
 
 While Kleinberg's small world model has been used primarily up to this point, other graph types may provide additional interesting insights. For example, using a plain grid could provide a baseline for what can be expected, to see if the algorithm developed takes advantage of the long link properties of the network. Alternatively, an real social network dataset could be used to see if the algorithm also work in actual networks.
 
-\section{User Models}
+\section{User Models} \label{sec:user_models}
 While the main focus of this project was on the effect of the social network's "showing" algorithm, the model used also requires an algorithm to represent the user's actions. This algorithm should decide which of the messages shown to a user they then share - it chooses $S_{t}(v)$ based on $T_{t}(v)$. Depending on how this decision is modelled, it can add an element of uncertainty or randomness to the system, affecting which "showing" algorithms perform well.
 
 \subsection{Basic User Model}
@@ -179,7 +179,7 @@ A more realistic user model can be created using more probabilistic methods. In 
 
 This results in a situation where a user may share all the messages they see, or may share none. This emulates how a user will only share certain messages based on some criteria unknown to the network. With this model, if messages are not sent to enough users then they are likely to not be shared and be lost.
 
-\section{Showing Algorithms}
+\section{Showing Algorithms} \label{sec:showing_algorithms}
 The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
 
 So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user.
@@ -241,9 +241,7 @@ T_{t}(v) = candidates[:a]
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
 
 
-\chapter{Experimentation}
-
-\section{Simulation Program}
+\chapter{Implementation}
 For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
 
 There is a \texttt{GraphGenerator} abstract base class, subclasses of which encapsulate the knowledge specific to the graph model being used - including how to create a graph of that type, and how the nodes should be positioned in the visualisation (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning that by simply using a different subclass the graph generation method can be modified completed - for example the graph could be loaded from a static file.
@@ -252,9 +250,26 @@ The showing algorithms are contained within subclasses of the \texttt{ShowModel}
 
 These classes are brought together by the \texttt{Simulation} class, which is given an instance of each of \texttt{GraphGenerator}, \texttt{ShowModel}, and \texttt{ShareModel} on creation. The simulation can then be either run once or repeated multiple times, collating the results. When repeating the simulation, it can set to either use the exact same network graph or to regenerate the graph using the same generation method - in the case of randomly generated graphs, this allows for repeating the simulation to remove random differences caused by specific graphs. The simulation class can also create visualisations as outputs. It can output either images of the state at each round of the simulation, or a single video of the entire simulation. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole.
 
-\section{Results}
-After development of the algorithms, experiments were run to compare their performance. All simulations were run on a 20 by 20 graph generated using Kleinberg's model, with parameters $k = 1$ and $q = 2$. They were simulated for 25 rounds, which was found in all cases to be enough time for any activity to stop. 
 
+\chapter{Results}
+After development of the algorithms, experiments were run to compare their performance. Experiments were also run to ensure that the parameters chosen were reasonable and would give valid results. Unless otherwise stated all simulations were run until any action had completely stopped - that is, no messages were seen in some round by any node, either due them being delivered already or dying out before delivery. Also, unless otherwise stated, all simulations were run 20 times and the average result taken, to avoid random fluctuations.
+
+\section{Kleinberg Graph Size} \label{sec:graph_size_results}
+For a large number of experiments, Kleinberg's graph model, as described in Section \ref{sec:graph_def}, was used. In all of these experiments, $k=1$ and $q=2$ were used, where $k$ is the number of "long links" created from each node and $q$ "clustering exponent", which is used alongside the grid distance between two nodes to calculate the probability of there being a long link between them. [q=2 shown to be the sweet spot when creating the graph from a 2 dimensional lattice at which decentralised routing can achieve delivery times polynomial in log n (relevance?). k=1 set for simplicity?] Experiments were performed to find a good size for the original grid, which is used to build the graph. The aim was to find a sufficiently large value such that the "edge cases" - that is, the difference in results compared to if the graph was infinitely large - to have minimal effect, while keeping it small enough for experiments to run in a reasonable amount of time.
+
+[results]
+
+
+\section{User Model}
+The two models of which messages are shared by users, as described in Section \ref{sec:user_models} were compared to each other experimentally to decide which was a better fit for future experiments. This was conducted by running simulations using showing algorithms 1, 2, and 3 as described in Section \ref{sec:showing_algorithms}. The purpose of these experiments was to document how the success of each user model changes as messages are spread more or less. It was hypothesised that since the basic user model shares all messages when there are very few shown to it, then limiting the spreading of messages to one copy per distinct message would give good results. However this would not match the expected result on real humans - somewhere along the chain a user would be expected to not share a message, due to not liking the contents or something similar.
+
+First, the basic user model was tested. This model uses two variables: $a$, the maximum messages that each user will "see" or consider as candidates to share; and $b$, the maximum number of messages that the user will share (where $b \leq a$). If less than or equal to $b$ messages are shown then all will be shared, otherwise from the first $a$ messages, $b$ are randomly chosen to be shared. For these experiments the values $a = 20$ and $b = 5$ were used - they were chosen arbitrarily, as the purpose of these results is not to compare the different user models or parameters directly, but to see how the results for each model change as the amount of message spread changes. It was tested against four different showing algorithm setups: Algorithm 1, which potentially shows only messages to users closer to their destination (equivalent to Algorithm 2 with $p=0$); Algorithm 2 with $p=0.4$, where $p$ is the probability of a message being a candidate to be shown to a user not closer to the destination; Algorithm 2 with $p=0.6$; and Algorithm 3 where each message is shown to exactly one other user each round. To determine whether nodes are "closer" or not, the grid position based distance measure was used in all cases. These all used distinct Kleinberg's model graphs, created from a [20 by 20] grid (as was shown to be sufficient in Section \ref{sec:graph_size_results}).
+
+[results - mention message count]
+
+Next the probabilistic user model was tested. Again, $a=20$ was used for the maximum number of messages "seen" by each user. For the probability of sharing each message seen, $p=0.5$ was used. The same showing algorithms, distance measure, and graph setup were used as for the basic user model.
+
+[results again]
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
