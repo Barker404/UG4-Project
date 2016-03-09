@@ -3,6 +3,7 @@ venv/
 
 # Image output
 output/
+out/
 
 # SFTP transfer config
 sftp-config.json
