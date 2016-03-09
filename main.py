@@ -33,7 +33,7 @@ def standard_show_model_graph(show_model, seen_limit,
     for k in range(message_step, max_messages + message_step, message_step):
         xs.append(k)
         simulation = Simulation(show_model, share_model,
-                                graph_generator, round_count=None, k)
+                                graph_generator, None, k)
         sims.append(simulation)
 
     plot_simulations(sims, xs, "Message count", repeats, True,
@@ -56,7 +56,7 @@ def test_messages_percent_absolute():
     for i in range(4000, 6250, 250):
         xs.append(i)
         simulation = Simulation(show_model, share_model, graph_generator,
-                                ROUND_COUNT, i)
+                                None, i)
         sims.append(simulation)
 
     repeats = 15
@@ -194,7 +194,7 @@ def compare_user_models():
             for k in range(25, 400, 25):
                 xs.append(k)
                 simulation = Simulation(show_models[j], share_models[i],
-                                        graph_generator, ROUND_COUNT, k)
+                                        graph_generator, None, k)
                 sims.append(simulation)
 
             plot_simulations(sims, xs, "Message count", repeats, True,
@@ -227,7 +227,7 @@ def not_closer_prob_graph():
 
             xs.append(j)
             simulation = Simulation(show_model, share_model,
-                                    graph_generator, ROUND_COUNT,
+                                    graph_generator, None,
                                     message_counts[i])
             sims.append(simulation)
 
