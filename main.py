@@ -4,7 +4,8 @@ import showing
 import sharing
 import numpy as np
 import graph
-from output import plot_simulations
+import os
+from output import plot_simulations, re_plot_results
 from simulation import Simulation
 
 ROWS = 20
@@ -12,36 +13,9 @@ COLUMNS = 20
 K = 1
 Q = 2
 
-ROUND_COUNT = 25
-MESSAGE_COUNT = 100
-
-DRAW = True
-WATCHED_MESSAGE = 0
-DRAW_LABELS = False
-
 
 def main():
-
-    seen_limit = 20
-    share_prob = 0.5
-
-    distance_measure = showing.DiffusionDistanceMeasure(20)
-    show_model = showing.FurtherProbShowModel(
-        seen_limit, 0.6, distance_measure)
-    share_model = sharing.ProbShareModel(seen_limit, share_prob)
-    graph_generator = graph.GridGenerator(COLUMNS, ROWS)
-
-    xs = []
-    sims = []
-    for k in range(25, 225, 25):
-        xs.append(k)
-        simulation = Simulation(show_model, share_model,
-                                graph_generator, 70, k)
-        sims.append(simulation)
-
-    plot_simulations(sims, xs, "Message count", 5, as_percent=True,
-                     output_path="test", output_filename="grid.png",
-                     store_data=False)
+    test_graph_sizes()
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -59,7 +33,7 @@ def standard_show_model_graph(show_model, seen_limit,
     for k in range(message_step, max_messages + message_step, message_step):
         xs.append(k)
         simulation = Simulation(show_model, share_model,
-                                graph_generator, ROUND_COUNT, k)
+                                graph_generator, round_count=None, k)
         sims.append(simulation)
 
     plot_simulations(sims, xs, "Message count", repeats, True,
@@ -92,6 +66,86 @@ def test_messages_percent_absolute():
 
     plot_simulations(sims, xs, "Message count", repeats, False,
                      "report_out/percent_vs_absolute", "absolute.png")
+
+
+def test_graph_sizes(start=5, end=55, step=5, repeats=20):
+    seen_limit = 20
+    further_prob = 0.5
+    share_prob = 0.5
+
+    k = 1
+    q = 2
+
+    # Grid distance measure
+    # Any closer
+    # Prob share
+    distance_measure_a = showing.GridDistanceMeasure()
+    show_model_a = showing.AnyCloserShowModel(
+        seen_limit, distance_measure_a)
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    for size in range(start, end, step):
+        graph_generator = graph.KleinbergGenerator(size, size, K, Q)
+        simulation = Simulation(show_model_a, share_model, graph_generator,
+                                round_count=None, message_count=size*size)
+        simulation.repeat_simulation(repeats, as_percent=True,
+                                     output_path=os.path.join(
+                                        "out/graph_size/a", str(size)),
+                                     store_data=True)
+        print "Done a: {}".format(size)
+
+    re_plot_results("Width and height of grid", True, as_percent=True,
+                    output_path="out/graph_size/a", store_data=True)
+
+    # Graph distance measure
+    distance_measure_b = showing.GridDistanceMeasure()
+    show_model_b = showing.AnyCloserShowModel(
+        seen_limit, distance_measure_b)
+    for size in range(start, end, step):
+        graph_generator = graph.KleinbergGenerator(size, size, K, Q)
+        simulation = Simulation(show_model_b, share_model, graph_generator,
+                                round_count=None, message_count=size*size)
+        simulation.repeat_simulation(repeats, as_percent=True,
+                                     output_path=os.path.join(
+                                        "out/graph_size/b", str(size)),
+                                     store_data=True)
+        print "Done b: {}".format(size)
+
+    re_plot_results("Width and height of grid", True, as_percent=True,
+                    output_path="out/graph_size/b", store_data=True)
+
+    # Grid distance measure
+    # Further prob, p = 0.5
+    show_model_c = showing.FurtherProbShowModel(
+        seen_limit, further_prob, distance_measure_a)
+    for size in range(start, end, step):
+        graph_generator = graph.KleinbergGenerator(size, size, K, Q)
+        simulation = Simulation(show_model_c, share_model, graph_generator,
+                                round_count=None, message_count=size*size)
+        simulation.repeat_simulation(repeats, as_percent=True,
+                                     output_path=os.path.join(
+                                        "out/graph_size/c", str(size)),
+                                     store_data=True)
+        print "Done c: {}".format(size)
+
+    re_plot_results("Width and height of grid", True, as_percent=True,
+                    output_path="out/graph_size/c", store_data=True)
+
+    # Graph distance measure
+    # Further prob, p = 0.5
+    show_model_d = showing.FurtherProbShowModel(
+        seen_limit, further_prob, distance_measure_b)
+    for size in range(start, end, step):
+        graph_generator = graph.KleinbergGenerator(size, size, K, Q)
+        simulation = Simulation(show_model_d, share_model, graph_generator,
+                                round_count=None, message_count=size*size)
+        simulation.repeat_simulation(repeats, as_percent=True,
+                                     output_path=os.path.join(
+                                        "out/graph_size/d", str(size)),
+                                     store_data=True)
+        print "Done d: {}".format(size)
+
+    re_plot_results("Width and height of grid", True, as_percent=True,
+                    output_path="out/graph_size/d", store_data=True)
 
 
 def compare_user_models():
