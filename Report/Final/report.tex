@@ -11,6 +11,7 @@
 \usepackage{subcaption}
 \usepackage{wrapfig}
 \usepackage{tikz}
+\usepackage{pgfplots}
 
 \begin{document}
 
@@ -39,7 +40,7 @@
 % please un-comment just one of the following
 %\project{Undergraduate Dissertation} % CS&E, E&SE, AI&L
 %\project{Undergraduate Thesis} % AI%Psy
-\project{4th Year Project Interim Report}
+\project{4th Year Project Report}
 
 \date{\today}
 
@@ -254,22 +255,47 @@ These classes are brought together by the \texttt{Simulation} class, which is gi
 \chapter{Results}
 After development of the algorithms, experiments were run to compare their performance. Experiments were also run to ensure that the parameters chosen were reasonable and would give valid results. Unless otherwise stated all simulations were run until any action had completely stopped - that is, no messages were seen in some round by any node, either due them being delivered already or dying out before delivery. Also, unless otherwise stated, all simulations were run 20 times and the average result taken, to avoid random fluctuations.
 
-\section{Kleinberg Graph Size} \label{sec:graph_size_results}
-For a large number of experiments, Kleinberg's graph model, as described in Section \ref{sec:graph_def}, was used. In all of these experiments, $k=1$ and $q=2$ were used, where $k$ is the number of "long links" created from each node and $q$ "clustering exponent", which is used alongside the grid distance between two nodes to calculate the probability of there being a long link between them. [q=2 shown to be the sweet spot when creating the graph from a 2 dimensional lattice at which decentralised routing can achieve delivery times polynomial in log n (relevance?). k=1 set for simplicity?] Experiments were performed to find a good size for the original grid, which is used to build the graph. The aim was to find a sufficiently large value such that the "edge cases" - that is, the difference in results compared to if the graph was infinitely large - to have minimal effect, while keeping it small enough for experiments to run in a reasonable amount of time.
-
-[results]
+For a large number of experiments, Kleinberg's graph model, as described in Section \ref{sec:graph_def}, was used. In all of these experiments, $k=1$ and $q=2$ were used, where $k$ is the number of "long links" created from each node and $q$ "clustering exponent", which is used alongside the grid distance between two nodes to calculate the probability of there being a long link between them. As is shown in \cite{Kleinberg00},  $q=2$ is the the "sweet spot" for a graph based on a 2 dimensional lattice, at which decentralised routing can achieve delivery times polynomial in $\log n$. Additionally $k$ must be set to a small constant, so $k=1$ was chosen. A 20 by 20 grid was used to create the graph from, as this size was found to be large enough to provide good results, but not so large that the experiments took an excessively long time to run.
 
 
-\section{User Model}
-The two models of which messages are shared by users, as described in Section \ref{sec:user_models} were compared to each other experimentally to decide which was a better fit for future experiments. This was conducted by running simulations using showing algorithms 1, 2, and 3 as described in Section \ref{sec:showing_algorithms}. The purpose of these experiments was to document how the success of each user model changes as messages are spread more or less. It was hypothesised that since the basic user model shares all messages when there are very few shown to it, then limiting the spreading of messages to one copy per distinct message would give good results. However this would not match the expected result on real humans - somewhere along the chain a user would be expected to not share a message, due to not liking the contents or something similar.
+\section{User Models Comparison}
+The two models of message sharing by users, as described in Section \ref{sec:user_models}, were compared to each other experimentally to decide which was a better fit for future experiments. This was conducted by running separate simulations using showing algorithms 1, 2, and 3 as described in Section \ref{sec:showing_algorithms}. The purpose of these experiments was to document how the success of each user model changes as messages are spread more or less. It was hypothesised that since the basic user model shares all messages when there are very few shown to it, then limiting the spreading of messages to one copy per distinct message would give good results. However this would not match the expected result on real humans - somewhere along the chain a user would be expected to not share a message, due to not liking the contents or something similar.
 
-First, the basic user model was tested. This model uses two variables: $a$, the maximum messages that each user will "see" or consider as candidates to share; and $b$, the maximum number of messages that the user will share (where $b \leq a$). If less than or equal to $b$ messages are shown then all will be shared, otherwise from the first $a$ messages, $b$ are randomly chosen to be shared. For these experiments the values $a = 20$ and $b = 5$ were used - they were chosen arbitrarily, as the purpose of these results is not to compare the different user models or parameters directly, but to see how the results for each model change as the amount of message spread changes. It was tested against four different showing algorithm setups: Algorithm 1, which potentially shows only messages to users closer to their destination (equivalent to Algorithm 2 with $p=0$); Algorithm 2 with $p=0.4$, where $p$ is the probability of a message being a candidate to be shown to a user not closer to the destination; Algorithm 2 with $p=0.6$; and Algorithm 3 where each message is shown to exactly one other user each round. To determine whether nodes are "closer" or not, the grid position based distance measure was used in all cases. These all used distinct Kleinberg's model graphs, created from a [20 by 20] grid (as was shown to be sufficient in Section \ref{sec:graph_size_results}).
+First, the basic user model was tested. This model uses two variables: $a$, the maximum messages that each user will "see" or consider as candidates to share; and $b$, the maximum number of messages that the user will share (where $b \leq a$). If less than or equal to $b$ messages are shown then all will be shared, otherwise from the first $a$ messages, $b$ are randomly chosen to be shared. For these experiments the values $a = 20$ and $b = 5$ were used - they were chosen arbitrarily, as the purpose of these results is not to compare the different user models or parameters directly, but to see how the results for each model change as the amount of message spread changes. It was tested against four different showing algorithm setups: Algorithm 1, which potentially shows only messages to users closer to their destination (equivalent to Algorithm 2 with $p=0$); Algorithm 2 with $p=0.4$, where $p$ is the probability of a message being a candidate to be shown to a user not closer to the destination; Algorithm 2 with $p=0.6$; and Algorithm 3 where each message is shown to exactly one other user each round. To determine whether nodes are "closer" or not, the grid position based distance measure was used in all cases. These simulations all used distinct Kleinberg's model graphs.
 
-[results - mention message count]
+\begin{figure}
+\begin{tikzpicture}
+\begin{axis}
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/user_model/BasicShare_OnlyBest.csv};
+\end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+\begin{axis}
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/user_model/BasicShare_Prob0.csv};
+\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/user_model/BasicShare_Prob40.csv};
+\end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+\begin{axis}
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/user_model/BasicShare_Prob60.csv};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
 
 Next the probabilistic user model was tested. Again, $a=20$ was used for the maximum number of messages "seen" by each user. For the probability of sharing each message seen, $p=0.5$ was used. The same showing algorithms, distance measure, and graph setup were used as for the basic user model.
 
 [results again]
+
+\section{Showing Algorithms Comparisons}
+
+
+\section{Distance Measures Comparisons}
+
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
