@@ -22,7 +22,7 @@ def standard_show_model_graph(show_model, seen_limit,
                               output_path, graph_filename,
                               max_messages=400, message_step=25):
     share_prob = 0.5
-    repeats = 10
+    repeats = 20
 
     xs = []
     sims = []
@@ -59,7 +59,7 @@ def test_messages_percent_absolute():
                                 None, i)
         sims.append(simulation)
 
-    repeats = 15
+    repeats = 20
 
     plot_simulations(sims, xs, "Message count", repeats, True,
                      "report_out/percent_vs_absolute", "percent.png")
@@ -72,9 +72,6 @@ def test_graph_sizes(start=5, end=55, step=5, repeats=20):
     seen_limit = 20
     further_prob = 0.5
     share_prob = 0.5
-
-    k = 1
-    q = 2
 
     # Grid distance measure
     # Any closer
@@ -148,57 +145,54 @@ def test_graph_sizes(start=5, end=55, step=5, repeats=20):
                     output_path="out/graph_size/d", store_data=True)
 
 
-def compare_user_models():
+def compare_user_models(msg_count_start=25, msg_count_end=825,
+                        msg_count_step=25, repeats=20):
     seen_limit = 20
     share_limit = 5
     share_prob_1 = 0.5
-    share_prob_2 = 0.25
+
     share_model_a = sharing.BasicShareModel(seen_limit, share_limit)
     share_model_b = sharing.ProbShareModel(seen_limit, share_prob_1)
-    share_model_c = sharing.ProbShareModel(seen_limit, share_prob_2)
-    share_models = [share_model_a, share_model_b, share_model_c]
+    share_models = [share_model_a, share_model_b]
 
-    grid_distance = showing.GraphDistanceMeasure()
+    grid_distance = showing.GridDistanceMeasure()
 
     show_model_1 = showing.AnyCloserShowModel(seen_limit, grid_distance)
     show_model_2 = showing.FurtherProbShowModel(seen_limit, 0.4, grid_distance)
     show_model_3 = showing.FurtherProbShowModel(seen_limit, 0.6, grid_distance)
     show_model_4 = showing.OnlyBestShowModel(seen_limit, grid_distance)
     show_models = [show_model_1, show_model_2, show_model_3, show_model_4]
+
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
-    filenames_all = [
+    subdirs_all = [
         [
-            "BasicShare_Prob0.png",
-            "BasicShare_Prob40.png",
-            "BasicShare_Prob60.png",
-            "BasicShare_OnlyBest.png"],
+            "BasicShare_Prob0",
+            "BasicShare_Prob40",
+            "BasicShare_Prob60",
+            "BasicShare_OnlyBest"],
         [
-            "Prob50Share_Prob0.png",
-            "Prob50Share_Prob40.png",
-            "Prob50Share_Prob60.png",
-            "Prob50Share_OnlyBest.png"],
-        [
-            "Prob25Share_Prob0.png",
-            "Prob25Share_Prob40.png",
-            "Prob25Share_Prob60.png",
-            "Prob25Share_OnlyBest.png"]
+            "ProbShare_Prob0",
+            "ProbShare_Prob40",
+            "ProbShare_Prob60",
+            "ProbShare_OnlyBest"]
     ]
 
-    repeats = 10
-
-    for i in range(0, 3):
+    for i in range(0, 2):
         for j in range(0, 4):
             xs = []
             sims = []
-            for k in range(25, 400, 25):
+            for k in range(msg_count_start, msg_count_end, msg_count_step):
                 xs.append(k)
                 simulation = Simulation(show_models[j], share_models[i],
-                                        graph_generator, None, k)
+                                        graph_generator, round_count=None,
+                                        message_count=k)
                 sims.append(simulation)
 
-            plot_simulations(sims, xs, "Message count", repeats, True,
-                             "report_out/user_models", filenames_all[i][j])
+            plot_simulations(
+                sims, xs, "Message count", repeats, as_percent=True,
+                output_path=os.path.join("out/user_models", subdirs_all[i][j]),
+                store_data=True)
 
 
 def not_closer_prob_graph():
