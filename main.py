@@ -15,7 +15,7 @@ Q = 2
 
 
 def main():
-    test_graph_sizes()
+    compare_user_models()
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -94,7 +94,7 @@ def test_graph_sizes(start=5, end=55, step=5, repeats=20):
                     output_path="out/graph_size/a", store_data=True)
 
     # Graph distance measure
-    distance_measure_b = showing.GridDistanceMeasure()
+    distance_measure_b = showing.GraphDistanceMeasure()
     show_model_b = showing.AnyCloserShowModel(
         seen_limit, distance_measure_b)
     for size in range(start, end, step):
