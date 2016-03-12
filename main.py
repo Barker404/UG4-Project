@@ -45,7 +45,7 @@ def test_messages_percent_absolute():
     seen_limit = 20
     share_limit = 5
 
-    grid_distance = showing.GraphDistanceMeasure()
+    grid_distance = showing.GridDistanceMeasure()
 
     show_model = showing.AnyCloserShowModel(seen_limit, grid_distance)
     share_model = sharing.BasicShareModel(seen_limit, share_limit)
@@ -215,7 +215,7 @@ def test_not_closer_prob(step=0.05, repeats=20):
     ]
 
     repeats = 20
-    grid_distance = showing.GraphDistanceMeasure()
+    grid_distance = showing.GridDistanceMeasure()
 
     for i in range(0, 4):
         xs = []
