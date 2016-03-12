@@ -1,4 +1,5 @@
 average delivered (percent), min delivered (percent), max delivered (percent), Not Closer Show Probability
+38.9, 32.0, 51.0, 0.0
 47.95, 42.5, 55.0, 0.05
 56.775, 47.5, 64.0, 0.1
 63.225, 59.0, 69.5, 0.15
@@ -19,4 +20,3 @@ average delivered (percent), min delivered (percent), max delivered (percent), N
 92.975, 88.0, 96.0, 0.9
 92.675, 88.0, 96.0, 0.95
 93.825, 91.5, 95.5, 1.0
-38.9, 32.0, 51.0, 0.0
