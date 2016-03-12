@@ -407,7 +407,25 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 \label{fig:not_closer_prob}
 \end{figure}
 
-Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each subfigure shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05
+Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each subfigure shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. It is clear that very low values of $p_{further}$ (including the value 0, which is equivalent to algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Due to this, choosing an optimal value of $p_{further}$ to be used may only be possible if the amount of initial messages is known (or at least approximately known). 
+
+%\begin{wrapfigure}{L}{0.5\textwidth}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$},width=0.45\textwidth,]
+\addplot table [x=not closer prob, y=Average messages delivered (percent), col sep=comma] {results/not_closer_prob/combined.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Average percent of messages delivered using showing algorithm 2 over different message counts}
+\label{fig:not_closer_prob_avg}
+\end{figure}
+
+For the sake of direct comparison to each other when the number of messages is varying, the average percent delivered across all four of these message counts was calculated. This is shown for each value of $p_{further}$ in Figure \ref{fig:not_closer_prob_avg}. Although delivery rates vary for specific message counts, beyond around $p_{further}=0.4$ it can be seen that the averages are quite similar. The overall best value was found to be $P_further=0.6$ with an average delivery rate of 75.74\%. However it should be noted that if other parameters of the system were to change - for example the distance measure used, or the type of the network graph - the exact best value for $p_{further}$ may change.
+
+\subsection{Algorithm 5 Fraction}
+
+
 
 \section{Distance Measure Comparisons}
 
