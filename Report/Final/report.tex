@@ -12,6 +12,7 @@
 \usepackage{wrapfig}
 \usepackage{tikz}
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.12}
 
 
 \pgfplotsset{percentgraph/.style={%
@@ -360,6 +361,10 @@ Figure \ref{fig:prob_user_model} shows the results for the probabilistic user mo
 Of particular note is the performance of showing algorithm 3 when the probabilistic user model is used, as seen in \ref{subfig:prob_user_model_3}. In this case the amount delivered is very low, as you would expect if each message was shown to only one person. This suggest that when the number of messages in the system is low, the probabilistic model is more realistic. Based on these results, the probabilistic user model is used for the remaining experiments.
 
 \section{Showing Algorithm Comparisons}
+
+With the user model chosen, the developed showing algorithms were next compared to each other. This involved doing additional experiments to compare different values for some of the algorithms' variables. For all of these experiments, the probabilistic user model was used with $a = 20$ and $p = 0.5$. Kleinberg model graphs and the grid-based distance measure were used.
+
+\subsection{Algorithm 2 Probability}
 
 
 \section{Distance Measure Comparisons}
