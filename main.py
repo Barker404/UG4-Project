@@ -15,7 +15,7 @@ Q = 2
 
 
 def main():
-    compare_user_models()
+    test_not_closer_prob()
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -194,39 +194,46 @@ def compare_user_models(msg_count_start=25, msg_count_end=825,
                 output_path=os.path.join("out/user_models", subdirs_all[i][j]),
                 store_data=True)
 
+            # re_plot_results(
+            #     "Message count", True, as_percent=True,
+            #     output_path=os.path.join("out/user_models", subdirs_all[i][j]))
 
-def not_closer_prob_graph():
+
+def test_not_closer_prob(step=0.05, repeats=20):
     # Probabilistic user model
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
-    message_counts = [200, 400, 800]
-    filenames = [
-        "notCloserProb_200messages.png",
-        "notCloserProb_400messages.png",
-        "notCloserProb_800messages.png"
+    message_counts = [200, 400, 600, 800]
+    subdirs = [
+        "notCloserProb_200messages",
+        "notCloserProb_400messages",
+        "notCloserProb_600messages",
+        "notCloserProb_800messages"
     ]
 
-    repeats = 10
+    repeats = 20
     grid_distance = showing.GraphDistanceMeasure()
 
-    for i in range(0, 3):
+    for i in range(0, 4):
         xs = []
         sims = []
-        for j in np.arange(0.1, 1.1, 0.1):
+        for j in np.arange(step, 1.0 + step, step):
             show_model = showing.FurtherProbShowModel(
                 seen_limit, j, grid_distance)
 
             xs.append(j)
             simulation = Simulation(show_model, share_model,
-                                    graph_generator, None,
-                                    message_counts[i])
+                                    graph_generator, round_count=None,
+                                    message_count=message_counts[i])
             sims.append(simulation)
 
-        plot_simulations(sims, xs, "Not Closer Show Probability", repeats,
-                         True, "report_out/not_closer_prob", filenames[i])
+        plot_simulations(
+            sims, xs, "Not Closer Show Probability", repeats, as_percent=True,
+            output_path=os.path.join("out/not_closer_prob", subdirs[i]),
+            store_data=True)
 
 if __name__ == "__main__":
     main()
