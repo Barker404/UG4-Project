@@ -365,7 +365,49 @@ Of particular note is the performance of showing algorithm 3 when the probabilis
 With the user model chosen, the developed showing algorithms were next compared to each other. This involved doing additional experiments to compare different values for some of the algorithms' variables. For all of these experiments, the probabilistic user model was used with $a = 20$ and $p_{share} = 0.5$. Kleinberg model graphs and the grid-based distance measure were used.
 
 \subsection{Algorithm 2 Probability}
+First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm selects candidates to show to each node by taking any message that would be made closer to its destination and also taking those which would not with a certain probability $p_{further}$. Experiments were run using this algorithm to find which value of $p_{further}$ gives the best results.
 
+\begin{figure}
+\begin{subfigure}[]{0.45\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$}]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/200messages.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{200 messages}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$}]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/400messages.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{400 messages}
+\end{subfigure}
+\par\bigskip 
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$}]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/600messages.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{600 messages}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$}]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/800messages.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{800 messages}
+\end{subfigure}
+\caption{Messages delivered using showing algorithm 2 as $p_{further}$ changes}
+\label{fig:not_closer_prob}
+\end{figure}
+
+Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each subfigure shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05
 
 \section{Distance Measure Comparisons}
 
