@@ -220,7 +220,7 @@ def test_not_closer_prob(step=0.05, repeats=20):
     for i in range(0, 4):
         xs = []
         sims = []
-        for j in np.arange(step, 1.0 + step, step):
+        for j in np.arange(0.0, 1.0 + step, step):
             show_model = showing.FurtherProbShowModel(
                 seen_limit, j, grid_distance)
 
@@ -230,10 +230,22 @@ def test_not_closer_prob(step=0.05, repeats=20):
                                     message_count=message_counts[i])
             sims.append(simulation)
 
+            # simulation.repeat_simulation(
+            #     repeats, as_percent=True,
+            #     output_path=os.path.join(
+            #         "out/not_closer_prob", subdirs[i], str(j)),
+            #     store_data=True)
+
+        # re_plot_results(
+        #     "Not Closer Show Probability", True, as_percent=True,
+        #     output_path=os.path.join("out/not_closer_prob", subdirs[i]),
+        #     store_data=True)
+
         plot_simulations(
             sims, xs, "Not Closer Show Probability", repeats, as_percent=True,
             output_path=os.path.join("out/not_closer_prob", subdirs[i]),
             store_data=True)
+
 
 if __name__ == "__main__":
     main()
