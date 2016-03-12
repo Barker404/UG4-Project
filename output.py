@@ -216,7 +216,7 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
     return averages, mins, maxs
 
 
-def re_plot_results(x_label, x_vals_integers, as_percent=True,
+def re_plot_results(x_label, x_vals_numerical, as_percent=True,
                     output_path='output', output_filename='plot.png',
                     store_data=False):
     averages = []
@@ -264,8 +264,12 @@ def re_plot_results(x_label, x_vals_integers, as_percent=True,
                         mins.append(min_delivered)
                         maxs.append(max_delivered)
 
-                    if x_vals_integers:
-                        x_values.append(int(dir_name))
+                    if x_vals_numerical:
+                        try:
+                            val = int(dir_name)
+                        except ValueError:
+                            val = float(dir_name)
+                        x_values.append(val)
                     else:
                         x_values.append(dir_name)
             except IOError:
