@@ -77,9 +77,6 @@ class Simulation(object):
             self.visualiser.draw_image(
                 self.g, self.pos, 0, self.messages, self.show_model.max_shown,
                 watched_message, draw_labels)
-        if store_data:
-            round_path = os.path.join(output_path, "round0")
-            data_storage.store_round_info(round_path, self, 0)
 
         # Simulate rounds
         round_no = 0
@@ -88,9 +85,6 @@ class Simulation(object):
             round_no += 1
             self.simulate_round(round_no, output_images,
                                 watched_message, draw_labels)
-            if store_data:
-                round_path = os.path.join(output_path, "round" + str(round_no))
-                data_storage.store_round_info(round_path, self, round_no)
 
             if self.round_count is not None:
                 simulating = not round_no >= self.round_count

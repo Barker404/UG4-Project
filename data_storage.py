@@ -113,27 +113,23 @@ def store_post_sim_info(path, sim):
             if m.delivered:
                 f_del.write("{}:{}\n".format(m.id, m.delivery_turn))
 
+    # round info
+    with open(os.path.join(path, "shown.txt"), "w") as f_shown:
+        for round_no in range(sim.rounds_simulated):
+            f_shown.write("***ROUND {}\n***".format(round_no))
+            for node_index in sim.g.nodes_iter():
+                f_shown.write(str(node_index) + ":")
+                f_shown.write(",".join(
+                    [str(m.id) for
+                     (m, u) in sim.g.node[node_index]['seen_all'][round_no]]))
+                f_shown.write("\n")
 
-def store_round_info(path, sim, round_no):
-    try:
-        os.makedirs(path)
-    except OSError:
-        if not os.path.isdir(path):
-            raise
-    # shown messages
-    with open(os.path.join(path, SHOWN_MESSAGES_FILENAME), 'w') as f_shown:
-        for node_index in sim.g.nodes_iter():
-            f_shown.write(str(node_index) + ":")
-            f_shown.write(",".join(
-                ["{{{}-{}}}".format(m.id, u) for
-                 (m, u) in sim.g.node[node_index]['seen_all'][round_no]]))
-            f_shown.write("\n")
-
-    # shared messages
-    with open(os.path.join(path, SHARED_MESSAGES_FILENAME), 'w') as f_shared:
-        for node_index in sim.g.nodes_iter():
-            f_shared.write(str(node_index) + ":")
-            f_shared.write(",".join(
-                [str(m.id) for
-                 m in sim.g.node[node_index]['shared'][round_no]]))
-            f_shared.write("\n")
+    with open(os.path.join(path, "shared.txt"), "w") as f_shared:
+        for round_no in range(sim.rounds_simulated):
+            f_shared.write("***ROUND {}***".format(round_no))
+            for node_index in sim.g.nodes_iter():
+                f_shared.write(str(node_index) + ":")
+                f_shared.write(",".join(
+                    [str(m.id) for
+                     m in sim.g.node[node_index]['shared'][round_no]]))
+                f_shared.write("\n")
