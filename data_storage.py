@@ -125,7 +125,8 @@ def store_round_info(path, sim, round_no):
         for node_index in sim.g.nodes_iter():
             f_shown.write(str(node_index) + ":")
             f_shown.write(",".join(
-                [str(m.id) for m in sim.g.node[node_index]['seen'][round_no]]))
+                ["{{{}-{}}}".format(m.id, u) for
+                 (m, u) in sim.g.node[node_index]['seen_all'][round_no]]))
             f_shown.write("\n")
 
     # shared messages
@@ -133,5 +134,6 @@ def store_round_info(path, sim, round_no):
         for node_index in sim.g.nodes_iter():
             f_shared.write(str(node_index) + ":")
             f_shared.write(",".join(
-                [str(m.id) for m in sim.g.node[node_index]['shared'][round_no]]))
+                [str(m.id) for
+                 m in sim.g.node[node_index]['shared'][round_no]]))
             f_shared.write("\n")

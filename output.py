@@ -116,7 +116,7 @@ class Visualiser(object):
                 seen_colours.append(SEEN_COLOUR)
 
             # Gradient based on no of messages seen
-            cmapValue = float(len(g.node[node_index]['seen'][round_no]))
+            cmapValue = float(len(g.node[node_index]['seen_all'][round_no]))
             cmap_nodelist.append(node_index)
             cmap_colours.append(cmapValue)
 

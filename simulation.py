@@ -50,6 +50,8 @@ class Simulation(object):
 
             # Assume starting node always shares
             self.g.node[source_index]['seen'][0].append(message)
+            self.g.node[source_index]['seen_all'][0].append(
+                (message, source_index))
             self.g.node[source_index]['shared'][0].append(message)
 
         return self.messages
@@ -58,6 +60,7 @@ class Simulation(object):
         if self.g is not None:
             for i in self.g.nodes_iter():
                 self.g.node[i]['seen'] = [[]]
+                self.g.node[i]['seen_all'] = [[]]
                 self.g.node[i]['shared'] = [[]]
 
     def run_simulation(self, output_images, output_video, output_path='output',
@@ -131,9 +134,10 @@ class Simulation(object):
                         [round_no - 1]]
 
             # Update seen messages
-            showResults = self.show_model.show_alg(
+            show_result = self.show_model.show_alg(
                 self.g, self.g_info, node_index, possible)
-            seen = list(set([s[0] for s in showResults]))
+            self.g.node[node_index]['seen_all'].append(show_result)
+            seen = list(set([s[0] for s in show_result]))
             self.g.node[node_index]['seen'].append(seen)
 
             # Check if messages have reached destinations
@@ -145,8 +149,8 @@ class Simulation(object):
                     # print str(message.id) + " delivered!"
 
             # Update shared messages
-            shareResult = self.share_model.share_alg(showResults)
-            self.g.node[node_index]['shared'].append(shareResult)
+            share_result = self.share_model.share_alg(show_result)
+            self.g.node[node_index]['shared'].append(share_result)
 
         if output_images:
             self.visualiser.draw_image(
