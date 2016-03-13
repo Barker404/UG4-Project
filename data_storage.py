@@ -116,7 +116,7 @@ def store_post_sim_info(path, sim):
     # round info
     with open(os.path.join(path, "shown.txt"), "w") as f_shown:
         for round_no in range(sim.rounds_simulated):
-            f_shown.write("***ROUND {}\n***".format(round_no))
+            f_shown.write("***ROUND {}***\n".format(round_no))
             for node_index in sim.g.nodes_iter():
                 f_shown.write(str(node_index) + ":")
                 f_shown.write(",".join(
