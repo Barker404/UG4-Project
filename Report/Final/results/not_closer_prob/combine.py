@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 values = {}
 for i in range(200, 1000, 200):
