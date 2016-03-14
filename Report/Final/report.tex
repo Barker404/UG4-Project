@@ -248,6 +248,19 @@ T_{t}(v) = candidates[:a]
 
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
 
+\subsection{Algorithm 4: Distance Priority}
+The previous algorithms looked at how far a message is from its destination, but only in terms of whether or not a single step takes it closer - there is not consideration of how much closer it gets. It also treats all messages equally regardless of how close to their destination they currently are - however a message that is only two steps from the destination is far more likely to get delivered than one which is ten steps away. To maximise the overall number of messages delivered, it may be advantageous to greedily prioritise those which are closer to their destination.
+
+This algorithm achieves both prioritising long links (in a sense) and prioritising nearly-delivered messages. It does this using a simple method - of the messages that can possible be shown to a node $v$, $P_{t}(v)$, those which have not already been delivered are ordered by the distance from $v$ to the destination of that message. The closest $a$ items are then shown to the user, where $a$ is the user's attention limit (or if there are less than $a$ possible messages, all are shown). Long links are not specifically prioritised, however travelling a (useful) long link should take a message significantly closer to its destination, and so is more likely to be chosen at any point in time than a short link starting from the same place.
+
+[insert formal detail]
+
+\subsection{Algorithm 5: Fractional Distance Priority}
+While algorithm 4 prioritises messages which are close to their destination, this is done at the expense of others - if the network has many messages, those which are almost delivered will be propagated many times and use up the the attention limit of users and prevent message which are further away from spreading. If a message that is far from its destination can reach a long link then it will quickly be delivered, but it must survive up to that point. This algorithm uses the prioritisation method of algorithm 4 for quick focused delivery, but also setting aside some capacity for keeping messages alive.
+
+This is achieved by defining a fraction $f$ of each user's attention limit $a$ to be used for "focused" delivery. First, as always, those messages which are already delivered are ignored. From the undelivered messages, $a \times f$ are chosen based on which are closest to their destination. Of the remaining unpicked messages, $a - (a \times f)$ (the amount of attention still unused) are chosen at random. The first $a \times f$ messages accomplish the fast delivery of messages close to their destination, while the other $a - (a \times f)$ are used to keep other messages alive.
+
+[insert formal detail]
 
 \chapter{Implementation}
 For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
@@ -421,7 +434,7 @@ Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each s
 \label{fig:not_closer_prob_avg}
 \end{figure}
 
-For the sake of direct comparison to each other when the number of messages is varying, the average percent delivered across all four of these message counts was calculated. This is shown for each value of $p_{further}$ in Figure \ref{fig:not_closer_prob_avg}. Although delivery rates vary for specific message counts, beyond around $p_{further}=0.4$ it can be seen that the averages are quite similar. The overall best value was found to be $P_further=0.6$ with an average delivery rate of 75.74\%. However it should be noted that if other parameters of the system were to change - for example the distance measure used, or the type of the network graph - the exact best value for $p_{further}$ may change.
+For the sake of direct comparison to each other when the number of messages is varying, the average percent delivered across all four of these message counts was calculated. This is shown for each value of $p_{further}$ in Figure \ref{fig:not_closer_prob_avg}. Although delivery rates vary for specific message counts, beyond around $p_{further}=0.4$ it can be seen that the averages are quite similar. [Note variance - differences essentially meaningless]
 
 \subsection{Algorithm 5 Fraction}
 
