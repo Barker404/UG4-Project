@@ -15,7 +15,7 @@ Q = 2
 
 
 def main():
-    test_not_closer_prob()
+    test_distance_priority_fraction()
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -214,7 +214,6 @@ def test_not_closer_prob(step=0.05, repeats=20):
         "notCloserProb_800messages"
     ]
 
-    repeats = 20
     grid_distance = showing.GridDistanceMeasure()
 
     for i in range(0, 4):
@@ -244,6 +243,43 @@ def test_not_closer_prob(step=0.05, repeats=20):
         plot_simulations(
             sims, xs, "Not Closer Show Probability", repeats, as_percent=True,
             output_path=os.path.join("out/not_closer_prob", subdirs[i]),
+            store_data=True)
+
+
+def test_distance_priority_fraction(step=0.05, repeats=20):
+    # Probabilistic user model
+    seen_limit = 20
+    share_prob = 0.5
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+
+    message_counts = [200, 400, 600, 800]
+    subdirs = [
+        "distancePriorityFraction_200messages",
+        "distancePriorityFraction_400messages",
+        "distancePriorityFraction_600messages",
+        "distancePriorityFraction_800messages"
+    ]
+
+    grid_distance = showing.GridDistanceMeasure()
+
+    for i in range(0, 4):
+        xs = []
+        sims = []
+        for j in np.arange(0.0, 1.0 + step, step):
+            show_model = showing.FractionalDistancePriorityShowModel(
+                seen_limit, j, grid_distance)
+
+            xs.append(j)
+            simulation = Simulation(show_model, share_model,
+                                    graph_generator, round_count=None,
+                                    message_count=message_counts[i])
+            sims.append(simulation)
+
+        plot_simulations(
+            sims, xs, "Distance Priority Fraction", repeats, as_percent=True,
+            output_path=os.path.join(
+                "out/distance_priority_fraction", subdirs[i]),
             store_data=True)
 
 
