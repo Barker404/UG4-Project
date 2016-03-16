@@ -283,5 +283,66 @@ def test_distance_priority_fraction(step=0.05, repeats=20):
             store_data=True)
 
 
+def test_show_models(msg_count_start=25, msg_count_end=825,
+                     msg_count_step=25, repeats=20):
+    seen_limit = 20
+    share_prob = 0.5
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    grid_distance = showing.GridDistanceMeasure()
+
+    models = [
+        showing.AnyCloserShowModel(
+            seen_limit, grid_distance),
+        showing.FurtherProbShowModel(
+            seen_limit, 0.6, grid_distance),
+        showing.FurtherProbShowModel(
+            seen_limit, 0.75, grid_distance),
+        showing.OnlyBestShowModel(
+            seen_limit, grid_distance),
+        showing.DistancePriorityShowModel(
+            seen_limit, grid_distance),
+        showing.FractionalDistancePriorityShowModel(
+            seen_limit, 0.01, grid_distance),
+        showing.FractionalDistancePriorityShowModel(
+            seen_limit, 0.2, grid_distance),
+    ]
+    subdirs = [
+        "AnyCloser",
+        "FurtherProb_60",
+        "FurtherPro_75",
+        "OnlyBest",
+        "DistancePriority",
+        "FractionalDistancePriority_05",
+        "FractionalDistancePriority_20"
+    ]
+
+    for i in range(0, len(subdir_names)):
+        xs = []
+        sims = []
+        show_model = models[i]
+        for j in range(msg_count_start, msg_count_end, msg_count_step):
+            xs.append(j)
+            simulation = Simulation(show_model, share_model,
+                                    graph_generator, round_count=None,
+                                    message_count=j)
+            sims.append(simulation)
+
+        #     simulation.repeat_simulation(
+        #         repeats, as_percent=True,
+        #         output_path=os.path.join(
+        #             "out/all_show_models", subdirs[i], str(j)),
+        #         store_data=True)
+
+        # re_plot_results(
+        #     "Message Count", True, as_percent=True,
+        #     output_path=os.path.join("out/all_show_models", subdirs[i]),
+        #     store_data=True)
+
+        plot_simulations(
+            sims, xs, "Message Count", repeats, as_percent=True,
+            output_path=os.path.join("out/all_show_models", subdirs[i]),
+            store_data=True)
+
 if __name__ == "__main__":
     main()
