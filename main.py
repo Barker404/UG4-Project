@@ -317,7 +317,7 @@ def test_show_models(msg_count_start=25, msg_count_end=825,
         "FractionalDistancePriority_20"
     ]
 
-    for i in range(0, len(subdir_names)):
+    for i in range(0, len(subdirs)):
         xs = []
         sims = []
         show_model = models[i]
