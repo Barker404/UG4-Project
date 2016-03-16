@@ -190,40 +190,39 @@ This results in a situation where a user may share all the messages they see, or
 \section{Showing Algorithms} \label{sec:showing_algorithms}
 The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
 
-So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user.
+So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user. In all of these when considering possible message to show to a user, those which have already been delivered are discounted. To simplify this, $Q_{t}(v)$ is defined as the set of sender-message pairs from $P_{t}(v)$ where the message has not been delivered.
+
+Note that in some of these algorithm, if a message is in the possible set multiple times (from different previous nodes), it may be shown to the user multiple times (once for each previous node). Depending on the user model, this may increase the probability of it being shared by them.
 
 \subsection{Algorithm 1: Any Closer Node}
-In the first algorithm used, for each node we first select candidate messages that might be shown to them. A message is made a candidate if it has not already been delivered, and the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node was (the one that shared the message in the previous round, causing this message to be part of the possible set). After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
+In the first algorithm used, for each node we first select candidate messages that might be shown to them. A message is made a candidate if the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node was (the one that shared the message in the previous round, causing this message to be part of the possible set). After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
 
 \begin{equation}
 \begin{split}
-candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & D(v, d_{k}) < D(u, d_{k}) \: \wedge \\
-& m_{k} \mbox{ has not been delivered} \}
+candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & D(v, d_{k}) < D(u, d_{k}) \}
 \end{split}
 \end{equation}
 
 \begin{equation}
-T_{t}(v) = sample(candidates, max(||candidates||, a))
+T_{t}(v) = sample(candidates_{t}(v), min(|candidates_{t}(v)|, a))
 \end{equation}
 
-Where $D(u, v)$ is the grid (Manhattan) distance between $u$ and $v$, $sample(x, n)$ randomly samples $n$ values from the collection $x$, and $a$ is the maximum messages that can be shown to any node (their attention span).
+Where $D(x, y)$ is the grid (Manhattan) distance between $x$ and $y$; $sample(x, n)$ randomly samples $n$ values from the collection $x$; and $a$ is the maximum messages that can be shown to any node (their attention span).
 
-Note that if a message is in the possible set multiple times (from different previous nodes), it may be shown to the user multiple times (once for each previous node). Depending on the user model, this may increase the probability of it being shared by them.
 
 \subsection{Algorithm 2: Further Nodes With Probability}
 The second algorithm is a modification of the first with the intention of allowing the messages to spread in other directions not necessarily towards their destination. This may help prevent the message from dying out if the "direct" route is very busy.
 
-In this algorithm, we again select candidates to be shown to each node. Again, messages are only made candidates if they have not been delivered. Of those undelivered messages, any for which the receiving node is closer to the destination than the previous node are made candidates, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
+In this algorithm, we again select candidates to be shown to each node. Any message for which the receiving node is closer to the destination than the previous node are made candidates, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
 
 \begin{equation}
 \begin{split}
-candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & (D(v, d_{k}) < D(u, d_{k}) \: \vee \: r < p_{further}) \: \wedge \\
-& m_{k} \mbox{ has not been delivered} \}
+candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & (D(v, d_{k}) < D(u, d_{k}) \quad or \quad r < p_{further}) \}
 \end{split}
 \end{equation}
 
 \begin{equation}
-T_{t}(v) = sample(candidates, max(|candidates|, a))
+T_{t}(v) = sample(candidates_{t}(v), min(|candidates_{t}(v)|, a))
 \end{equation}
 
 Where $0 \leq p_{further} < 1$ is a globally constant probability and $0 \leq r < 1$ is a randomly chosen value.
@@ -237,13 +236,12 @@ Candidate messages are again selected for each node. In this algorithm a message
 
 \begin{equation}
 \begin{split}
-candidates = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \: \wedge \\
-& m_{k} \mbox{ has not been delivered} \}
+candidates_{t}(v) = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \}
 \end{split}
 \end{equation}
 
 \begin{equation}
-T_{t}(v) = candidates[:a]
+T_{t}(v) = candidates_{t}(v)[:a]
 \end{equation}
 
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
@@ -400,19 +398,6 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 
 Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each line on the graph shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. It is clear that very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Due to this, choosing an optimal value of $p_{further}$ to be used may only be possible if the amount of initial messages is known (or at least approximately known). 
 
-%\begin{wrapfigure}{L}{0.5\textwidth}
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$},width=0.45\textwidth,]
-\addplot table [x=not closer prob, y=Average messages delivered (percent), col sep=comma] {results/not_closer_prob/combined.csv};
-\end{axis}
-\end{tikzpicture}
-\caption{Average percent of messages delivered using Showing Algorithm 2 over different message counts}
-\label{fig:not_closer_prob_avg}
-\end{figure}
-
-For the sake of direct comparison to each other when the number of messages is varying, the average percent delivered across all four of these message counts was calculated. This is shown for each value of $p_{further}$ in Figure \ref{fig:not_closer_prob_avg}. Although delivery rates vary for specific message counts, beyond around $p_{further}=0.4$ it can be seen that the averages are quite similar. [Note variance - differences essentially meaningless]
 
 \subsection{Algorithm 5 Fraction}
 Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm uses a fraction parameter $f$ to split the messages shown to each user between distance-prioritised (showing those which are closest to their destination) and picking randomly from the remainder of the possible messages. Experiments were run to determine the best value for the parameter $f$.
@@ -433,21 +418,8 @@ Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm 
 
 Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. Again, the four subfigures show results for initial message counts ranging from 200 to 800. For each message count, the value of $f$ was increased from 0.0 to 1.0 in steps of 0.05. From these results it can be seen that generally low values of $f$ provide the best results. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is unsurprising, as at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case.
 
-%\begin{wrapfigure}{L}{0.5\textwidth}
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$f$},width=0.45\textwidth,]
-\addplot table [x=Distance Priority Fraction, y=Average messages delivered (percent), col sep=comma] {results/distance_priority_fraction/combined.csv};
-\end{axis}
-\end{tikzpicture}
-\caption{Average percent of messages delivered using Showing Algorithm 5 over different message counts}
-\label{fig:distance_priority_fraction_avg}
-\end{figure}
 
-The average delivery rate across all message counts was taken for each value of $f$, as shown in Figure \ref{fig:distance_priority_fraction_avg}. This shows more clearly that a low value of $f$ performs well - as long as at least one message is being taken based on the distance.
-
-[Consider confidence intervals, variance etc]
+\subsection{Overall Comparison}
 
 
 \section{Distance Measure Comparisons}
