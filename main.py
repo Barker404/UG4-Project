@@ -15,7 +15,7 @@ Q = 2
 
 
 def main():
-    test_distance_priority_fraction()
+    test_not_closer_prob(1200, 1600, 200)
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -199,24 +199,17 @@ def compare_user_models(msg_count_start=25, msg_count_end=825,
             #     output_path=os.path.join("out/user_models", subdirs_all[i][j]))
 
 
-def test_not_closer_prob(step=0.05, repeats=20):
+def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
+                         msg_count_step=200, step=0.05, repeats=20):
     # Probabilistic user model
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
-    message_counts = [200, 400, 600, 800]
-    subdirs = [
-        "notCloserProb_200messages",
-        "notCloserProb_400messages",
-        "notCloserProb_600messages",
-        "notCloserProb_800messages"
-    ]
-
     grid_distance = showing.GridDistanceMeasure()
 
-    for i in range(0, 4):
+    for i in range(msg_count_start, msg_count_end, msg_count_step):
         xs = []
         sims = []
         for j in np.arange(0.0, 1.0 + step, step):
@@ -226,44 +219,43 @@ def test_not_closer_prob(step=0.05, repeats=20):
             xs.append(j)
             simulation = Simulation(show_model, share_model,
                                     graph_generator, round_count=None,
-                                    message_count=message_counts[i])
+                                    message_count=i)
             sims.append(simulation)
 
-            # simulation.repeat_simulation(
-            #     repeats, as_percent=True,
-            #     output_path=os.path.join(
-            #         "out/not_closer_prob", subdirs[i], str(j)),
-            #     store_data=True)
+            simulation.repeat_simulation(
+                repeats, as_percent=True,
+                output_path=os.path.join(
+                    "out/not_closer_prob",
+                    "notCloserProb_{}messages".format(i),
+                    str(j)),
+                store_data=True)
 
-        # re_plot_results(
-        #     "Not Closer Show Probability", True, as_percent=True,
-        #     output_path=os.path.join("out/not_closer_prob", subdirs[i]),
-        #     store_data=True)
+        re_plot_results(
+            "Not Closer Show Probability", True, as_percent=True,
+            output_path=os.path.join(
+                "out/not_closer_prob",
+                "notCloserProb_{}messages".format(i)),
+            store_data=True)
 
         plot_simulations(
             sims, xs, "Not Closer Show Probability", repeats, as_percent=True,
-            output_path=os.path.join("out/not_closer_prob", subdirs[i]),
+            output_path=os.path.join(
+                "out/not_closer_prob",
+                "notCloserProb_{}messages".format(i)),
             store_data=True)
 
 
-def test_distance_priority_fraction(step=0.05, repeats=20):
+def test_distance_priority_fraction(msg_count_start=200, msg_count_end=1000,
+                                    msg_count_step=200, step=0.05, repeats=20):
     # Probabilistic user model
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
     graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
-    message_counts = [200, 400, 600, 800]
-    subdirs = [
-        "distancePriorityFraction_200messages",
-        "distancePriorityFraction_400messages",
-        "distancePriorityFraction_600messages",
-        "distancePriorityFraction_800messages"
-    ]
-
     grid_distance = showing.GridDistanceMeasure()
 
-    for i in range(0, 4):
+    for i in range(msg_count_start, msg_count_end, msg_count_step):
         xs = []
         sims = []
         for j in np.arange(0.0, 1.0 + step, step):
@@ -273,15 +265,77 @@ def test_distance_priority_fraction(step=0.05, repeats=20):
             xs.append(j)
             simulation = Simulation(show_model, share_model,
                                     graph_generator, round_count=None,
-                                    message_count=message_counts[i])
+                                    message_count=i)
             sims.append(simulation)
 
         plot_simulations(
             sims, xs, "Distance Priority Fraction", repeats, as_percent=True,
             output_path=os.path.join(
-                "out/distance_priority_fraction", subdirs[i]),
+                "out/distance_priority_fraction",
+                "notCloserProb_{}messages".format(i)),
             store_data=True)
 
+
+def test_show_models(msg_count_start=25, msg_count_end=825,
+                     msg_count_step=25, repeats=20):
+    seen_limit = 20
+    share_prob = 0.5
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    grid_distance = showing.GridDistanceMeasure()
+
+    models = [
+        showing.AnyCloserShowModel(
+            seen_limit, grid_distance),
+        showing.FurtherProbShowModel(
+            seen_limit, 0.6, grid_distance),
+        showing.FurtherProbShowModel(
+            seen_limit, 0.75, grid_distance),
+        showing.OnlyBestShowModel(
+            seen_limit, grid_distance),
+        showing.DistancePriorityShowModel(
+            seen_limit, grid_distance),
+        showing.FractionalDistancePriorityShowModel(
+            seen_limit, 0.01, grid_distance),
+        showing.FractionalDistancePriorityShowModel(
+            seen_limit, 0.2, grid_distance),
+    ]
+    subdirs = [
+        "AnyCloser",
+        "FurtherProb_60",
+        "FurtherPro_75",
+        "OnlyBest",
+        "DistancePriority",
+        "FractionalDistancePriority_05",
+        "FractionalDistancePriority_20"
+    ]
+
+    for i in range(0, len(subdirs)):
+        xs = []
+        sims = []
+        show_model = models[i]
+        for j in range(msg_count_start, msg_count_end, msg_count_step):
+            xs.append(j)
+            simulation = Simulation(show_model, share_model,
+                                    graph_generator, round_count=None,
+                                    message_count=j)
+            sims.append(simulation)
+
+        #     simulation.repeat_simulation(
+        #         repeats, as_percent=True,
+        #         output_path=os.path.join(
+        #             "out/all_show_models", subdirs[i], str(j)),
+        #         store_data=True)
+
+        # re_plot_results(
+        #     "Message Count", True, as_percent=True,
+        #     output_path=os.path.join("out/all_show_models", subdirs[i]),
+        #     store_data=True)
+
+        plot_simulations(
+            sims, xs, "Message Count", repeats, as_percent=True,
+            output_path=os.path.join("out/all_show_models", subdirs[i]),
+            store_data=True)
 
 if __name__ == "__main__":
     main()
