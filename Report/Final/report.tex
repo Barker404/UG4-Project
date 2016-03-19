@@ -110,9 +110,13 @@ Another less common aspect is targeting users within the social network. The pap
 
 
 \chapter{Formal Definitions}
+
+Before any algorithms could be developed, the problem model had to be defined formally. This describes the process by which messages are spread through the graph, and how the user and showing algorithms affect this. At this point the graph type to focus on was also decided as Kleinberg's model, allowing for the showing algorithms to take advantage of some of the features of this model. After formalising this the specific models of how users act were defined, and then the showing algorithms themselves could be developed and defined formally.
+
+This section formally defines these aspects. The problem model itself is defined, followed by a description of the graph model used. Then the various user models and showing algorithms are described and defined formally in terms of the problem model, including the different ways to measure distance within the graph which form part of the showing algorithm.
+
 \section{Problem Model}
 
-\subsection{Problem Statement}
 Initially we are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$. 
 
 The graph $G$ represents the social network, with vertices in $V$ being the users of the network and edges in $E$ being connections between users within the network. A connection between two users $a$ and $b$ means in our context that user $a$ may see some content shared by user $b$ - however whether they actually see it or not is decided by the social network's algorithm.
@@ -316,6 +320,143 @@ D(u, v) = abs(u_{x} - v_{x}) + abs(u_{y} - v_{y})
 Where $abs(x)$ is the absolute value of $x$.
 
 For graph types which are based on a grid, such as the Kleinberg model, this Manhatten grid distance can be used to determine the "distance" between two nodes. This has the advantage of being very quick to compute, and also is possible using only local information at each node (although in this case we have centralised information anyway). However it is rather simplistic, and does not take into account the structure of the other parts of the graph, such as long links in the Kleinberg model.
+
+
+\subsection{Graph Distance}
+With the use of centralised knowledge, a more accurate measure of distance than the simplistic grid measure can be created. This uses the length of the shortest path between any two nodes as their distance - equivalent to the minimum number of rounds for a message to travel between the nodes. This method also has the advantage of being usable for any kind of graph, whereas the grid distance measure required the graph to be based on a grid.
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black, line width=1.5] (A) at (0,4.5) {A};
+    \node[shape=circle,draw=black] (B) at (1.5,4.5) {B};
+    \node[shape=circle,draw=black] (C) at (3,4.5) {C};
+    \node[shape=circle,draw=black] (D) at (4.5,4.5) {D};
+    \node[shape=circle,draw=black] (E) at (0,3) {E};
+    \node[shape=circle,draw=black] (F) at (1.5,3) {F};
+    \node[shape=circle,draw=black] (G) at (3,3) {G};
+    \node[shape=circle,draw=black] (H) at (4.5,3) {H};
+    \node[shape=circle,draw=black] (I) at (0,1.5) {I};
+    \node[shape=circle,draw=black] (J) at (1.5,1.5) {J};
+    \node[shape=circle,draw=black] (K) at (3,1.5) {K};
+    \node[shape=circle,draw=black] (L) at (4.5,1.5) {L};
+    \node[shape=circle,draw=black] (M) at (0,0) {M};
+    \node[shape=circle,draw=black] (N) at (1.5,0) {N};
+    \node[shape=circle,draw=black] (O) at (3,0) {O};
+    \node[shape=circle,draw=black, line width=1.5] (P) at (4.5,0) {P};
+    \node[shape=circle,draw=black] (Q) at (0.5,-2.5) {Q};
+    \node[shape=circle,draw=black] (R) at (2.5,-2.5) {R};
+    
+    \path (A) edge (B);
+    \path (B) edge (C);
+    \path (C) edge (D);
+    \path (E) edge (F);
+    \path (F) edge (G);
+    \path (G) edge (H);
+    \path (I) edge (J);
+    \path (J) edge (K);
+    \path (K) edge (L);
+    \path (M) edge (N);
+    \path (N) edge (O);
+    \path (O) edge (P);
+
+    \path (A) edge (E);
+    \path (E) edge (I);
+    \path (I) edge (M);
+    \path (B) edge (F);
+    \path (F) edge (J);
+    \path (J) edge (N);
+    \path (C) edge (G);
+    \path (G) edge (K);
+    \path (K) edge (O);
+    \path (D) edge (H);
+    \path (H) edge (L);
+    \path (L) edge (P);
+    
+    \path (A) edge [bend right] (Q);
+    \path (Q) edge (R);
+    \path (R) edge (P);
+\end{tikzpicture}
+\caption{An example of a graph where using the graph distance may give poorer delivery rates. In the case where A message is at $A$ and the destination is $I$, taking the longer routes through the grid may reduce the chance of the message being lost by allowing duplication.}
+\label{fig:graph_dist_example}
+\end{wrapfigure}
+
+A possible downside of this method is that while it can be used to direct messages towards the \textit{shortest} route to their destination, this route is not necessarily useful in this model. Since any user may fail to share a message, messages must be duplicated. Therefore an ideal "next step" for a message to take would not only be closer to the destination, but also have multiple routes to it - allowing for some instances of the message to be lost.
+
+An example is shown in Figure \ref{fig:graph_dist_example}. If we assume that a message is currently at $A$, and the destination is $P$, then the shortest path using graph distance is via $Q$ and $R$. However this requires both $Q$ and $R$ to share the message after it is shown to them. On the other hand, if a slightly longer path through the grid-like part of the graph is taken, the message can easily be duplicated amongst the various other nodes in between. However measuring by graph distance puts both $B$ and $E$ further from the destination than $Q$ is, so in several of the showing algorithms used this wouldn't happen often. A similar situation can arise in Kleinberg's graph model, where nodes taking the role of $Q$ and $R$ are very far away from the destination in the grid, and so delivering via them requires the use of specific long links.
+
+This problem is avoided in the grid distance measure as any step taken closer will always still have short links leading towards the destination which are closer to reaching it than the short links at a the previous node.
+
+\subsection{Diffusion Distance}
+To deal with this problem of some short paths requiring the exact route be taken without failure, diffusion distance can be used as an alternative distance measure. This method uses random walks to determine the distance between two nodes - if the random walks starting at either node have a good chance to end up in the same places, then the nodes are deemed "close". This means that nodes with multiple paths between them are more likely to be closer to each other in this measure, as the chance of a random walk taking one of several paths is better than that of it taking a single specific path. An example is shown in Figure
+
+\begin{wrapfigure}{r}{0.4\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black, line width=1.5] (A) at (0,3) {A};
+    \node[shape=circle,draw=black] (B) at (0,2) {B};
+    \node[shape=circle,draw=black] (C) at (0,1) {C};
+    \node[shape=circle,draw=black] (D) at (0,0) {D};
+    \node[shape=circle,draw=black] (E) at (2.5,3) {E};
+    \node[shape=circle,draw=black] (F) at (2.5,2) {F};
+    \node[shape=circle,draw=black] (G) at (2.5,1) {G};
+    \node[shape=circle,draw=black] (H) at (2.5,0) {H};
+    
+    \path (A) edge (E);
+    \path (A) edge (F);
+    \path (A) edge (G);
+    \path (A) edge (H);
+    \path (B) edge (E);
+    \path (B) edge (F);
+    \path (B) edge (G);
+    \path (B) edge (H);
+    \path (C) edge (E);
+    \path (C) edge (F);
+    \path (C) edge (G);
+    \path (C) edge (H);
+    \path (D) edge (E);
+    \path (D) edge (F);
+    \path (D) edge (G);
+    \path (D) edge (H);
+    
+    \path (E) edge (A);
+    \path (E) edge (B);
+    \path (E) edge (C);
+    \path (E) edge (D);
+    \path (F) edge (A);
+    \path (F) edge (B);
+    \path (F) edge (C);
+    \path (F) edge (D);
+    \path (G) edge (A);
+    \path (G) edge (B);
+    \path (G) edge (C);
+    \path (G) edge (D);
+    \path (H) edge (A);
+    \path (H) edge (B);
+    \path (H) edge (C);
+    \path (H) edge (D);
+\end{tikzpicture}
+\caption{A complete bipartite graph. If a random walk starts at at $A$ and goes on for an even number of steps, it has no chance of ending at any of $E$, $F$, $G$, or $H$.}
+\label{fig:diffusion_distance_bipartite}
+\end{wrapfigure}
+
+More specifically, to find the diffusion distance between $u$ and $v$ we first find the probability for random walks of some specific length $t$ starting at each to end in at any node in the graph. A potential problem with this is that the value of $t$ chosen may overly favour some nodes. For example, in a bipartate graph like that shown in Figure \ref{fig:diffusion_distance_bipartite}, if the value of $t$ is divisible by two then the random walk will always end on the same "side" as it started on - and similarly if $t$ is even it will always end on the other "side". This would result in the random walks of two nodes on opposite "sides" never ending in the same place, and they would be deemed infinitely far apart. Since grids are , this can cause issues when using a grid-like graph such as Kleniberg's model. To combat this, "lazy" random walks are used, where there is a 0.5 probability at each step of the walk staying in the same place. This removes the bias caused by such aspects of the graph.
+
+Given this, the transition matrix for the random walk (the probability of moving from one node to another) is given by:
+
+\begin{equation}
+\textbf{Z} = 0.5 \times (\textbf{I} + \textbf{D}^{-1} \times \textbf{A})
+\end{equation}
+
+Where $\textbf{A}$ is the graph's adjacency matrix, $\textbf{D}$ is the graph's diagonal degree matrix, and $\textbf{I}$ is the identity matrix (containing only 1s along the diagonal) of the same size as $\textbf{A}$ and $\textbf{D}$. In this matrix, $\textbf{Z}[i, j]$ is the probability of a random walk at node $i$ moving to node $j$ in the next step, where the graph nodes are indexed in some way. We then take $\textbf{Z}^{t}[i, j]$ to get the probability of a random walk starting at $i$ ending at $j$ after $t$ steps.
+
+Finally, to compare two nodes we take the row vectors containing the probabilities for random walks starting at each of these nodes, and find the difference between these vectors:
+
+\begin{equation}
+D(u, v) = \sum_{w=1}^{|V|} (\textbf{Z}^{t}[u, w] - \textbf{Z}^{t}[v, w])^{2}
+\end{equation}
+
+Where $|V|$ is the number of nodes in the graph.
 
 \chapter{Implementation}
 For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
