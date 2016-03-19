@@ -127,11 +127,11 @@ For any round $t$, and for some vertex $v \in V$, the \textbf{shared set} $S_{t}
 We assume that the source of a message will invariably share it initially (otherwise it has no chance to propagate). Therefore initially, at round 0, for each $v \in V$ the shared set is defined as the set of messages for which $v$ is the source:
 
 \begin{equation}
-S_{0}(v) = \{m_{x} \; | \; x \in [0, k] \wedge s_{x} = v\}
+S_{0}(v) = \{m_{x} \; | \; x \in [0, k] and s_{x} = v\}
 \end{equation}
 
 
-We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ may be able to see at this point:
+We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ could potentially be shown at this point:
 
 \begin{equation}
 P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
@@ -139,7 +139,7 @@ P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
 
 In the above equation, $N(v)$ is the set of neighbouring vertices of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
 
-Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$, $T_{t}(v)$, as the result of this algorithm - this will be a subset of the possible set for that user and round:
+Which of these messages are actually shown to $v$ is determined by the social network's \textbf{showing algorithm} - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$, $T_{t}(v)$, as the result of this algorithm - this will be a subset of the possible set for that user and round:
 
 \begin{equation}
 T_{t}(v) \subseteq P_{t}(v)
@@ -148,13 +148,13 @@ T_{t}(v) \subseteq P_{t}(v)
 Finally, from the messages that are shown to a user, the user will share some of them. This is decided by the user model algorithm. The result of this form the \textbf{shared set} of that user for this round - all messages in the user's shared set must have been part of their shown set for that round:
 
 \begin{equation}
-\forall m \in S_{t}(v) . \exists (u, n) \in T_{t}(v) . m = n
+\forall m \in S_{t}(v) .\; \exists (u, n) \in T_{t}(v) .\; m = n
 \end{equation}
 
-This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network.
+This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network. Note that if in some a particular message is not shared by any user (whether this is due to it not being shown to anyone or the user model algorithm not selecting any instance of it) then that message will not be present in any possible sets for the next round. As a result it cannot be shown to any more users, and if it was not already delivered can never be delivered.
 
 \section{Network Graph} \label{sec:graph_def}
-An important factor in how a message showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
+An important factor in how a showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
 
 For the majority of this project, Kleinberg's model for small world graphs was used\cite{Kleinberg00}. This is a model which randomly creates a graph that fits certain properties. Initially, nodes are arranged in a grid layout, with a "grid distance" from each other. Each node is connected to its immediate neighbours (those a grid distance of 1 away). Each node is then connected to a constant number $k$ of other nodes. The probability of connecting node $u$ to node $v$ in this way is proportional to $d(u, v)^{-q}$ where $d(u, v)$ is the grid distance between $u$ and $v$, and $q$ is a constant affecting how likely the links are to be "far-reaching". If $q$ is 0, then the node will be linked to other nodes uniformly. If $q$ is high, the long links are more likely to connect closer nodes.
 
@@ -175,17 +175,29 @@ This can be related to real networks intuitively. Individuals are more likely to
 While Kleinberg's small world model has been used primarily up to this point, other graph types may provide additional interesting insights. For example, using a plain grid could provide a baseline for what can be expected, to see if the algorithm developed takes advantage of the long link properties of the network. Alternatively, an real social network dataset could be used to see if the algorithm also work in actual networks.
 
 \section{User Models} \label{sec:user_models}
-While the main focus of this project was on the effect of the social network's "showing" algorithm, the model used also requires an algorithm to represent the user's actions. This algorithm should decide which of the messages shown to a user they then share - it chooses $S_{t}(v)$ based on $T_{t}(v)$. Depending on how this decision is modelled, it can add an element of uncertainty or randomness to the system, affecting which "showing" algorithms perform well.
+While the main focus of this project was on the effect of the social network's showing algorithm, the model used also requires an algorithm to represent the user's actions. This algorithm should decide which of the messages shown to a user they then share - it chooses $S_{t}(v)$ based on $T_{t}(v)$. Depending on how this decision is modelled, it can add an element of uncertainty or randomness to the system, affecting which showing algorithms perform well.
 
 \subsection{Basic User Model}
-Initially, a very basic random selection method was used to choose the $S_{t}(v)$. Firstly, the user only considers the top $a$ of the messages shown to them (or all of the messages if there is less than $a$), where $a$ is a global constant - this represents the user's "attention", being unable to look at every message shown to them. In the implementations used, the value of $a$ is also known to the showing algorithm, which does not show more than this many messages. From these $a$ messages, $b$ are selected at random and shared (or all of them are shared if there are less than $b$), where $b$ is a global constant and $b \le a$.
+Initially, a very basic random selection method was used to choose $S_{t}(v)$. Firstly, the user only actually sees and considers the top $a$ of the messages shown to them (or all of the messages if there is less than $a$), where $a$ is a global constant - this represents the user's "attention", being unable to look at every message shown to them. In the implementations used, the value of $a$ is also known to the showing algorithm, which does not show more than this many messages. From these $a$ messages, $b$ are selected at random and shared (or all of them are shared if there are less than $b$), where $b$ is a global constant and $b \le a$. More formally:
+
+\begin{equation}
+S_{t}(v) = sample(T_{t}(v)[:a], \; min(|T_{t}(v)|,\: b))
+\end{equation}
+
+Where $x[:a]$ is the first $a$ items in $x$ and $sample(x, n)$ randomly samples $n$ values from the collection $x$.
 
 This provides us with a degree of randomness - if there are more than $b$ messages shown to the user, we can't tell which ones will be passed on. However in the case where there are less than or equal to $b$ messages shown to the user, this model acts unrealistically - the user will share every message they see. A real social network user would likely be less predictable (unless there was some incentive to share messages), and may not share all of the messages in nay circumstances. As a result of this unnatural behaviour, showing each message to only a single user at each step was found to be a highly effective strategy - however in a real situation this would likely result in losing the message at an uncooperative user.
 
 \subsection{Probabilistic User Model}
-A more realistic user model can be created using more probabilistic methods. In this user model, the concept of a maximum attention of $a$ is retained, with the user considering up to $a$ messages. However from these $a$ messages, rather than choose a set amount at random each message is shared with a probability $p_{share}$, where $p_{share}$ is a global constant.
+A more realistic user model can be created using more probabilistic methods. In this user model, the concept of a maximum attention of $a$ is retained, with the user considering up to $a$ messages. However from these $a$ messages, rather than choose a set amount at random each message is shared with a probability $p_{share}$, where $p_{share}$ is a global constant. More formally:
 
-This results in a situation where a user may share all the messages they see, or may share none. This emulates how a user will only share certain messages based on some criteria unknown to the network. With this model, if messages are not sent to enough users then they are likely to not be shared and be lost.
+\begin{equation}
+S_{t}(v) = \{x \in T_{t}(v)[:a] \:\: | \:\:  r < p_{share}\}
+\end{equation}
+
+Where the previous definition of $x[:a]$ applies, and $0 \leq r < 1$ is a value chosen at random each time it is inspected. 
+
+This results in a situation where a user may share all the messages they see, or may share none. This emulates more closely how an actual user will only share certain messages based on some criteria unknown to the network - these unknown criteria are modelled over all users in general by this probabilistic sharing. With this model, if messages are not spread to a sufficiently large number of users then they are likely to not be shared at some point and be lost.
 
 \section{Showing Algorithms} \label{sec:showing_algorithms}
 The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
