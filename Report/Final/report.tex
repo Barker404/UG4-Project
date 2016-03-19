@@ -202,12 +202,14 @@ This results in a situation where a user may share all the messages they see, or
 \section{Showing Algorithms} \label{sec:showing_algorithms}
 The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
 
-So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user. In all of these when considering possible message to show to a user, those which have already been delivered are discounted. To simplify this, $Q_{t}(v)$ is defined as the set of sender-message pairs from $P_{t}(v)$ where the message has not been delivered.
+So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user. In all of these when considering possible message to show to a user, those which have already been delivered are discounted. To simplify this, $Q_{t}(v)$ is defined as the set of sender-message pairs from $P_{t}(v)$ where the message has not been delivered. In the non-formal descriptions, delivered messages are implicitly discounted unless otherwise stated.
+
+Almost all of these algorithms use some sense of "distance" between nodes. There are several ways to define this distance, each giving different performance - for detail on these see Section \ref{sec:distance_measures}. For the sake of defining the showing algorithms this "distance measure" is left general, using $D(u, v)$ to represent the distance between two nodes in whatever measure is used. In simulations a distance measure must be chosen to be used as part of the showing algorithm.
 
 Note that in some of these algorithm, if a message is in the possible set multiple times (from different previous nodes), it may be shown to the user multiple times (once for each previous node). Depending on the user model, this may increase the probability of it being shared by them.
 
 \subsection{Algorithm 1: Any Closer Node}
-In the first algorithm used, for each node we first select candidate messages that might be shown to them. A message is made a candidate if the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node was (the one that shared the message in the previous round, causing this message to be part of the possible set). After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
+In the first algorithm used, for each node we first select candidate messages that may be shown to them. A message is made a candidate if the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node is (the one that shared this message in the previous round, causing it to be part of the possible set). In other words, the messages progress only to nodes which are closer to the destination. After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
 
 \begin{equation}
 \begin{split}
@@ -219,13 +221,13 @@ candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & D(v, d_{k}) < D(u, 
 T_{t}(v) = sample(candidates_{t}(v), min(|candidates_{t}(v)|, a))
 \end{equation}
 
-Where $D(x, y)$ is the grid (Manhattan) distance between $x$ and $y$; $sample(x, n)$ randomly samples $n$ values from the collection $x$; and $a$ is the maximum messages that can be shown to any node (their attention span).
+Where $sample(x, n)$ randomly samples $n$ values from the collection $x$ and $a$ is the maximum number of messages that can be shown to any one node (their attention span).
 
 
 \subsection{Algorithm 2: Further Nodes With Probability}
-The second algorithm is a modification of the first with the intention of allowing the messages to spread in other directions not necessarily towards their destination. This may help prevent the message from dying out if the "direct" route is very busy.
+The second algorithm is a modification of the first with the intention of allowing the messages to spread in other directions not necessarily towards their destination. This may help prevent the message from dying out if the "direct" route is very busy, by creating additional duplicates.
 
-In this algorithm, we again select candidates to be shown to each node. Any message for which the receiving node is closer to the destination than the previous node are made candidates, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
+In this algorithm, we again select candidates to be shown to each node. Any message for which the receiving node is closer to the destination than the previous node is made a candidate, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
 
 \begin{equation}
 \begin{split}
@@ -234,21 +236,21 @@ candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & (D(v, d_{k}) < D(u,
 \end{equation}
 
 \begin{equation}
-T_{t}(v) = sample(candidates_{t}(v), min(|candidates_{t}(v)|, a))
+T_{t}(v) = sample(candidates_{t}(v), \; min(|candidates_{t}(v)|, \: a))
 \end{equation}
 
-Where $0 \leq p_{further} < 1$ is a globally constant probability and $0 \leq r < 1$ is a randomly chosen value.
+Where $0 \leq p_{further} < 1$ is a globally constant probability and $0 \leq r < 1$ is a value chosen at random each time it is inspected. 
 
 Note that if $p_{further}$ were to be set to 0, Algorithm 2 would behave the exact same as Algorithm 1.
 
 \subsection{Algorithm 3: Only Single Best Node}
-The third algorithm tested uses a simpler concept - each message is passed on to at most one other node, the node which is determined to be the "best" next step. This provides a basis for comparison with the case where messages are never duplicated.
+The third algorithm uses a simpler concept - each message is passed on to at most one other node, which is always the node that is determined to be the "best" next step. This is used mainly for comparing other algorithms to this case, where messages are never duplicated.
 
-Candidate messages are again selected for each node. In this algorithm a message is a candidate if it has not yet been delivered, and if that node is the "best" next step for the message. We define the "best" next step as the neighbour of the previous step which is closest to the target in grid distance, and in the case of a draw has the lowest node index (to ensure that the "best" next step is consistent). If there are too many candidates then the first up to the limit are taken. Since we are not worried about spreading messages "fairly" as they do not duplicate, this doesn't need to be chosen randomly. Formally:
+Candidate messages are again selected for each node. In this algorithm a message is a candidate only if that node is the "best" next step for the message. We define the "best" next step as the neighbour of the previous step (the only node which has this message) which is closest to the target, and in the case of a draw has the lowest node index (to ensure that the "best" next step is consistent). If there are more than $a$ candidates then the first up to $a$ are taken. Since we are not worried about spreading messages "fairly" as they do not duplicate, this doesn't need to be chosen randomly. Formally:
 
 \begin{equation}
 \begin{split}
-candidates_{t}(v) = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \}
+candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \}
 \end{split}
 \end{equation}
 
@@ -259,20 +261,51 @@ T_{t}(v) = candidates_{t}(v)[:a]
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
 
 \subsection{Algorithm 4: Distance Priority}
-The previous algorithms looked at how far a message is from its destination, but only in terms of whether or not a single step takes it closer - there is not consideration of how much closer it gets. It also treats all messages equally regardless of how close to their destination they currently are - however a message that is only two steps from the destination is far more likely to get delivered than one which is ten steps away. To maximise the overall number of messages delivered, it may be advantageous to greedily prioritise those which are closer to their destination.
+The previous algorithms looked at how far a message is from its destination, but only in terms of whether or not a single step takes it closer - there is not consideration of how much closer it gets. They also treat all messages equally regardless of how close to their destination they currently are - however a message that is only two steps from the destination is far more likely to get delivered than one which is ten steps away. To maximise the overall number of messages delivered, it may be advantageous to greedily prioritise those which are closer to their destination.
 
-This algorithm achieves both prioritising long links (in a sense) and prioritising nearly-delivered messages. It does this using a simple method - of the messages that can possible be shown to a node $v$, $P_{t}(v)$, those which have not already been delivered are ordered by the distance from $v$ to the destination of that message. The closest $a$ items are then shown to the user, where $a$ is the user's attention limit (or if there are less than $a$ possible messages, all are shown). Long links are not specifically prioritised, however travelling a (useful) long link should take a message significantly closer to its destination, and so is more likely to be chosen at any point in time than a short link starting from the same place.
+This algorithm achieves both prioritising long links (in a sense) and prioritising nearly-delivered messages. It does this using a simple method - the messages that can be shown to a user $v$, $P_{t}(v)$, are ordered by the distance from $v$ to the destination of that message. The closest $a$ items are then shown to the user, where $a$ is the user's attention limit (or if there are less than $a$ possible messages, all are shown). Long links are not specifically prioritised, however travelling a (useful) long link should take a message significantly closer to its destination, and so is generally more likely to be chosen at any point in time than a short link starting from the same place.
 
-[insert formal detail]
+To describe this formally, we define a ranking $R_{dist}(u, m)$, the ranking of messages in $Q_{t}(v)$ by the distance from $u$ to the destination of $m$. For any two messages $m_{i}, m{j} \in Q_{t}(v)$, if $D(u, d_{i}) < D(u, d_{j})$ then $R_{dist}(u, m_{i}) > R_{dist}(u, m_{j})$. The closest message to its destination is given the rank 0, and ranks increase from there. In the case of a draw (where two messages would be the same distance from their destination) then they are ordered arbitrarily in the ranking (but still have distinct ranks). The algorithm can then be described as follows:
+
+\begin{equation}
+T_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: R_{dist}(v, m_{k}) < a \}
+\end{equation}
+
+In other words, up to $a$ of the lowest ranking (closest) messages are shown to the user.
 
 \subsection{Algorithm 5: Fractional Distance Priority}
 While algorithm 4 prioritises messages which are close to their destination, this is done at the expense of others - if the network has many messages, those which are almost delivered will be propagated many times and use up the the attention limit of users and prevent message which are further away from spreading. If a message that is far from its destination can reach a long link then it will quickly be delivered, but it must survive up to that point. This algorithm uses the prioritisation method of algorithm 4 for quick focused delivery, but also setting aside some capacity for keeping messages alive.
 
 This is achieved by defining a fraction $f$ of each user's attention limit $a$ to be used for "focused" delivery. First, as always, those messages which are already delivered are ignored. From the undelivered messages, $a \times f$ are chosen based on which are closest to their destination. Of the remaining unpicked messages, $a - (a \times f)$ (the amount of attention still unused) are chosen at random. The first $a \times f$ messages accomplish the fast delivery of messages close to their destination, while the other $a - (a \times f)$ are used to keep other messages alive.
 
-[insert formal detail]
+Formally, we first define $a_{priority} = a \times f$ as the number of messages which will be chosen based on the distance - this is rounded down if not a whole number. We also define $a_{random} = a - a_{priority}$, the number of messages chosen randomly.
+
+We then split the set of possible message into two parts, those which are to be the portion chosen by distance and the remaining possible messages:
+\begin{equation}
+priority_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: R_{dist}(v, m_{k}) < a_{priority} \}
+\end{equation}
+\begin{equation}
+others_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: R_{dist}(v, m_{k}) >= a_{priority} \}
+\end{equation}
+
+We choose the random selection of messages:
+
+\begin{equation}
+random_{t}(v) = sample(others_{t}(v), \; min(|others_{t}(v)|, \: a_{random}))
+\end{equation}
+
+Finally, we combine these two to produce our shown set:
+
+\begin{equation}
+T_{t}(v) = priority_{t}(v) \; \cup \; random_{t}(v)
+\end{equation}
 
 Note that if $f$ were to be set to 1, Algorithm 5 would behave the exact same as Algorithm 4.
+
+
+\section{Distance Measures} \label{sec:distance_measures}
+
+
 
 \chapter{Implementation}
 For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
