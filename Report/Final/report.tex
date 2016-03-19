@@ -304,8 +304,18 @@ Note that if $f$ were to be set to 1, Algorithm 5 would behave the exact same as
 
 
 \section{Distance Measures} \label{sec:distance_measures}
+Many of the showing algorithms described in Section \ref{sec:showing_algorithms} involve some measure of distance $D(u, v)$ between two nodes $u$ and $v$. There a various ways to define this distance, depending on the desired properties and the graph type in use. Multiple different distance measures were used for experiments, to investigate how they affect the performance of the showing algorithm.
 
+\subsection{Grid Distance}
+The most simplistic distance measure used was based on the work done by Kleinberg in \cite{Kleinberg00}, the paper in which the Kleinberg graph model was proposed. In this paper a routing scheme for decentralised message delivery (with individual messages forwarded one node at a time) is outlined. The method used is simply to use the local knowledge of position within the graph - in the real world this may be geographical location, but in the graph it is represented using the position of the node in the original grid. Messages are forwarded to the neighbour who is closest to the destination in terms of lattice (or Manhatten) distance in this grid. If the $x$ and $y$ positions of a node $u$ in the grid are represented by $u_{x}$ and $u_{y}$, then this can be defined as follows:
 
+\begin{equation}
+D(u, v) = abs(u_{x} - v_{x}) + abs(u_{y} - v_{y})
+\end{equation}
+
+Where $abs(x)$ is the absolute value of $x$.
+
+For graph types which are based on a grid, such as the Kleinberg model, this Manhatten grid distance can be used to determine the "distance" between two nodes. This has the advantage of being very quick to compute, and also is possible using only local information at each node (although in this case we have centralised information anyway). However it is rather simplistic, and does not take into account the structure of the other parts of the graph, such as long links in the Kleinberg model.
 
 \chapter{Implementation}
 For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
