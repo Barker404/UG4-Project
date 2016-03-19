@@ -127,14 +127,14 @@ For any round $t$, and for some vertex $v \in V$, the \textbf{shared set} $S_{t}
 We assume that the source of a message will invariably share it initially (otherwise it has no chance to propagate). Therefore initially, at round 0, for each $v \in V$ the shared set is defined as the set of messages for which $v$ is the source:
 
 \begin{equation}
-S_{0}(v) = \{m_{x} \; | \; x \in [0, k] and s_{x} = v\}
+S_{0}(v) = \{m_{x} \:\: | \:\: x \in [0, k] \:\: and \:\: s_{x} = v\}
 \end{equation}
 
 
 We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ could potentially be shown at this point:
 
 \begin{equation}
-P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
+P_{t}(v) = \bigcup_{u \in N(v)} \:\:\:\: \bigcup_{m \in S_{t-1}(u)} (u, m)
 \end{equation}
 
 In the above equation, $N(v)$ is the set of neighbouring vertices of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
