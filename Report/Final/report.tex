@@ -389,6 +389,9 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/400messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/600messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/800messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1000messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1200messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1400messages.csv};
 \legend{200 Messages,400 Messages,600 Messages,800 Messages}
 \end{axis}
 \end{tikzpicture}
@@ -396,7 +399,7 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 \label{fig:not_closer_prob}
 \end{figure}
 
-Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each line on the graph shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. It is clear that very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Due to this, choosing an optimal value of $p_{further}$ to be used may only be possible if the amount of initial messages is known (or at least approximately known). 
+Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each line on the graph shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. It is clear that very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Due to this, choosing an optimal value of $p_{further}$ to be used may only be possible if the amount of initial messages is known (or at least approximately known).
 
 
 \subsection{Algorithm 5 Fraction}
@@ -416,7 +419,7 @@ Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm 
 \label{fig:distance_priority_fraction}
 \end{figure}
 
-Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. Again, the four subfigures show results for initial message counts ranging from 200 to 800. For each message count, the value of $f$ was increased from 0.0 to 1.0 in steps of 0.05. From these results it can be seen that generally low values of $f$ provide the best results. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is unsurprising, as at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case.
+Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. Again, the plots on the graph show results for initial message counts ranging from 200 to 800. For each message count, the value of $f$ was increased from 0.0 to 1.0 in steps of 0.05. From these results it can be seen that generally low values of $f$ provide the best results. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is unsurprising, as at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case.
 
 
 \subsection{Overall Comparison}
