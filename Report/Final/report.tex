@@ -110,9 +110,13 @@ Another less common aspect is targeting users within the social network. The pap
 
 
 \chapter{Formal Definitions}
+
+Before any algorithms could be developed, the problem model had to be defined formally. This describes the process by which messages are spread through the graph, and how the user and showing algorithms affect this. At this point the graph type to focus on was also decided as Kleinberg's model, allowing for the showing algorithms to take advantage of some of the features of this model. After formalising this the specific models of how users act were defined, and then the showing algorithms themselves could be developed and defined formally.
+
+This section formally defines these aspects. The problem model itself is defined, followed by a description of the graph model used. Then the various user models and showing algorithms are described and defined formally in terms of the problem model, including the different ways to measure distance within the graph which form part of the showing algorithm.
+
 \section{Problem Model}
 
-\subsection{Problem Statement}
 Initially we are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$. 
 
 The graph $G$ represents the social network, with vertices in $V$ being the users of the network and edges in $E$ being connections between users within the network. A connection between two users $a$ and $b$ means in our context that user $a$ may see some content shared by user $b$ - however whether they actually see it or not is decided by the social network's algorithm.
@@ -127,19 +131,19 @@ For any round $t$, and for some vertex $v \in V$, the \textbf{shared set} $S_{t}
 We assume that the source of a message will invariably share it initially (otherwise it has no chance to propagate). Therefore initially, at round 0, for each $v \in V$ the shared set is defined as the set of messages for which $v$ is the source:
 
 \begin{equation}
-S_{0}(v) = \{m_{x} \; | \; x \in [0, k] \wedge s_{x} = v\}
+S_{0}(v) = \{m_{x} \:\: | \:\: x \in [0, k] \:\: and \:\: s_{x} = v\}
 \end{equation}
 
 
-We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ may be able to see at this point:
+We also define, for each $v \in V$ at any round $t > 0$, the \textbf{possible set} as all of the messages shared by neighbours of $v$ in the previous round - all the messages which $v$ could potentially be shown at this point:
 
 \begin{equation}
-P_{t}(v) = \bigcup_{u \in N(v)} \quad \bigcup_{m \in S_{t-1}(u)} (u, m)
+P_{t}(v) = \bigcup_{u \in N(v)} \:\:\:\: \bigcup_{m \in S_{t-1}(u)} (u, m)
 \end{equation}
 
 In the above equation, $N(v)$ is the set of neighbouring vertices of v, and $(u, m)$ is a 2-tuple. Given a tuple $p = (u, m)$, we say that $p_{(1)} = u$ and $p_{(2)} = m$, as a way of accessing the parts of the tuple.
 
-Which of these messages are actually shown to $v$ is determined by the social network's algorithm - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$, $T_{t}(v)$, as the result of this algorithm - this will be a subset of the possible set for that user and round:
+Which of these messages are actually shown to $v$ is determined by the social network's \textbf{showing algorithm} - which is what we wish to design. We define the \textbf{shown set} of a user $v$ at some round $t$, $T_{t}(v)$, as the result of this algorithm - this will be a subset of the possible set for that user and round:
 
 \begin{equation}
 T_{t}(v) \subseteq P_{t}(v)
@@ -148,13 +152,13 @@ T_{t}(v) \subseteq P_{t}(v)
 Finally, from the messages that are shown to a user, the user will share some of them. This is decided by the user model algorithm. The result of this form the \textbf{shared set} of that user for this round - all messages in the user's shared set must have been part of their shown set for that round:
 
 \begin{equation}
-\forall m \in S_{t}(v) . \exists (u, n) \in T_{t}(v) . m = n
+\forall m \in S_{t}(v) .\; \exists (u, n) \in T_{t}(v) .\; m = n
 \end{equation}
 
-This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network.
+This is then used as the basis for the possible set of neighbouring vertices in the next round. With this, we need only define the showing and user model algorithms to be able to simulate the spread of messages throughout the network. Note that if in some a particular message is not shared by any user (whether this is due to it not being shown to anyone or the user model algorithm not selecting any instance of it) then that message will not be present in any possible sets for the next round. As a result it cannot be shown to any more users, and if it was not already delivered can never be delivered.
 
 \section{Network Graph} \label{sec:graph_def}
-An important factor in how a message showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
+An important factor in how a showing algorithm performs is the network that it is being performed on. If the network has invalid properties, the a successful algorithm may not be successful on other networks.
 
 For the majority of this project, Kleinberg's model for small world graphs was used\cite{Kleinberg00}. This is a model which randomly creates a graph that fits certain properties. Initially, nodes are arranged in a grid layout, with a "grid distance" from each other. Each node is connected to its immediate neighbours (those a grid distance of 1 away). Each node is then connected to a constant number $k$ of other nodes. The probability of connecting node $u$ to node $v$ in this way is proportional to $d(u, v)^{-q}$ where $d(u, v)$ is the grid distance between $u$ and $v$, and $q$ is a constant affecting how likely the links are to be "far-reaching". If $q$ is 0, then the node will be linked to other nodes uniformly. If $q$ is high, the long links are more likely to connect closer nodes.
 
@@ -175,27 +179,41 @@ This can be related to real networks intuitively. Individuals are more likely to
 While Kleinberg's small world model has been used primarily up to this point, other graph types may provide additional interesting insights. For example, using a plain grid could provide a baseline for what can be expected, to see if the algorithm developed takes advantage of the long link properties of the network. Alternatively, an real social network dataset could be used to see if the algorithm also work in actual networks.
 
 \section{User Models} \label{sec:user_models}
-While the main focus of this project was on the effect of the social network's "showing" algorithm, the model used also requires an algorithm to represent the user's actions. This algorithm should decide which of the messages shown to a user they then share - it chooses $S_{t}(v)$ based on $T_{t}(v)$. Depending on how this decision is modelled, it can add an element of uncertainty or randomness to the system, affecting which "showing" algorithms perform well.
+While the main focus of this project was on the effect of the social network's showing algorithm, the model used also requires an algorithm to represent the user's actions. This algorithm should decide which of the messages shown to a user they then share - it chooses $S_{t}(v)$ based on $T_{t}(v)$. Depending on how this decision is modelled, it can add an element of uncertainty or randomness to the system, affecting which showing algorithms perform well.
 
 \subsection{Basic User Model}
-Initially, a very basic random selection method was used to choose the $S_{t}(v)$. Firstly, the user only considers the top $a$ of the messages shown to them (or all of the messages if there is less than $a$), where $a$ is a global constant - this represents the user's "attention", being unable to look at every message shown to them. In the implementations used, the value of $a$ is also known to the showing algorithm, which does not show more than this many messages. From these $a$ messages, $b$ are selected at random and shared (or all of them are shared if there are less than $b$), where $b$ is a global constant and $b \le a$.
+Initially, a very basic random selection method was used to choose $S_{t}(v)$. Firstly, the user only actually sees and considers the top $a$ of the messages shown to them (or all of the messages if there is less than $a$), where $a$ is a global constant - this represents the user's "attention", being unable to look at every message shown to them. In the implementations used, the value of $a$ is also known to the showing algorithm, which does not show more than this many messages. From these $a$ messages, $b$ are selected at random and shared (or all of them are shared if there are less than $b$), where $b$ is a global constant and $b \le a$. More formally:
+
+\begin{equation}
+S_{t}(v) = sample(T_{t}(v)[:a], \; min(|T_{t}(v)|,\: b))
+\end{equation}
+
+Where $x[:a]$ is the first $a$ items in $x$ and $sample(x, n)$ randomly samples $n$ values from the collection $x$.
 
 This provides us with a degree of randomness - if there are more than $b$ messages shown to the user, we can't tell which ones will be passed on. However in the case where there are less than or equal to $b$ messages shown to the user, this model acts unrealistically - the user will share every message they see. A real social network user would likely be less predictable (unless there was some incentive to share messages), and may not share all of the messages in nay circumstances. As a result of this unnatural behaviour, showing each message to only a single user at each step was found to be a highly effective strategy - however in a real situation this would likely result in losing the message at an uncooperative user.
 
 \subsection{Probabilistic User Model}
-A more realistic user model can be created using more probabilistic methods. In this user model, the concept of a maximum attention of $a$ is retained, with the user considering up to $a$ messages. However from these $a$ messages, rather than choose a set amount at random each message is shared with a probability $p_{share}$, where $p_{share}$ is a global constant.
+A more realistic user model can be created using more probabilistic methods. In this user model, the concept of a maximum attention of $a$ is retained, with the user considering up to $a$ messages. However from these $a$ messages, rather than choose a set amount at random each message is shared with a probability $p_{share}$, where $p_{share}$ is a global constant. More formally:
 
-This results in a situation where a user may share all the messages they see, or may share none. This emulates how a user will only share certain messages based on some criteria unknown to the network. With this model, if messages are not sent to enough users then they are likely to not be shared and be lost.
+\begin{equation}
+S_{t}(v) = \{x \in T_{t}(v)[:a] \:\: | \:\:  r < p_{share}\}
+\end{equation}
+
+Where the previous definition of $x[:a]$ applies, and $0 \leq r < 1$ is a value chosen at random each time it is inspected. 
+
+This results in a situation where a user may share all the messages they see, or may share none. This emulates more closely how an actual user will only share certain messages based on some criteria unknown to the network - these unknown criteria are modelled over all users in general by this probabilistic sharing. With this model, if messages are not spread to a sufficiently large number of users then they are likely to not be shared at some point and be lost.
 
 \section{Showing Algorithms} \label{sec:showing_algorithms}
 The key part of this project is the algorithm which decides which messages to show to each user. Users have "attention" limits, meaning that they will only look at a certain (globally constant) number of messages each round. This means that we can't just pass on every message - we need to prioritise. Each user is therefore only shown messages up to the "attention limit" to represent this. By changing which messages are shown we can attempt to direct messages to their recipients, preferably without clogging up the network with numerous duplicates and without losing the message by not duplicating it enough.
 
-So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user. In all of these when considering possible message to show to a user, those which have already been delivered are discounted. To simplify this, $Q_{t}(v)$ is defined as the set of sender-message pairs from $P_{t}(v)$ where the message has not been delivered.
+So far, several simple algorithms have been investigated, using basic heuristics to decide whether or not to show a message to a user. In all of these when considering possible message to show to a user, those which have already been delivered are discounted. To simplify this, $Q_{t}(v)$ is defined as the set of sender-message pairs from $P_{t}(v)$ where the message has not been delivered. In the non-formal descriptions, delivered messages are implicitly discounted unless otherwise stated.
+
+Almost all of these algorithms use some sense of "distance" between nodes. There are several ways to define this distance, each giving different performance - for detail on these see Section \ref{sec:distance_measures}. For the sake of defining the showing algorithms this "distance measure" is left general, using $D(u, v)$ to represent the distance between two nodes in whatever measure is used. In simulations a distance measure must be chosen to be used as part of the showing algorithm.
 
 Note that in some of these algorithm, if a message is in the possible set multiple times (from different previous nodes), it may be shown to the user multiple times (once for each previous node). Depending on the user model, this may increase the probability of it being shared by them.
 
 \subsection{Algorithm 1: Any Closer Node}
-In the first algorithm used, for each node we first select candidate messages that might be shown to them. A message is made a candidate if the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node was (the one that shared the message in the previous round, causing this message to be part of the possible set). After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
+In the first algorithm used, for each node we first select candidate messages that may be shown to them. A message is made a candidate if the receiving node (the one potentially being shown the message) is closer to the message's final target than the previous node is (the one that shared this message in the previous round, causing it to be part of the possible set). In other words, the messages progress only to nodes which are closer to the destination. After candidates have been selected, if there are more messages than can be shown to the node, the maximum amount are chosen randomly from the candidates. More formally:
 
 \begin{equation}
 \begin{split}
@@ -207,13 +225,13 @@ candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & D(v, d_{k}) < D(u, 
 T_{t}(v) = sample(candidates_{t}(v), min(|candidates_{t}(v)|, a))
 \end{equation}
 
-Where $D(x, y)$ is the grid (Manhattan) distance between $x$ and $y$; $sample(x, n)$ randomly samples $n$ values from the collection $x$; and $a$ is the maximum messages that can be shown to any node (their attention span).
+Where $sample(x, n)$ randomly samples $n$ values from the collection $x$ and $a$ is the maximum number of messages that can be shown to any one node (their attention span).
 
 
 \subsection{Algorithm 2: Further Nodes With Probability}
-The second algorithm is a modification of the first with the intention of allowing the messages to spread in other directions not necessarily towards their destination. This may help prevent the message from dying out if the "direct" route is very busy.
+The second algorithm is a modification of the first with the intention of allowing the messages to spread in other directions not necessarily towards their destination. This may help prevent the message from dying out if the "direct" route is very busy, by creating additional duplicates.
 
-In this algorithm, we again select candidates to be shown to each node. Any message for which the receiving node is closer to the destination than the previous node are made candidates, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
+In this algorithm, we again select candidates to be shown to each node. Any message for which the receiving node is closer to the destination than the previous node is made a candidate, as before. Additionally, messages which will not get closer to their destination are made candidates with a globally constant probability $p$. As before, if there are too many candidates then the correct amount are chosen at random. More formally:
 
 \begin{equation}
 \begin{split}
@@ -222,21 +240,21 @@ candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & (D(v, d_{k}) < D(u,
 \end{equation}
 
 \begin{equation}
-T_{t}(v) = sample(candidates_{t}(v), min(|candidates_{t}(v)|, a))
+T_{t}(v) = sample(candidates_{t}(v), \; min(|candidates_{t}(v)|, \: a))
 \end{equation}
 
-Where $0 \leq p_{further} < 1$ is a globally constant probability and $0 \leq r < 1$ is a randomly chosen value.
+Where $0 \leq p_{further} < 1$ is a globally constant probability and $0 \leq r < 1$ is a value chosen at random each time it is inspected. 
 
 Note that if $p_{further}$ were to be set to 0, Algorithm 2 would behave the exact same as Algorithm 1.
 
 \subsection{Algorithm 3: Only Single Best Node}
-The third algorithm tested uses a simpler concept - each message is passed on to at most one other node, the node which is determined to be the "best" next step. This provides a basis for comparison with the case where messages are never duplicated.
+The third algorithm uses a simpler concept - each message is passed on to at most one other node, which is always the node that is determined to be the "best" next step. This is used mainly for comparing other algorithms to this case, where messages are never duplicated.
 
-Candidate messages are again selected for each node. In this algorithm a message is a candidate if it has not yet been delivered, and if that node is the "best" next step for the message. We define the "best" next step as the neighbour of the previous step which is closest to the target in grid distance, and in the case of a draw has the lowest node index (to ensure that the "best" next step is consistent). If there are too many candidates then the first up to the limit are taken. Since we are not worried about spreading messages "fairly" as they do not duplicate, this doesn't need to be chosen randomly. Formally:
+Candidate messages are again selected for each node. In this algorithm a message is a candidate only if that node is the "best" next step for the message. We define the "best" next step as the neighbour of the previous step (the only node which has this message) which is closest to the target, and in the case of a draw has the lowest node index (to ensure that the "best" next step is consistent). If there are more than $a$ candidates then the first up to $a$ are taken. Since we are not worried about spreading messages "fairly" as they do not duplicate, this doesn't need to be chosen randomly. Formally:
 
 \begin{equation}
 \begin{split}
-candidates_{t}(v) = \{ (u, m_{k}) \in P_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \}
+candidates_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: & isBest(m_{k}, u) \}
 \end{split}
 \end{equation}
 
@@ -247,20 +265,198 @@ T_{t}(v) = candidates_{t}(v)[:a]
 Where $isBest(m, u)$ is a predicate which is true if node $u$ is the best next step for message $m$, and $x[:a]$ is the first $a$ items in $x$.
 
 \subsection{Algorithm 4: Distance Priority}
-The previous algorithms looked at how far a message is from its destination, but only in terms of whether or not a single step takes it closer - there is not consideration of how much closer it gets. It also treats all messages equally regardless of how close to their destination they currently are - however a message that is only two steps from the destination is far more likely to get delivered than one which is ten steps away. To maximise the overall number of messages delivered, it may be advantageous to greedily prioritise those which are closer to their destination.
+The previous algorithms looked at how far a message is from its destination, but only in terms of whether or not a single step takes it closer - there is not consideration of how much closer it gets. They also treat all messages equally regardless of how close to their destination they currently are - however a message that is only two steps from the destination is far more likely to get delivered than one which is ten steps away. To maximise the overall number of messages delivered, it may be advantageous to greedily prioritise those which are closer to their destination.
 
-This algorithm achieves both prioritising long links (in a sense) and prioritising nearly-delivered messages. It does this using a simple method - of the messages that can possible be shown to a node $v$, $P_{t}(v)$, those which have not already been delivered are ordered by the distance from $v$ to the destination of that message. The closest $a$ items are then shown to the user, where $a$ is the user's attention limit (or if there are less than $a$ possible messages, all are shown). Long links are not specifically prioritised, however travelling a (useful) long link should take a message significantly closer to its destination, and so is more likely to be chosen at any point in time than a short link starting from the same place.
+This algorithm achieves both prioritising long links (in a sense) and prioritising nearly-delivered messages. It does this using a simple method - the messages that can be shown to a user $v$, $P_{t}(v)$, are ordered by the distance from $v$ to the destination of that message. The closest $a$ items are then shown to the user, where $a$ is the user's attention limit (or if there are less than $a$ possible messages, all are shown). Long links are not specifically prioritised, however travelling a (useful) long link should take a message significantly closer to its destination, and so is generally more likely to be chosen at any point in time than a short link starting from the same place.
 
-[insert formal detail]
+To describe this formally, we define a ranking $R_{dist}(u, m)$, the ranking of messages in $Q_{t}(v)$ by the distance from $u$ to the destination of $m$. For any two messages $m_{i}, m{j} \in Q_{t}(v)$, if $D(u, d_{i}) < D(u, d_{j})$ then $R_{dist}(u, m_{i}) > R_{dist}(u, m_{j})$. The closest message to its destination is given the rank 0, and ranks increase from there. In the case of a draw (where two messages would be the same distance from their destination) then they are ordered arbitrarily in the ranking (but still have distinct ranks). The algorithm can then be described as follows:
+
+\begin{equation}
+T_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: R_{dist}(v, m_{k}) < a \}
+\end{equation}
+
+In other words, up to $a$ of the lowest ranking (closest) messages are shown to the user.
 
 \subsection{Algorithm 5: Fractional Distance Priority}
 While algorithm 4 prioritises messages which are close to their destination, this is done at the expense of others - if the network has many messages, those which are almost delivered will be propagated many times and use up the the attention limit of users and prevent message which are further away from spreading. If a message that is far from its destination can reach a long link then it will quickly be delivered, but it must survive up to that point. This algorithm uses the prioritisation method of algorithm 4 for quick focused delivery, but also setting aside some capacity for keeping messages alive.
 
 This is achieved by defining a fraction $f$ of each user's attention limit $a$ to be used for "focused" delivery. First, as always, those messages which are already delivered are ignored. From the undelivered messages, $a \times f$ are chosen based on which are closest to their destination. Of the remaining unpicked messages, $a - (a \times f)$ (the amount of attention still unused) are chosen at random. The first $a \times f$ messages accomplish the fast delivery of messages close to their destination, while the other $a - (a \times f)$ are used to keep other messages alive.
 
-[insert formal detail]
+Formally, we first define $a_{priority} = a \times f$ as the number of messages which will be chosen based on the distance - this is rounded down if not a whole number. We also define $a_{random} = a - a_{priority}$, the number of messages chosen randomly.
+
+We then split the set of possible message into two parts, those which are to be the portion chosen by distance and the remaining possible messages:
+\begin{equation}
+priority_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: R_{dist}(v, m_{k}) < a_{priority} \}
+\end{equation}
+\begin{equation}
+others_{t}(v) = \{ (u, m_{k}) \in Q_{t}(v) \:\: | \:\: R_{dist}(v, m_{k}) >= a_{priority} \}
+\end{equation}
+
+We choose the random selection of messages:
+
+\begin{equation}
+random_{t}(v) = sample(others_{t}(v), \; min(|others_{t}(v)|, \: a_{random}))
+\end{equation}
+
+Finally, we combine these two to produce our shown set:
+
+\begin{equation}
+T_{t}(v) = priority_{t}(v) \; \cup \; random_{t}(v)
+\end{equation}
 
 Note that if $f$ were to be set to 1, Algorithm 5 would behave the exact same as Algorithm 4.
+
+
+\section{Distance Measures} \label{sec:distance_measures}
+Many of the showing algorithms described in Section \ref{sec:showing_algorithms} involve some measure of distance $D(u, v)$ between two nodes $u$ and $v$. There a various ways to define this distance, depending on the desired properties and the graph type in use. Multiple different distance measures were used for experiments, to investigate how they affect the performance of the showing algorithm.
+
+\subsection{Grid Distance}
+The most simplistic distance measure used was based on the work done by Kleinberg in \cite{Kleinberg00}, the paper in which the Kleinberg graph model was proposed. In this paper a routing scheme for decentralised message delivery (with individual messages forwarded one node at a time) is outlined. The method used is simply to use the local knowledge of position within the graph - in the real world this may be geographical location, but in the graph it is represented using the position of the node in the original grid. Messages are forwarded to the neighbour who is closest to the destination in terms of lattice (or Manhatten) distance in this grid. If the $x$ and $y$ positions of a node $u$ in the grid are represented by $u_{x}$ and $u_{y}$, then this can be defined as follows:
+
+\begin{equation}
+D(u, v) = abs(u_{x} - v_{x}) + abs(u_{y} - v_{y})
+\end{equation}
+
+Where $abs(x)$ is the absolute value of $x$.
+
+For graph types which are based on a grid, such as the Kleinberg model, this Manhatten grid distance can be used to determine the "distance" between two nodes. This has the advantage of being very quick to compute, and also is possible using only local information at each node (although in this case we have centralised information anyway). However it is rather simplistic, and does not take into account the structure of the other parts of the graph, such as long links in the Kleinberg model.
+
+
+\subsection{Graph Distance}
+With the use of centralised knowledge, a more accurate measure of distance than the simplistic grid measure can be created. This uses the length of the shortest path between any two nodes as their distance - equivalent to the minimum number of rounds for a message to travel between the nodes. This method also has the advantage of being usable for any kind of graph, whereas the grid distance measure required the graph to be based on a grid.
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black, line width=1.5] (A) at (0,4.5) {A};
+    \node[shape=circle,draw=black] (B) at (1.5,4.5) {B};
+    \node[shape=circle,draw=black] (C) at (3,4.5) {C};
+    \node[shape=circle,draw=black] (D) at (4.5,4.5) {D};
+    \node[shape=circle,draw=black] (E) at (0,3) {E};
+    \node[shape=circle,draw=black] (F) at (1.5,3) {F};
+    \node[shape=circle,draw=black] (G) at (3,3) {G};
+    \node[shape=circle,draw=black] (H) at (4.5,3) {H};
+    \node[shape=circle,draw=black] (I) at (0,1.5) {I};
+    \node[shape=circle,draw=black] (J) at (1.5,1.5) {J};
+    \node[shape=circle,draw=black] (K) at (3,1.5) {K};
+    \node[shape=circle,draw=black] (L) at (4.5,1.5) {L};
+    \node[shape=circle,draw=black] (M) at (0,0) {M};
+    \node[shape=circle,draw=black] (N) at (1.5,0) {N};
+    \node[shape=circle,draw=black] (O) at (3,0) {O};
+    \node[shape=circle,draw=black, line width=1.5] (P) at (4.5,0) {P};
+    \node[shape=circle,draw=black] (Q) at (0.5,-2.5) {Q};
+    \node[shape=circle,draw=black] (R) at (2.5,-2.5) {R};
+    
+    \path (A) edge (B);
+    \path (B) edge (C);
+    \path (C) edge (D);
+    \path (E) edge (F);
+    \path (F) edge (G);
+    \path (G) edge (H);
+    \path (I) edge (J);
+    \path (J) edge (K);
+    \path (K) edge (L);
+    \path (M) edge (N);
+    \path (N) edge (O);
+    \path (O) edge (P);
+
+    \path (A) edge (E);
+    \path (E) edge (I);
+    \path (I) edge (M);
+    \path (B) edge (F);
+    \path (F) edge (J);
+    \path (J) edge (N);
+    \path (C) edge (G);
+    \path (G) edge (K);
+    \path (K) edge (O);
+    \path (D) edge (H);
+    \path (H) edge (L);
+    \path (L) edge (P);
+    
+    \path (A) edge [bend right] (Q);
+    \path (Q) edge (R);
+    \path (R) edge (P);
+\end{tikzpicture}
+\caption{An example of a graph where using the graph distance may give poorer delivery rates. In the case where A message is at $A$ and the destination is $I$, taking the longer routes through the grid may reduce the chance of the message being lost by allowing duplication.}
+\label{fig:graph_dist_example}
+\end{wrapfigure}
+
+A possible downside of this method is that while it can be used to direct messages towards the \textit{shortest} route to their destination, this route is not necessarily useful in this model. Since any user may fail to share a message, messages must be duplicated. Therefore an ideal "next step" for a message to take would not only be closer to the destination, but also have multiple routes to it - allowing for some instances of the message to be lost.
+
+An example is shown in Figure \ref{fig:graph_dist_example}. If we assume that a message is currently at $A$, and the destination is $P$, then the shortest path using graph distance is via $Q$ and $R$. However this requires both $Q$ and $R$ to share the message after it is shown to them. On the other hand, if a slightly longer path through the grid-like part of the graph is taken, the message can easily be duplicated amongst the various other nodes in between. However measuring by graph distance puts both $B$ and $E$ further from the destination than $Q$ is, so in several of the showing algorithms used this wouldn't happen often. A similar situation can arise in Kleinberg's graph model, where nodes taking the role of $Q$ and $R$ are very far away from the destination in the grid, and so delivering via them requires the use of specific long links.
+
+This problem is avoided in the grid distance measure as any step taken closer will always still have short links leading towards the destination which are closer to reaching it than the short links at a the previous node.
+
+\subsection{Diffusion Distance}
+To deal with this problem of some short paths requiring the exact route be taken without failure, diffusion distance can be used as an alternative distance measure. This method uses random walks to determine the distance between two nodes - if the random walks starting at either node have a good chance to end up in the same places, then the nodes are deemed "close". This means that nodes with multiple paths between them are more likely to be closer to each other in this measure, as the chance of a random walk taking one of several paths is better than that of it taking a single specific path. An example is shown in Figure
+
+\begin{wrapfigure}{r}{0.4\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black, line width=1.5] (A) at (0,3) {A};
+    \node[shape=circle,draw=black] (B) at (0,2) {B};
+    \node[shape=circle,draw=black] (C) at (0,1) {C};
+    \node[shape=circle,draw=black] (D) at (0,0) {D};
+    \node[shape=circle,draw=black] (E) at (2.5,3) {E};
+    \node[shape=circle,draw=black] (F) at (2.5,2) {F};
+    \node[shape=circle,draw=black] (G) at (2.5,1) {G};
+    \node[shape=circle,draw=black] (H) at (2.5,0) {H};
+    
+    \path (A) edge (E);
+    \path (A) edge (F);
+    \path (A) edge (G);
+    \path (A) edge (H);
+    \path (B) edge (E);
+    \path (B) edge (F);
+    \path (B) edge (G);
+    \path (B) edge (H);
+    \path (C) edge (E);
+    \path (C) edge (F);
+    \path (C) edge (G);
+    \path (C) edge (H);
+    \path (D) edge (E);
+    \path (D) edge (F);
+    \path (D) edge (G);
+    \path (D) edge (H);
+    
+    \path (E) edge (A);
+    \path (E) edge (B);
+    \path (E) edge (C);
+    \path (E) edge (D);
+    \path (F) edge (A);
+    \path (F) edge (B);
+    \path (F) edge (C);
+    \path (F) edge (D);
+    \path (G) edge (A);
+    \path (G) edge (B);
+    \path (G) edge (C);
+    \path (G) edge (D);
+    \path (H) edge (A);
+    \path (H) edge (B);
+    \path (H) edge (C);
+    \path (H) edge (D);
+\end{tikzpicture}
+\caption{A complete bipartite graph. If a random walk starts at at $A$ and goes on for an even number of steps, it has no chance of ending at any of $E$, $F$, $G$, or $H$.}
+\label{fig:diffusion_distance_bipartite}
+\end{wrapfigure}
+
+More specifically, to find the diffusion distance between $u$ and $v$ we first find the probability for random walks of some specific length $t$ starting at each to end in at any node in the graph. A potential problem with this is that the value of $t$ chosen may overly favour some nodes. For example, in a bipartate graph like that shown in Figure \ref{fig:diffusion_distance_bipartite}, if the value of $t$ is divisible by two then the random walk will always end on the same "side" as it started on - and similarly if $t$ is even it will always end on the other "side". This would result in the random walks of two nodes on opposite "sides" never ending in the same place, and they would be deemed infinitely far apart. Since grids are , this can cause issues when using a grid-like graph such as Kleniberg's model. To combat this, "lazy" random walks are used, where there is a 0.5 probability at each step of the walk staying in the same place. This removes the bias caused by such aspects of the graph.
+
+Given this, the transition matrix for the random walk (the probability of moving from one node to another) is given by:
+
+\begin{equation}
+\textbf{Z} = 0.5 \times (\textbf{I} + \textbf{D}^{-1} \times \textbf{A})
+\end{equation}
+
+Where $\textbf{A}$ is the graph's adjacency matrix, $\textbf{D}$ is the graph's diagonal degree matrix, and $\textbf{I}$ is the identity matrix (containing only 1s along the diagonal) of the same size as $\textbf{A}$ and $\textbf{D}$. In this matrix, $\textbf{Z}[i, j]$ is the probability of a random walk at node $i$ moving to node $j$ in the next step, where the graph nodes are indexed in some way. We then take $\textbf{Z}^{t}[i, j]$ to get the probability of a random walk starting at $i$ ending at $j$ after $t$ steps.
+
+Finally, to compare two nodes we take the row vectors containing the probabilities for random walks starting at each of these nodes, and find the difference between these vectors:
+
+\begin{equation}
+D(u, v) = \sum_{w=1}^{|V|} (\textbf{Z}^{t}[u, w] - \textbf{Z}^{t}[v, w])^{2}
+\end{equation}
+
+Where $|V|$ is the number of nodes in the graph.
 
 \chapter{Implementation}
 For the purpose of running simulations of message spread in networks, a program was written allowing for running various simulations and receiving relevant results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate the network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating different versions to swap in and out.
