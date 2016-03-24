@@ -527,7 +527,7 @@ The results for the basic user model can be seen in Figure \ref{fig:basic_user_m
 Next the probabilistic user model was tested. Again, $a=20$ was used for the maximum number of messages "seen" by each user. For the probability of sharing each message seen, $p_{share}=0.5$ was used. The same showing algorithms, distance measure, and graph setup were used as for the basic user model.
 
 \begin{figure}
-\begin{subfigure}[]{0.45\textwidth}
+\begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/user_model/ProbShare_Prob0.csv};
@@ -588,14 +588,16 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1000messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1200messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1400messages.csv};
-\legend{200 Messages,400 Messages,600 Messages,800 Messages}
+\legend{200 Messages,400 Messages,600 Messages,800 Messages,1000 Messages,1200 Messages,1400 Messages}
 \end{axis}
 \end{tikzpicture}
 \caption{Messages delivered using Showing Algorithm 2 as $p_{further}$ changes}
 \label{fig:not_closer_prob}
 \end{figure}
 
-Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each line on the graph shows the results for a different initial number of messages in the network, from 200 up to 800. In each case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. It is clear that very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Due to this, choosing an optimal value of $p_{further}$ to be used may only be possible if the amount of initial messages is known (or at least approximately known).
+Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each line on the graph shows the results for a different initial number of messages in the network from 200 up to 1400, and in case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. Although later experiments limit the message count to 800, the value was increased further here to find what the best values of $p_{further}$ trend towards as the message count is increased - this is not clear at 800 messages.
+
+Very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Choosing the best value of $p_{further}$ for a specific case may depend on the amount of initial messages. In general however, it can be seen that as the message increases, the best performing values of $p_{further}$ trend towards around 0.2. The value $p_{further}=0.2$ was chosen to use in later experiments.
 
 
 \subsection{Algorithm 5 Fraction}
@@ -608,18 +610,83 @@ Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm 
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/400messages.csv};
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/600messages.csv};
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/800messages.csv};
-\legend{200 Messages,400 Messages,600 Messages,800 Messages}
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/1000messages.csv};
+\legend{200 Messages,400 Messages,600 Messages,800 Messages,1000 Messages}
 \end{axis}
 \end{tikzpicture}
 \caption{Messages delivered using Showing Algorithm 5 as $f$ changes}
 \label{fig:distance_priority_fraction}
 \end{figure}
 
-Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. Again, the plots on the graph show results for initial message counts ranging from 200 to 800. For each message count, the value of $f$ was increased from 0.0 to 1.0 in steps of 0.05. From these results it can be seen that generally low values of $f$ provide the best results. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is unsurprising, as at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case.
+Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. Again, the plots on the graph show results for initial message counts ranging from 200 to 1000, with the value of $f$ increasing in each from 0.0 to 1.0 in steps of 0.05. The additional experiment with message count 1000 was run to make the optimal value more clear, however even at lower message counts it is the same.
+
+From these results it can be seen that generally low values of $f$ provide the best results, with an optimal value being around $f=0.2$. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is since at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case. Since it is quite interesting that such a small amount of prioritisation could have a good effect, both $f=0.2$ and $f=0.05$ were chosen to use in further experiments.
 
 
 \subsection{Overall Comparison}
+With the values parameters chosen where required, every showing algorithm was compared. Each was run with message counts ranging from 25 to 800 in steps of 25,
 
+\begin{figure}
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 1}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 2 ($p_{further}=0.2$)}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/OnlyBest.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 3}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 4}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($p_{further}=0.05$)}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($p_{further}=0.2$)}
+\end{subfigure}
+\caption{Results}
+\label{fig:all_show_models}
+\end{figure}
 
 \section{Distance Measure Comparisons}
 
