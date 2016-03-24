@@ -575,7 +575,7 @@ Of particular note is the performance of showing algorithm 3 when the probabilis
 
 With the user model chosen, the developed showing algorithms were next compared to each other. This involved doing additional experiments to compare different values for some of the algorithms' variables. For all of these experiments, the probabilistic user model was used with $a = 20$ and $p_{share} = 0.5$. Kleinberg model graphs and the grid-based distance measure were used.
 
-\subsection{Algorithm 2 Probability}
+\subsection{Algorithm 2 Probability} \label{subsec:algorithm_2_prob}
 First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm selects candidates to show to each node by taking any message that would be made closer to its destination and also taking those which would not with a certain probability $p_{further}$. Experiments were run using this algorithm to find which value of $p_{further}$ gives the best results.
 
 \begin{figure}
@@ -597,7 +597,9 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 
 Figure \ref{fig:not_closer_prob} shows the results for these experiments. Each line on the graph shows the results for a different initial number of messages in the network from 200 up to 1400, and in case the value of $p_{further}$ was increased from 0.0 to 1.0 in steps of 0.05. Although later experiments limit the message count to 800, the value was increased further here to find what the best values of $p_{further}$ trend towards as the message count is increased - this is not clear at 800 messages.
 
-Very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Choosing the best value of $p_{further}$ for a specific case may depend on the amount of initial messages. In general however, it can be seen that as the message increases, the best performing values of $p_{further}$ trend towards around 0.2. The value $p_{further}=0.2$ was chosen to use in later experiments.
+Very low values of $p_{further}$ (including the value 0, which is equivalent to Algorithm 1) perform poorly in all cases. High values, on the other hand, perform very well when there are fewer messages and worse when there are many messages. Due to this, choosing the best value of $p_{further}$ for a specific case may depend on the amount of initial messages. In general however, it can be seen that as the message increases, the best performing values of $p_{further}$ trend towards around 0.2. The fact that the value for this "sweet spot" decreases as the message count increases suggests that it is caused by the network becoming saturated with messages. If there are few messages then they can be spread a lot and improve delivery, however with more initial messages spreading them too far will clog up the network and decrease delivery rates. The exact relationship between the number of messages, capacity of the network, and value of $p_{further}$ is unclear, and may be a topic worth investigating further.
+
+As the case where message count is high is of most interest, the value $p_{further}=0.2$ was chosen to use in later experiments.
 
 
 \subsection{Algorithm 5 Fraction}
@@ -618,13 +620,13 @@ Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm 
 \label{fig:distance_priority_fraction}
 \end{figure}
 
-Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. Again, the plots on the graph show results for initial message counts ranging from 200 to 1000, with the value of $f$ increasing in each from 0.0 to 1.0 in steps of 0.05. The additional experiment with message count 1000 was run to make the optimal value more clear, however even at lower message counts it is the same.
+Figure \ref{fig:distance_priority_fraction} shows the results for these experiments. The plots on the graph show results for initial message counts ranging from 200 to 1000, with the value of $f$ increasing in each from 0.0 to 1.0 in steps of 0.05. The additional experiment with message count 1000 was run to make the optimal value more clear, however even at lower message counts it is approximately the same.
 
-From these results it can be seen that generally low values of $f$ provide the best results, with an optimal value being around $f=0.2$. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is since at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case. Since it is quite interesting that such a small amount of prioritisation could have a good effect, both $f=0.2$ and $f=0.05$ were chosen to use in further experiments.
+From these results it can be seen that generally low values of $f$ provide the best results, with an optimal value being around $f=0.2$ regardless of the message count - unlike Algorithm 2 where the optimal value changed as message count increased. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is since at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case. Since it is quite interesting that such a small amount of prioritisation could have a good effect, both $f=0.2$ and $f=0.05$ were chosen to use in further experiments.
 
 
 \subsection{Overall Comparison}
-With the values parameters chosen where required, every showing algorithm was compared. Each was run with message counts ranging from 25 to 800 in steps of 25,
+With the values parameters chosen where required, every showing algorithm was compared. Six different showing algorithm configurations were used - Algorithm 1 (Any Closer Node), Algorithm 2 (Further Nodes with Probability) with $p_{further}=0.2$, Algorithm 2 with $p_{further}=0.4$, Algorithm 4 (Distance Priority), Algorithm 5 (Fractional Distance Priority) with $f=0.05$ =, and Algorithm 5 with $f=0.2$. Each was run with message counts ranging from 25 to 800 in steps of 25. The results for these experiments are shown in the subfigures within Figure \ref{fig:all_show_models}.
 
 \begin{figure}
 \begin{subfigure}[]{0.47\textwidth}
@@ -650,10 +652,10 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/OnlyBest.csv};
+\addplot table [x=Message Count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_40.csv};
 \end{axis}
 \end{tikzpicture}
-\caption{Algorithm 3}
+\caption{Algorithm 2 ($p_{further}=0.4$)}
 \end{subfigure}
 %
 \begin{subfigure}[]{0.47\textwidth}
@@ -673,7 +675,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
 \end{axis}
 \end{tikzpicture}
-\caption{Algorithm 5 ($p_{further}=0.05$)}
+\caption{Algorithm 5 ($f=0.05$)}
 \end{subfigure}
 %
 \begin{subfigure}[]{0.47\textwidth}
@@ -682,11 +684,17 @@ With the values parameters chosen where required, every showing algorithm was co
 \addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
 \end{axis}
 \end{tikzpicture}
-\caption{Algorithm 5 ($p_{further}=0.2$)}
+\caption{Algorithm 5 ($f=0.2$)}
 \end{subfigure}
 \caption{Results}
 \label{fig:all_show_models}
 \end{figure}
+
+Algorithm 1 consistently performs poorly, achieving around 40\% delivery rates with barely any change as the message count rises. This suggests that network saturation is not causing many delivery failures, and the primary problem is messages being lost due to not being spread enough. This is supported by the performance for both cases of Algorithm 2, which does better than Algorithm 1, but drops in performance as the message count increases - suggesting that it is able to saturate the graph in these cases. The delivery rates when $f_{further}=0.2$ drop from 71.2\% at 25 messages to 59.8\% at 800 messages. The same algorithm with $f_{further}=0.4$ performs better at low message counts, delivering 84.2\% at 25 messages, suggesting that it is able to better take advantage of the graph's capacity due to spreading messages more. However as the message count increases, it drops significantly more to 63.7\% at 800 messages, almost reaching the same performance as $f_{further}=0.4$. As seen in Subsection \ref{subsec:algorithm_2_prob}, this performance will eventually become lower than when $p_{further}=0.2$.
+
+In the case of Algorithm 4, delivery rates start very high at low message counts, with 95.2\% at 25 messages, but drop quite quickly to a relatively low 53.8\% at 800 messages. This is most likely due to the fact that when message counts are high, there will be enough messages which start close to their destination that prioritising them will use up all of the network capacity. By the time they are delivered and capacity is freed up, the other messages have died out. Algorithm 5, which aims to avoid this by spreading some messages randomly and some by distance prioritisation, performs significantly better. In the case where $f=0.05$, which means that a single message per node is chosen based on distance priority, it achieves a 72.3\% delivery rate for 800 messages. The best parameter value found, $f=0.2$, is able to deliver 75.6\% at 800 messages, the highest success rate seen so far.
+
+Overall these results suggest that in the case Algorithm 2 (and Algorithm 1), there must be a balance between the number of messages and the amount messages are spread. For a low number of messages a high value of $p_{further}$ will perform well, but if high message counts are possible then a lower value of $p_{further}$ is necessary, giving more stable performance across message counts. In the case of Algorithm 5 (and Algorithm 4), the results show that an algorithm which has a large amount of randomness, with only some messages chosen in a non random way, is able to perform very well.
 
 \section{Distance Measure Comparisons}
 
