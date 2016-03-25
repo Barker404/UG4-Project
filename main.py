@@ -15,9 +15,15 @@ Q = 2
 
 
 def main():
-    test_show_models(
-        25, 825, 25, 20, showing.GraphDistanceMeasure(),
-        "graph_dist/all_show_models")
+    t = 6
+    dist = showing.DiffusionDistanceMeasure(t)
+
+    test_not_closer_prob(
+        msg_count_end=1600, distance_measure=dist,
+        dir="diffusion_distance/not_closer_prob")
+    test_distance_priority_fraction(
+        msg_count_end=1200, distance_measure=dist,
+        dir="diffusion_distance/distance_priority_fraction")
 
 
 def standard_show_model_graph(show_model, seen_limit,
@@ -337,14 +343,89 @@ def test_show_models(msg_count_start=25, msg_count_end=825,
         #         store_data=True)
 
         # re_plot_results(
-        #     "Message Count", True, as_percent=True,
+        #     "Message count", True, as_percent=True,
         #     output_path=os.path.join("out/all_show_models", subdirs[i]),
         #     store_data=True)
 
         plot_simulations(
-            sims, xs, "Message Count", repeats, as_percent=True,
+            sims, xs, "Message count", repeats, as_percent=True,
             output_path=os.path.join("out/{}".format(dir), subdirs[i]),
             store_data=True)
+
+
+def test_diffusion_dist_t(vals, msg_count_start=200, msg_count_end=1000,
+                          msg_count_step=200, repeats=20, further_prob=True,
+                          fractional_distance=True):
+    seen_limit = 20
+    share_prob = 0.5
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+
+    if further_prob:
+        for j in range(msg_count_start, msg_count_end, msg_count_step):
+            xs = []
+            sims = []
+            for t in vals:
+                show_model = showing.FurtherProbShowModel(
+                    seen_limit, 0.4, showing.DiffusionDistanceMeasure(t))
+
+                xs.append(t)
+                simulation = Simulation(show_model, share_model,
+                                        graph_generator, round_count=None,
+                                        message_count=j)
+                # sims.append(simulation)
+
+                simulation.repeat_simulation(
+                    repeats, as_percent=True,
+                    output_path=os.path.join(
+                        "out/diffusion_distance_t/further_prob",
+                        str(j), str(t)),
+                    store_data=True)
+
+            re_plot_results(
+                "diffusion distance t", True, as_percent=True,
+                output_path=os.path.join(
+                    "out/diffusion_distance_t/further_prob", str(j)),
+                store_data=True)
+
+            # plot_simulations(
+            #     sims, xs, "diffusion distance t", repeats, as_percent=True,
+            #     output_path=os.path.join(
+            #         "out/diffusion_distance_t/further_prob", str(j)),
+            #     store_data=True)
+
+    if fractional_distance:
+        for j in range(msg_count_start, msg_count_end, msg_count_step):
+            xs = []
+            sims = []
+            for t in vals:
+                show_model = showing.FractionalDistancePriorityShowModel(
+                    seen_limit, 0.2, showing.DiffusionDistanceMeasure(t))
+                xs.append(t)
+                simulation = Simulation(show_model, share_model,
+                                        graph_generator, round_count=None,
+                                        message_count=j)
+                # sims.append(simulation)
+
+                simulation.repeat_simulation(
+                    repeats, as_percent=True,
+                    output_path=os.path.join(
+                        "out/diffusion_distance_t/fraction_distance",
+                        str(j), str(t)),
+                    store_data=True)
+
+            re_plot_results(
+                "diffusion distance t", True, as_percent=True,
+                output_path=os.path.join(
+                    "out/diffusion_distance_t/fraction_distance", str(j)),
+                store_data=True)
+
+            # plot_simulations(
+            #     sims, xs, "diffusion distance t", repeats, as_percent=True,
+            #     output_path=os.path.join(
+            #         "out/diffusion_distance_t/fraction_distance", str(j)),
+            #     store_data=True)
+
 
 if __name__ == "__main__":
     main()
