@@ -322,7 +322,7 @@ Where $abs(x)$ is the absolute value of $x$.
 For graph types which are based on a grid, such as the Kleinberg model, this Manhatten grid distance can be used to determine the "distance" between two nodes. This has the advantage of being very quick to compute, and also is possible using only local information at each node (although in this case we have centralised information anyway). However it is rather simplistic, and does not take into account the structure of the other parts of the graph, such as long links in the Kleinberg model.
 
 
-\subsection{Graph Distance}
+\subsection{Graph Distance} \label{subsec:graph_dist}
 With the use of centralised knowledge, a more accurate measure of distance than the simplistic grid measure can be created. This uses the length of the shortest path between any two nodes as their distance - equivalent to the minimum number of rounds for a message to travel between the nodes. This method also has the advantage of being usable for any kind of graph, whereas the grid distance measure required the graph to be based on a grid.
 
 \begin{wrapfigure}{r}{0.5\textwidth}
@@ -387,7 +387,7 @@ An example is shown in Figure \ref{fig:graph_dist_example}. If we assume that a 
 
 This problem is avoided in the grid distance measure as any step taken closer will always still have short links leading towards the destination which are closer to reaching it than the short links at a the previous node.
 
-\subsection{Diffusion Distance}
+\subsection{Diffusion Distance} \label{subsec:diffusion_dist}
 To deal with this problem of some short paths requiring the exact route be taken without failure, diffusion distance can be used as an alternative distance measure. This method uses random walks to determine the distance between two nodes - if the random walks starting at either node have a good chance to end up in the same places, then the nodes are deemed "close". This means that nodes with multiple paths between them are more likely to be closer to each other in this measure, as the chance of a random walk taking one of several paths is better than that of it taking a single specific path. An example is shown in Figure
 
 \begin{wrapfigure}{r}{0.4\textwidth}
@@ -518,7 +518,7 @@ First, the basic user model was tested. This model uses two variables: $a$, the 
 \caption{Algorithm 3}
 \label{subfig:basic_user_model_3}
 \end{subfigure}
-\caption{Results using the basic user model}
+\caption{Delivery rates using the basic user model, as message count increases. In this case the algorithms which spread messages less do better, with Algorithm 3 in particular doing very well.}
 \label{fig:basic_user_model}
 \end{figure}
 
@@ -563,7 +563,7 @@ Next the probabilistic user model was tested. Again, $a=20$ was used for the max
 \caption{Algorithm 3}
 \label{subfig:prob_user_model_3}
 \end{subfigure}
-\caption{Results using the probabilistic user model}
+\caption{Delivery rates using the probabilistic user model, as message count increases. In this case the algorithms which spread messages more do better, with algorithm 3 doing particularly poorly - as would be expected.}
 \label{fig:prob_user_model}
 \end{figure}
 
@@ -591,7 +591,7 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 \legend{200 Messages,400 Messages,600 Messages,800 Messages,1000 Messages,1200 Messages,1400 Messages}
 \end{axis}
 \end{tikzpicture}
-\caption{Messages delivered using Showing Algorithm 2 as $p_{further}$ changes}
+\caption{Delivery rates for Showing Algorithm 2 as $p_{further}$ increases, across different message counts. As the initial message count increases, the optimal value of $p_{further}$ moves towards 0.2.}
 \label{fig:not_closer_prob}
 \end{figure}
 
@@ -602,7 +602,7 @@ Very low values of $p_{further}$ (including the value 0, which is equivalent to 
 As the case where message count is high is of most interest, the value $p_{further}=0.2$ was chosen to use in later experiments.
 
 
-\subsection{Algorithm 5 Fraction}
+\subsection{Algorithm 5 Fraction}  \label{subsec:algorithm_5_fraction}
 Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm uses a fraction parameter $f$ to split the messages shown to each user between distance-prioritised (showing those which are closest to their destination) and picking randomly from the remainder of the possible messages. Experiments were run to determine the best value for the parameter $f$.
 
 \begin{figure}
@@ -616,7 +616,7 @@ Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm 
 \legend{200 Messages,400 Messages,600 Messages,800 Messages,1000 Messages}
 \end{axis}
 \end{tikzpicture}
-\caption{Messages delivered using Showing Algorithm 5 as $f$ changes}
+\caption{Delivery rates for Showing Algorithm 5 as $f$ increases, across different message counts. Regardless of message count, the optimal value of $f$ is around 0.2.}
 \label{fig:distance_priority_fraction}
 \end{figure}
 
@@ -625,8 +625,8 @@ Figure \ref{fig:distance_priority_fraction} shows the results for these experime
 From these results it can be seen that generally low values of $f$ provide the best results, with an optimal value being around $f=0.2$ regardless of the message count - unlike Algorithm 2 where the optimal value changed as message count increased. As the value of $f$ increases beyond this point, the percentage of messages delivered decreases - until $f=1$, which is identical to Algorithm 4. At $f=0$ there is a sharp drop in the delivery rate - this is since at this value of $f$, the messages to show are being chosen completely at random (from those which are undelivered). Note that since these experiments were conducted with $a=20$, a value of $f=0.05$ corresponds to only a single message being chosen using distance priority - and this is still enough to perform well in every case. Since it is quite interesting that such a small amount of prioritisation could have a good effect, both $f=0.2$ and $f=0.05$ were chosen to use in further experiments.
 
 
-\subsection{Overall Comparison}
-With the values parameters chosen where required, every showing algorithm was compared. Six different showing algorithm configurations were used - Algorithm 1 (Any Closer Node), Algorithm 2 (Further Nodes with Probability) with $p_{further}=0.2$, Algorithm 2 with $p_{further}=0.4$, Algorithm 4 (Distance Priority), Algorithm 5 (Fractional Distance Priority) with $f=0.05$ =, and Algorithm 5 with $f=0.2$. Each was run with message counts ranging from 25 to 800 in steps of 25. The results for these experiments are shown in the subfigures within Figure \ref{fig:all_show_models}.
+\subsection{Overall Comparison} \label{subsec:all_show_models_results}
+With the values parameters chosen where required, every showing algorithm was compared. Six different showing algorithm configurations were used - Algorithm 1 (Any Closer Node), Algorithm 2 (Further Nodes with Probability) with $p_{further}=0.2$, Algorithm 2 with $p_{further}=0.4$, Algorithm 4 (Distance Priority), Algorithm 5 (Fractional Distance Priority) with $f=0.05$ =, and Algorithm 5 with $f=0.2$ (Algorithm 3 was excluded as it has little value when using the probabilistic user model, always performing extremely poorly). Each was run with message counts ranging from 25 to 800 in steps of 25. The results for these experiments are shown in the subfigures within Figure \ref{fig:all_show_models}.
 
 \begin{figure}
 \begin{subfigure}[]{0.47\textwidth}
@@ -686,7 +686,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \end{tikzpicture}
 \caption{Algorithm 5 ($f=0.2$)}
 \end{subfigure}
-\caption{Results}
+\caption{Delivery rates as message count increases for various showing algorithms (all using the grid distance measure). Algorithm 5 does particularly well, even when only one message is chosen using distance priority ($f=0.05$).}
 \label{fig:all_show_models}
 \end{figure}
 
@@ -697,6 +697,81 @@ In the case of Algorithm 4, delivery rates start very high at low message counts
 Overall these results suggest that in the case Algorithm 2 (and Algorithm 1), there must be a balance between the number of messages and the amount messages are spread. For a low number of messages a high value of $p_{further}$ will perform well, but if high message counts are possible then a lower value of $p_{further}$ is necessary, giving more stable performance across message counts. In the case of Algorithm 5 (and Algorithm 4), the results show that an algorithm which has a large amount of randomness, with only some messages chosen in a non random way, is able to perform very well.
 
 \section{Distance Measure Comparisons}
+In addition to the showing algorithms, different distance measures were compared. These are different methods to calculate the distance between. Distances are used as part of the showing algorithms when trying to get messages closer to their destination. Aside from the grid-based Manhatten distance measure used in the previous section, two others were investigated: graph distance and the diffusion distance.
+
+\subsection{Graph Distance}
+Since messages may take shorter routes using long links, which are not considered by the grid distance measure, the distance given by it may not reflect how close messages actually are to their destination. The graph distance, as described in Subsection \ref{subsec:graph_dist}, takes into account any edge, using the shortest path between two nodes as their distance.
+
+Experiments were run as in Subsections \ref{subsec:algorithm_2_prob} and \ref{subsec:algorithm_5_fraction} to determine the optimal values of $p_{further}$ and $f$. It was found that when using the graph distance measure, $p_{further}=0.4$ provides the best results for high message counts with Algorithm 2, and $f=0.2$ is again the best value to use for Algorithm 5. Experiments were then run to find the delivery rates for each showing algorithm using the graph distance measure as in \ref{subsec:all_show_models_results}. Figure \ref{fig:graph_dist_show_models} shows these results, with the result using grid distance also shown on the same graphs for comparison. Note that in the case of Algorithm 2, shown in subfigure \ref{subfig:graph_dist_algorithm_2}, the grid distance version uses $p_{further}=0.2$ and the graph distance version uses $p_{further}=0.4$ (both the optimal values for their distance measures).
+
+\begin{figure}
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/AnyCloser.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 1}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count},legend pos=south east]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
+\legend{$p_{further}=0.2$, $p_{further}=0.4$}
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 2}
+\label{subfig:graph_dist_algorithm_2}
+\end{subfigure}
+%
+\par\bigskip
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/DistancePriority.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 4}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_05.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.05$)}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}, legend style={at={(2.3,0.2)},anchor=east}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_20.csv};
+\legend{Grid Distance, Graph Distance}
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.2$)}
+\end{subfigure}
+\caption{Delivery rates as message count increases for various showing algorithms, this time showing both the grid and graph distance measures. In most cases using graph distance results in at least a slight improvement, with Algorithm 1 being the only exception.}
+\label{fig:graph_dist_show_models}
+\end{figure}
+
+The only algorithm which sees a significant decrease in delivery rate is Algorithm 1, which goes from around $0.4$ at all message counts to around $0.2$ at all message counts. This is probably due to paths found using graph distance potentially being more "fragile" - they may require a message taking a very specific route, and if it is not shared the message can be lost. Since algorithm does not spread messages to avoid losses, it would be particularly susceptible to this.
+
+Algorithm 4 sees an increase in delivery rate, from 53.8\% at 800 messages with the grid distance measure, to 68.0\% with the graph distance measure. This may be due to the fact that this algorithm works by attempting to quickly deliver messages which are close to their destination already, ignoring those which are further away. Since the graph distance will find shorter routes to the destination, those which are closest can be delivered more quickly, allowing the algorithm to focus on the others sooner. Algorithm 2 and Algorithm 5 with $f=0.2$ see small increases in delivery rates, and Algorithm 5 with $f=0.05$ sees only a tiny increase - probably since it ignores distance for every message choice except one for each node.
+
+Overall, using the graph distance as a distance measure improves the delivery rates, by finding shorter paths that don't necessarily follow the direction towards the destination on the grid.
+
+\subsection{Diffusion Distance}
 
 \section{Graph Type Comparisons}
 
