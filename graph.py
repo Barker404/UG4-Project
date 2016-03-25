@@ -178,9 +178,14 @@ class KleinbergGeneratorSameNorm(KleinbergGenerator):
 class GraphInfo(object):
     def __init__(self, g):
         self.g = g
-        self.diameter = nx.diameter(g)
         self._graph_distances = None
         self._diffusion_distances = {}
+        self.diameter = None
+
+    def get_diameter(self):
+        if self.diameter is None:
+            self.diameter = nx.diameter(self.g)
+        return self.diameter
 
     def graph_distance(self, u, v):
         if self._graph_distances is None:
