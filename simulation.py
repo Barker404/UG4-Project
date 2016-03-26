@@ -73,8 +73,10 @@ class Simulation(object):
         if store_data:
             data_storage.store_sim_info(output_path, self)
 
-        visualiser_path = os.path.join(output_path, "visualisation")
-        self.visualiser = Visualiser(self.width, self.height, visualiser_path)
+        if output_images or output_video:
+            visualiser_path = os.path.join(output_path, "visualisation")
+            self.visualiser = Visualiser(
+                self.width, self.height, visualiser_path)
 
         if output_images:
             # Draw round 0
@@ -111,7 +113,8 @@ class Simulation(object):
             data_storage.store_post_sim_info(output_path, self)
         num_delivered = len([x for x in self.messages if x.delivered])
 
-        self.visualiser.clear()
+        if output_images or output_video:
+            self.visualiser.clear()
 
         if as_percent:
             return 100 * float(num_delivered) / float(self.message_count)
