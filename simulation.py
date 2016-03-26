@@ -155,7 +155,8 @@ class Simulation(object):
                           regenerate_messages=True, as_percent=False,
                           output_graphs=False, output_videos=False,
                           output_path='output', watched_message=0,
-                          draw_labels=False, store_data=False):
+                          draw_labels=False, store_data=False,
+                          store_less_data=False):
         total = 0
         total_delivered = 0
         min_delivered = float('inf')
@@ -175,7 +176,7 @@ class Simulation(object):
                                             draw_labels, as_percent=False,
                                             store_data=store_data)
 
-            if store_data:
+            if store_data or store_less_data:
                 data_storage.store_repeat_result(
                     output_path, self.message_count, delivered)
 

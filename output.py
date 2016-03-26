@@ -191,7 +191,7 @@ class Visualiser(object):
 
 def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
                      output_path='output', output_filename='plot.png',
-                     store_data=False):
+                     store_data=False, store_less_data=False):
 
     averages = []
     mins = []
@@ -211,7 +211,7 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
         i += 1
 
     plot(averages, mins, maxs, x_values, x_label, as_percent, output_path,
-         output_filename, store_data)
+         output_filename, store_data or store_less_data)
 
     return averages, mins, maxs
 
