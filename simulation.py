@@ -24,13 +24,14 @@ class Simulation(object):
         else:
             self.g = None
 
-    def generate_graph(self):
+    def generate_graph(self, generate_pos=True):
         # Create graph
         self.g, self.g_info = self.graph_generator.generate_graph()
-        self.pos = self.graph_generator.generate_positions(self.g)
+        if generate_pos:
+            self.pos = self.graph_generator.generate_positions(self.g)
 
-        self.width = self.graph_generator.get_width(self.g)
-        self.height = self.graph_generator.get_height(self.g)
+            self.width = self.graph_generator.get_width(self.g)
+            self.height = self.graph_generator.get_height(self.g)
 
         print "made graph"
 
@@ -165,7 +166,7 @@ class Simulation(object):
 
             self.clear_simulation()
             if regenerate_graph:
-                self.generate_graph()
+                self.generate_graph(output_graphs or output_videos)
             if regenerate_messages:
                 self.generate_messages()
 
