@@ -38,7 +38,10 @@ class Simulation(object):
         # Set up node attributes
         self.clear_simulation()
 
-        return (self.g, self.pos)
+        if generate_pos:
+            return (self.g, self.pos)
+        else:
+            return (self.g, None)
 
     def generate_messages(self):
         self.messages = []
