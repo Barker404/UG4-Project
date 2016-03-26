@@ -2,7 +2,7 @@
 
 import networkx as nx
 from random import uniform
-from math import floor
+from math import floor, sqrt
 import numpy as np
 
 from abc import ABCMeta, abstractmethod
@@ -26,6 +26,27 @@ class GraphGenerator(object):
     @abstractmethod
     def get_height(self, g):
         pass
+
+
+class FileGraphGenerator(GraphGenerator):
+
+    def __init__(self, path):
+        self.path = path
+        self.g = nx.read_edgelist(self.path)
+
+    def generate_graph(self):
+        g_copy = self.g.copy()
+        g_info = GraphInfo(g_copy)
+        return g_copy, g_info
+
+    def generate_positions(self, g):
+        return nx.spring_layout(g)
+
+    def get_width(self, g):
+        return sqrt(g.number_of_nodes)
+
+    def get_height(self, g):
+        return sqrt(g.number_of_nodes)
 
 
 class GridGenerator(GraphGenerator):
