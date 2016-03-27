@@ -449,7 +449,7 @@ A possible downside of the graph distance is that in some cases it relies on the
 
 This problem is avoided in the grid distance measure, as any step taken closer to the destination will always still have short links leading towards it. These will be closer to reaching it than the short links at a the previous node, and there will almost always be a large number of possible paths that do not rely on specific edges.
 
-\begin{wrapfigure}{R}{0.4\textwidth}
+\begin{wrapfigure}{R}{0.43\textwidth}
 \centering
 \begin{tikzpicture}
     \node[shape=circle,draw=black, line width=1.7] (A) at (0,4.5) {A};
@@ -842,7 +842,7 @@ Algorithm 4 sees an increase in delivery rate, from 53.8\% at 800 messages with 
 Overall, using the graph distance as a distance measure improves the delivery rates, by finding shorter paths that don't necessarily follow the direction towards the destination on the grid.
 
 \subsection{Diffusion Distance}
-A possible downside to using the graph distance measure is that it does not take into account the fact that messages can be lost. It may direct a message towards a very "thin" path, where if a single user does not share it, the message will be lost. Diffusion distance, described in more detail in Subsection \ref{subsec:diffusion_dist}, uses the similarity of random walks starting at both nodes to determine distance, which results in nodes connected by many paths being "closer" than those with only a single route between them. For this reason it was hypothesised that using diffusion distance could improve delivery rates by finding paths more resistant to message loss.
+A possible downside to the graph distance measure is that it may direct a message towards a very "thin" path, where if a single user does not share it, the message will be lost. Diffusion distance, described in more detail in Subsection \ref{subsec:diffusion_dist}, uses the similarity of random walks starting at both nodes to determine distance, which results in nodes connected by many paths being "closer" than those with only a single route between them. For this reason it was hypothesised that using diffusion distance could improve delivery rates by finding paths more resistant to message loss.
 
 \begin{figure}
 \begin{subfigure}[]{0.47\textwidth}
