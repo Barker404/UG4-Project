@@ -322,12 +322,54 @@ For graph types which are based on a grid, such as the Kleinberg model, this Man
 
 
 \subsection{Graph Distance} \label{subsec:graph_dist}
-With the use of centralised knowledge, a more accurate measure of distance than the simplistic grid measure can be created. This uses the length of the shortest path between any two nodes as their distance - equivalent to the minimum number of rounds for a message to travel between the nodes. This method also has the advantage of being usable for any kind of graph, whereas the grid distance measure required the graph to be based on a grid.
 
-\begin{wrapfigure}{r}{0.5\textwidth}
+\begin{wrapfigure}{r}{0.4\textwidth}
 \centering
 \begin{tikzpicture}
-    \node[shape=circle,draw=black, line width=1.5] (A) at (0,4.5) {A};
+    \node[shape=circle,draw=black] (A) at (0,3) {A};
+    \node[shape=circle,draw=black, line width=1.7] (B) at (1.5,3) {B};
+    \node[shape=circle,draw=black] (C) at (3,3) {C};
+    \node[shape=circle,draw=black] (D) at (0,1.5) {D};
+    \node[shape=circle,draw=black] (E) at (1.5,1.5) {E};
+    \node[shape=circle,draw=black] (F) at (3,1.5) {F};
+    \node[shape=circle,draw=black] (G) at (0,0) {G};
+    \node[shape=circle,draw=black] (H) at (1.5,0) {H};
+    \node[shape=circle,draw=black, line width=1.7] (I) at (3,0) {I};
+    
+    \path[color=red, line width = 2.5] (A) edge (B);
+    \path[color=blue, line width = 2.5] (B) edge (C);
+    \path (D) edge (E);
+    \path (E) edge (F);
+    \path (G) edge (H);
+    \path (H) edge (I);
+
+    \path (A) edge (D);
+    \path (D) edge (G);
+    \path (B) edge (E);
+    \path (E) edge (H);
+    \path[color=blue, line width = 2.5] (C) edge (F);
+    \path[color=blue, line width = 2.5] (F) edge (I);
+    
+    \path[color=red, line width = 2.5] (A) edge [bend right] (I);
+\end{tikzpicture}
+\caption{A case where using graph distance can find a shorter route than grid distance. If $B$ is the source and $I$ the target, the graph distance path has length 2 (shown in red), while a grid distance path has length 3 (shown in blue).}
+\label{fig:graph_dist_example}
+\end{wrapfigure}
+
+With the use of centralised knowledge, a more accurate measure of distance than the simplistic grid measure can be created. This is done by using the length of the shortest path between any two nodes as their distance - equivalent to the minimum number of rounds for a message to travel between the nodes. By directing messages based on this measure it is possible to find shorter paths that don't necessarily follow the "direction" towards the target within the grid - taking some steps in another direction may allow the use of convenient non-grid edges. This method also has the advantage of being usable for any kind of graph, whereas the grid distance measure required the graph to be based on a grid.
+
+Figure \ref{fig:graph_dist_example} shows an example of a simple graph where graph distance is able to find a shorter path that grid distance. In the case where a message is at $B$ with the destination $I$, although the node $A$ is further from the destination in terms of grid distance, it leads to a useful long link which results in a shorter route overall.
+
+\subsection{Diffusion Distance} \label{subsec:diffusion_dist}
+
+A possible downside of the graph distance is that in some cases it relies on the specific shortest route being taken. Although following shorter paths to the destination can be found, they may involve taking long links to a point that is far away from the destination in the grid, with only a single other long link leading back towards it. Since users may fail to share messages, there is no guarantee that a single step in the route will be successful - and if multiple specific steps in a row are required to be successful, the probability of any failing becomes high. Therefore ideally, a message's "next step" should not only be closer to the destination, but also have multiple routes leading to it - allowing for the message to be duplicated and some instances to be lost.
+
+This problem is avoided in the grid distance measure, as any step taken closer to the destination will always still have short links leading towards it. These will be closer to reaching it than the short links at a the previous node, and there will almost always be a large number of possible paths that do not rely on specific edges.
+
+\begin{wrapfigure}{R}{0.4\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black, line width=1.7] (A) at (0,4.5) {A};
     \node[shape=circle,draw=black] (B) at (1.5,4.5) {B};
     \node[shape=circle,draw=black] (C) at (3,4.5) {C};
     \node[shape=circle,draw=black] (D) at (4.5,4.5) {D};
@@ -342,19 +384,19 @@ With the use of centralised knowledge, a more accurate measure of distance than 
     \node[shape=circle,draw=black] (M) at (0,0) {M};
     \node[shape=circle,draw=black] (N) at (1.5,0) {N};
     \node[shape=circle,draw=black] (O) at (3,0) {O};
-    \node[shape=circle,draw=black, line width=1.5] (P) at (4.5,0) {P};
-    \node[shape=circle,draw=black] (Q) at (0.5,-2.5) {Q};
-    \node[shape=circle,draw=black] (R) at (2.5,-2.5) {R};
+    \node[shape=circle,draw=black, line width=1.7] (P) at (4.5,0) {P};
+    \node[shape=circle,draw=black] (Q) at (0.5,-2) {Q};
+    \node[shape=circle,draw=black] (R) at (2.5,-2) {R};
     
-    \path (A) edge (B);
+    \path[color=blue, line width = 2.5] (A) edge (B);
     \path (B) edge (C);
     \path (C) edge (D);
     \path (E) edge (F);
-    \path (F) edge (G);
+    \path[color=blue, line width = 2.5] (F) edge (G);
     \path (G) edge (H);
     \path (I) edge (J);
     \path (J) edge (K);
-    \path (K) edge (L);
+    \path[color=blue, line width = 2.5] (K) edge (L);
     \path (M) edge (N);
     \path (N) edge (O);
     \path (O) edge (P);
@@ -362,86 +404,32 @@ With the use of centralised knowledge, a more accurate measure of distance than 
     \path (A) edge (E);
     \path (E) edge (I);
     \path (I) edge (M);
-    \path (B) edge (F);
+    \path[color=blue, line width = 2.5] (B) edge (F);
     \path (F) edge (J);
     \path (J) edge (N);
     \path (C) edge (G);
-    \path (G) edge (K);
+    \path[color=blue, line width = 2.5] (G) edge (K);
     \path (K) edge (O);
     \path (D) edge (H);
     \path (H) edge (L);
-    \path (L) edge (P);
+    \path[color=blue, line width = 2.5] (L) edge (P);
     
-    \path (A) edge [bend right] (Q);
-    \path (Q) edge (R);
-    \path (R) edge (P);
+    \path[color=red, line width = 2.5, bend right] (A) edge (Q);
+    \path[color=red, line width = 2.5] (Q) edge (R);
+    \path[color=red, line width = 2.5] (R) edge (P);
 \end{tikzpicture}
-\caption{An example of a graph where using the graph distance may give poorer delivery rates. In the case where A message is at $A$ and the destination is $I$, taking the longer routes through the grid may reduce the chance of the message being lost by allowing duplication.}
-\label{fig:graph_dist_example}
+
+\caption{An example where using the graph distance may give poorer delivery rates. In the case where a message is at $A$ with the destination $I$, rather than the shortest route (shown in red), taking the longer routes through the grid (a possibility shown in blue) may reduce the chance of the message being lost by allowing duplication.}
+\label{fig:diffusion_dist_example}
 \end{wrapfigure}
 
-A possible downside of this method is that while it can be used to direct messages towards the \textit{shortest} route to their destination, this route is not necessarily useful in this model. Since any user may fail to share a message, messages must be duplicated. Therefore an ideal "next step" for a message to take would not only be closer to the destination, but also have multiple routes to it - allowing for some instances of the message to be lost.
+An example is shown in Figure \ref{fig:diffusion_dist_example}. If a message is currently at $A$, and the destination is $P$, then the shortest path using graph distance is via $Q$ and $R$. However this requires both $Q$ and $R$ to share the message after it is shown to them, which (depending on the probability of sharing) may leave a significant probability of failure. On the other hand, if a slightly longer path through the grid-like part of the graph is taken, the message can easily be duplicated amongst the various other nodes in between. However measuring by graph distance puts both $B$ and $E$ further from the destination than $A$ is, so in several of the showing algorithms used this route would be unlikely to be taken. A similar situation can arise in Kleinberg's graph model, where nodes taking the role of $Q$ and $R$ are very far away from the destination in the grid, and so delivering via them requires the use of specific long links.
 
-An example is shown in Figure \ref{fig:graph_dist_example}. If we assume that a message is currently at $A$, and the destination is $P$, then the shortest path using graph distance is via $Q$ and $R$. However this requires both $Q$ and $R$ to share the message after it is shown to them. On the other hand, if a slightly longer path through the grid-like part of the graph is taken, the message can easily be duplicated amongst the various other nodes in between. However measuring by graph distance puts both $B$ and $E$ further from the destination than $Q$ is, so in several of the showing algorithms used this wouldn't happen often. A similar situation can arise in Kleinberg's graph model, where nodes taking the role of $Q$ and $R$ are very far away from the destination in the grid, and so delivering via them requires the use of specific long links.
+To deal with this problem of some short paths requiring the exact route be taken without failure, diffusion distance can be used as an alternative distance measure. This method uses random walks to determine the distance between two nodes - if the random walks starting at either node have a good chance to end up in the same places, then the nodes are deemed "close". This means that nodes with multiple paths between them are more likely to be "close" to each other in this measure, as the chance of a random walk taking one of several paths is better than that of it taking a single specific path.
 
-This problem is avoided in the grid distance measure as any step taken closer will always still have short links leading towards the destination which are closer to reaching it than the short links at a the previous node.
+More specifically, to find the diffusion distance between $u$ and $v$ we first find the probability for random walks of some specific length $t$ starting at each to end in at any node in the graph. A problem with this can arise in cases where the probabilities of a random walk ending at any node do not reach an equilibrium. For example if a bipartate graph (such as a grid) is used, then for any value of $t$ the random walk can only end at nodes on one "side" of the graph (depending on whether $t$ is odd or even). Two nodes from opposite "sides" would therefore never have their random walks meet, and be deemed infinitely far apart. To combat this, "lazy" random walks are used, where there is a 0.5 probability at each step of the walk staying in the same place.
 
-\subsection{Diffusion Distance} \label{subsec:diffusion_dist}
-To deal with this problem of some short paths requiring the exact route be taken without failure, diffusion distance can be used as an alternative distance measure. This method uses random walks to determine the distance between two nodes - if the random walks starting at either node have a good chance to end up in the same places, then the nodes are deemed "close". This means that nodes with multiple paths between them are more likely to be closer to each other in this measure, as the chance of a random walk taking one of several paths is better than that of it taking a single specific path. An example is shown in Figure
-
-\begin{wrapfigure}{r}{0.4\textwidth}
-\centering
-\begin{tikzpicture}
-    \node[shape=circle,draw=black, line width=1.5] (A) at (0,3) {A};
-    \node[shape=circle,draw=black] (B) at (0,2) {B};
-    \node[shape=circle,draw=black] (C) at (0,1) {C};
-    \node[shape=circle,draw=black] (D) at (0,0) {D};
-    \node[shape=circle,draw=black] (E) at (2.5,3) {E};
-    \node[shape=circle,draw=black] (F) at (2.5,2) {F};
-    \node[shape=circle,draw=black] (G) at (2.5,1) {G};
-    \node[shape=circle,draw=black] (H) at (2.5,0) {H};
-    
-    \path (A) edge (E);
-    \path (A) edge (F);
-    \path (A) edge (G);
-    \path (A) edge (H);
-    \path (B) edge (E);
-    \path (B) edge (F);
-    \path (B) edge (G);
-    \path (B) edge (H);
-    \path (C) edge (E);
-    \path (C) edge (F);
-    \path (C) edge (G);
-    \path (C) edge (H);
-    \path (D) edge (E);
-    \path (D) edge (F);
-    \path (D) edge (G);
-    \path (D) edge (H);
-    
-    \path (E) edge (A);
-    \path (E) edge (B);
-    \path (E) edge (C);
-    \path (E) edge (D);
-    \path (F) edge (A);
-    \path (F) edge (B);
-    \path (F) edge (C);
-    \path (F) edge (D);
-    \path (G) edge (A);
-    \path (G) edge (B);
-    \path (G) edge (C);
-    \path (G) edge (D);
-    \path (H) edge (A);
-    \path (H) edge (B);
-    \path (H) edge (C);
-    \path (H) edge (D);
-\end{tikzpicture}
-\caption{A complete bipartite graph. If a random walk starts at at $A$ and goes on for an even number of steps, it has no chance of ending at any of $E$, $F$, $G$, or $H$.}
-\label{fig:diffusion_distance_bipartite}
-\end{wrapfigure}
-
-More specifically, to find the diffusion distance between $u$ and $v$ we first find the probability for random walks of some specific length $t$ starting at each to end in at any node in the graph. A potential problem with this is that the value of $t$ chosen may overly favour some nodes. For example, in a bipartate graph like that shown in Figure \ref{fig:diffusion_distance_bipartite}, if the value of $t$ is divisible by two then the random walk will always end on the same "side" as it started on - and similarly if $t$ is even it will always end on the other "side". This would result in the random walks of two nodes on opposite "sides" never ending in the same place, and they would be deemed infinitely far apart. Since grids are , this can cause issues when using a grid-like graph such as Kleniberg's model. To combat this, "lazy" random walks are used, where there is a 0.5 probability at each step of the walk staying in the same place. This removes the bias caused by such aspects of the graph.
-
-Given this, the transition matrix for the random walk (the probability of moving from one node to another) is given by:
+Given this, the transition matrix for the lazy random walk (the probability of moving from one node to another) is given by:
 
 \begin{equation}
 \textbf{Z} = 0.5 \times (\textbf{I} + \textbf{D}^{-1} \times \textbf{A})
@@ -449,7 +437,7 @@ Given this, the transition matrix for the random walk (the probability of moving
 
 Where $\textbf{A}$ is the graph's adjacency matrix, $\textbf{D}$ is the graph's diagonal degree matrix, and $\textbf{I}$ is the identity matrix (containing only 1s along the diagonal) of the same size as $\textbf{A}$ and $\textbf{D}$. In this matrix, $\textbf{Z}[i, j]$ is the probability of a random walk at node $i$ moving to node $j$ in the next step, where the graph nodes are indexed in some way. We then take $\textbf{Z}^{t}[i, j]$ to get the probability of a random walk starting at $i$ ending at $j$ after $t$ steps.
 
-Finally, to compare two nodes we take the row vectors containing the probabilities for random walks starting at each of these nodes, and find the difference between these vectors:
+To compare two nodes we take the row vectors containing the probabilities for random walks starting at each of these nodes, and find the difference between these vectors:
 
 \begin{equation}
 D(u, v) = \sum_{w=1}^{|V|} (\textbf{Z}^{t}[u, w] - \textbf{Z}^{t}[v, w])^{2}
