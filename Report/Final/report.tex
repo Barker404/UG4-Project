@@ -764,7 +764,7 @@ Since messages may take shorter routes using long links, which are not considere
 
 Experiments were run as in Subsections \ref{subsec:algorithm_2_prob} and \ref{subsec:algorithm_5_fraction} to determine the optimal values of $p_{further}$ and $f$. It was found that when using the graph distance measure, $p_{further}=0.4$ provides the best results for high message counts with Algorithm 2, and $f=0.2$ is again the best value to use for Algorithm 5. Experiments were then run to find the delivery rates for each showing algorithm using the graph distance measure as in Subsection \ref{subsec:all_show_models_results}. Figure \ref{fig:graph_dist_show_models} shows these results, with the result using grid distance also shown on the same graphs for comparison. Note that in the case of Algorithm 2, shown in subfigure \ref{subfig:graph_dist_algorithm_2}, the grid distance version uses $p_{further}=0.2$ and the graph distance version uses $p_{further}=0.4$ (both the optimal values for their distance measures).
 
-The only algorithm which sees a significant decrease in delivery rate is Algorithm 1, which goes from around $0.4$ at all message counts to around $0.2$ at all message counts. This is probably due to paths found using graph distance potentially being more "fragile" - they may require a message taking a very specific route, and if it is not shared the message can be lost. Since algorithm does not spread messages to avoid losses, it would be particularly susceptible to this.
+The only algorithm which sees a significant decrease in delivery rate is Algorithm 1, which goes from around 40\% at all message counts to around 20\%. This is probably due to paths found using graph distance potentially being more "fragile" - they may require a message taking a very specific route, and if it is not shared the message can be lost. Since algorithm does not spread messages to avoid losses, it would be particularly susceptible to this.
 
 Algorithm 4 sees an increase in delivery rate, from 53.8\% at 800 messages with the grid distance measure, to 68.0\% with the graph distance measure. This may be due to the fact that this algorithm works by attempting to quickly deliver messages which are close to their destination already, ignoring those which are further away. Since the graph distance will find shorter routes to the destination, those which are closest can be delivered more quickly, allowing the algorithm to focus on the others sooner. Algorithm 2 and Algorithm 5 with $f=0.2$ see small increases in delivery rates, and Algorithm 5 with $f=0.05$ sees only a tiny increase - probably since it ignores distance for every message choice except one for each node.
 
@@ -776,7 +776,7 @@ A possible downside to using the graph distance measure is that it does not take
 \begin{figure}
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
-\begin{axis}[percentgraph,xmin=0,xmax=128,xmode=log,log basis x={2},xlabel={$t$},legend pos=south east]
+\begin{axis}[percentgraph,xmax=128,xmode=log,log basis x={2},xlabel={$t$},legend pos=south east]
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/further_prob_200.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/further_prob_400.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/further_prob_600.csv};
@@ -789,7 +789,7 @@ A possible downside to using the graph distance measure is that it does not take
 %
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
-\begin{axis}[percentgraph,xmin=0,xmax=128,xmode=log,log basis x={2},xlabel={$t$},legend pos=south east]
+\begin{axis}[percentgraph,xmax=128,xmode=log,log basis x={2},xlabel={$t$},legend pos=south east]
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_200.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_400.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_600.csv};
@@ -805,6 +805,83 @@ A possible downside to using the graph distance measure is that it does not take
 \end{figure}
 
 Diffusion distance relies on a parameter $t$, the length of the random walks. If this parameter is too small then nodes which are far apart in terms of graph distance will never have their random walks meet - resulting in infinite diffusion distance between them. When $t$ is too large, the probabilities of the random walks ending at any node become very similar, reducing its usefulness. Experiments were run to determine the best value of $t$ in this case. Two versions were run - one using Algorithm 2 with $p_{further}=0.4$ and one using Algorithm 5 with $f=0.2$. Each were measured at 200, 400, 600 and 800 initial messages. Since $t$ could potentially be infinitely large and the ideal range was not known, the values of $t$ was initially set to powers of two, starting with 1 and increasing to 128. These results showed that the delivery rates for both algorithms began to drop after around $t=16$. Results were then taking with $t$ increasing from 2 to 16 in steps of 2. Both sets of results are shown in Figure \ref{fig:diffusion_dist_t}. Although there was not a large difference, the best delivery rates at the higher message counts were found to at around $t=6$, marked on the graphs with vertical lines. This is most likely related to the graph diameter, which for the graph parameters used was found to be around 10-11 [**How to present this?**]. Setting $t=6$ is just enough for two random walks starting at the furthest apart nodes to meet - leaving no nodes infinitely far apart.
+
+\begin{figure}
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
+\addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/AnyCloser.csv};
+\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/AnyCloser.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 1}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count},legend pos=south east]
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
+\addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
+\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FurtherProb_20.csv};
+\legend{$p_{further}=0.2$, $p_{further}=0.4$, $p_{further}=0.2$}
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 2}
+\label{subfig:diffusion_dist_algorithm_2}
+\end{subfigure}
+%
+\par\bigskip
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
+\addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/DistancePriority.csv};
+\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/DistancePriority.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 4}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
+\addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_05.csv};
+\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FractionalDistancePriority_05.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.05$)}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}, legend style={at={(2.3,0.2)},anchor=east}]
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
+\addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_20.csv};
+\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FractionalDistancePriority_20.csv};
+\legend{Grid Distance, Graph Distance, Diffusion Distance}
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.2$)}
+\end{subfigure}
+\caption{Delivery rates as message count increases for various showing algorithms, showing the grid, graph, and diffusion distance measures. In every case diffusion distance does either worse than or similarly to the other two.}
+\label{fig:diffusion_dist_show_models}
+\end{figure}
+
+With the value for $t$ chosen, experiments were again run as in Subsections \ref{subsec:algorithm_2_prob} and \ref{subsec:algorithm_5_fraction} to find optimal value for $p_{further}$ and $f$ when using this distance measure. In this case it was found that at high message counts, the best value of $p_{further}$ trends towards 0.2, as it did when using the grid distance measure. The best value for $f$ was once again found to be 0.2 for any number of messages. Using these values delivery rates were measured as message count increases for different showing algorithms. These results are shown in \ref{fig:diffusion_dist_show_models}, along with the results for the grid and graph distance measures. Note that in again, for Algorithm 2 in subfigure \ref{subfig:diffusion_dist_algorithm_2}, the results for each distance measure are shown using the value of $p_{further}$ which was found to be best for that measure.
+
+Overall diffusion distance does not perform as well as expected. Delivery rates when using it in Algorithm 1 are roughly halfway between the other measures' at around 30\% consistently, and in Algorithm 2 it performs slightly worse than both others. In Algorithm 4 diffusion distance also performs slightly worse that the other measures, whereas in both instances of Algorithm 5 it achieves very similar results to the others - for the most part slightly above grid distance and slightly below graph distance.
+
+In algorithm 4, diffusion distance's slightly worse performance than graph distance may be due to the fact that individual message loss while trying to reach the destination is not a serious problem. Most of the network's capacity is used on keeping messages alive, and in early rounds only those which are already close to their destination will be directed closer. In later rounds there will be more available capacity for remaining messages, and so losses will not have as serious an effect. Therefore the most important aspect in terms of the distance measure may be finding the shortest and fastest paths so that as many messages as possible can be delivered early, clearing up capacity for the remainder.
+
+In the case of the other algorithms, it is less clear why performance is generally than or similar to the other distance measures. More detailed analysis may be required to discover the reasoning, which may in turn help find more suitable distance measures.
+
+
+\chapter{Conclusion}
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
