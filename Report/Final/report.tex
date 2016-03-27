@@ -72,11 +72,94 @@ One of the main difficulties is that users do not see everything that their frie
 Since each message only needs to reach the destination once, the best way to reduce noise might be to find the shortest path from source to destination, and show it only to the next user along this path at each step. The problem with this is that even among those messages seen by a user, they may not share them all for one reason or another. Over enough steps a single copy of a message will likely get lost, and so it must be duplicated to increase the chance of delivery as much as possible. The algorithm now has to balance duplication of messages to avoid loss and avoiding unnecessary noise due to duplication.
 
 \begin{figure}
+\begin{subfigure}[]{0.48\textwidth}
+\centering
 \begin{tikzpicture}
+    \node[shape=circle,draw=black] (A) at (0,2) {A};
+    \node[shape=circle,draw=black] (B) at (0,0) {B};
+    \node[shape=circle,draw=black,fill=red!80!white] (C) at (1,1) {\textbf{C}};
+    \node[shape=circle,draw=black] (D) at (2,2) {D};
+    \node[shape=circle,draw=black] (E) at (2,0) {E};
+    \node[shape=circle,draw=black, line width=1.7] (F) at (3,1) {F};
+    
+    %\path[color=blue, line width = 2.5] (A) edge (B);
+    \path[line width=2.5, color=red!80!white] (A) edge (C);
+    \path[line width=2.5, color=red!80!white] (B) edge (C);
+    \path[line width=2.5, color=red!80!white] (C) edge (D);
+    \path[line width=2.5, color=red!80!white] (C) edge (E);
+    \path (D) edge (F);
+    \path (E) edge (F);
 \end{tikzpicture}
+\caption{Initially user $C$ has a message with the destination user $F$. They share the message, potentially allowing any of their neighbours to see it.}
+\end{subfigure}
+\quad
+%
+\begin{subfigure}[]{0.48\textwidth}
+\centering
 \begin{tikzpicture}
+    \node[shape=circle,draw=black] (A) at (0,2) {A};
+    \node[shape=circle,draw=black] (B) at (0,0) {B};
+    \node[shape=circle,draw=black] (C) at (1,1) {C};
+    \node[shape=circle,draw=black,fill=red!80!white] (D) at (2,2) {\textbf{D}};
+    \node[shape=circle,draw=black,fill=red!80!white] (E) at (2,0) {\textbf{E}};
+    \node[shape=circle,draw=black, line width=1.7] (F) at (3,1) {F};
+    
+    %\path[color=blue, line width = 2.5] (A) edge (B);
+    \path (A) edge (C);
+    \path (B) edge (C);
+    \path[line width=2.5, color=red!80!white] (C) edge (D);
+    \path[line width=2.5, color=red!80!white] (C) edge (E);
+    \path (D) edge (F);
+    \path (E) edge (F);
 \end{tikzpicture}
-\caption{TODO: Insert diagram. Should show multiple paths, some failing to share, and not showing message to unneeded nodes}
+\caption{We show $D$ and $E$ the message that was shared by $C$. Users $A$ and $B$ are further from the destination, so there is no reason to show the message to them.}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.48\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black] (A) at (0,2) {A};
+    \node[shape=circle,draw=black] (B) at (0,0) {B};
+    \node[shape=circle,draw=black] (C) at (1,1) {C};
+    \node[shape=circle,draw=black,fill=red!80!white] (D) at (2,2) {\textbf{D}};
+    \node[shape=circle,draw=black,fill=red!80!white] (E) at (2,0) {\textbf{E}};
+    \node[shape=circle,draw=black, line width=1.7] (F) at (3,1) {F};
+    
+    %\path[color=blue, line width = 2.5] (A) edge (B);
+    \path (A) edge (C);
+    \path (B) edge (C);
+    \path[line width=2.5, color=red!80!white] (C) edge (D);
+    \path (C) edge (E);
+    \path[line width=2.5, color=red!80!white] (D) edge (F);
+    \path (E) edge (F);
+\end{tikzpicture}
+\caption{User $D$ shares the message, but $E$ does not. This is outside of our control, and can't be predicted.}
+\end{subfigure}
+\quad
+%
+\begin{subfigure}[]{0.48\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[shape=circle,draw=black] (A) at (0,2) {A};
+    \node[shape=circle,draw=black] (B) at (0,0) {B};
+    \node[shape=circle,draw=black] (C) at (1,1) {C};
+    \node[shape=circle,draw=black] (D) at (2,2) {D};
+    \node[shape=circle,draw=black] (E) at (2,0) {E};
+    \node[shape=circle,draw=black, line width=1.7,fill=red!80!white] (F) at (3,1) {\textbf{F}};
+    
+    %\path[color=blue, line width = 2.5] (A) edge (B);
+    \path (A) edge (C);
+    \path (B) edge (C);
+    \path (C) edge (D);
+    \path (C) edge (E);
+    \path[line width=2.5, color=red!80!white] (D) edge (F);
+    \path (E) edge (F);
+\end{tikzpicture}
+\caption{We can now show the message that $D$ shared to $F$, the destination user. The message is now successfully delivered.}
+\end{subfigure}
+\caption{An example of how a message can travel across the network to reach its destination.}
 \label{fig:intro_example}
 \end{figure}
 
