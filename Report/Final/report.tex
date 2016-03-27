@@ -631,7 +631,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 1}
@@ -640,7 +640,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 2 ($p_{further}=0.2$)}
@@ -651,7 +651,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message Count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_40.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_40.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 2 ($p_{further}=0.4$)}
@@ -660,7 +660,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 4}
@@ -671,7 +671,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 5 ($f=0.05$)}
@@ -680,7 +680,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 5 ($f=0.2$)}
@@ -705,7 +705,7 @@ Since messages may take shorter routes using long links, which are not considere
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
 \addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/AnyCloser.csv};
 \end{axis}
 \end{tikzpicture}
@@ -715,7 +715,7 @@ Since messages may take shorter routes using long links, which are not considere
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count},legend pos=south east]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
 \addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
 \legend{$p_{further}=0.2$, $p_{further}=0.4$}
 \end{axis}
@@ -729,7 +729,7 @@ Since messages may take shorter routes using long links, which are not considere
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
 \addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/DistancePriority.csv};
 \end{axis}
 \end{tikzpicture}
@@ -739,7 +739,7 @@ Since messages may take shorter routes using long links, which are not considere
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
 \addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_05.csv};
 \end{axis}
 \end{tikzpicture}
@@ -751,7 +751,7 @@ Since messages may take shorter routes using long links, which are not considere
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}, legend style={at={(2.3,0.2)},anchor=east}]
-\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
 \addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_20.csv};
 \legend{Grid Distance, Graph Distance}
 \end{axis}
