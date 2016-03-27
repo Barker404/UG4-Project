@@ -49,6 +49,14 @@ class FileGraphGenerator(GraphGenerator):
         return sqrt(g.number_of_nodes)
 
 
+class FileConnectedComponentGenerator(FileGraphGenerator):
+
+    def __init__(self, path):
+        self.path = path
+        g_all = nx.read_edgelist(self.path)
+        self.g = max(nx.connected_component_subgraphs(g_all), key=len)
+
+
 class GridGenerator(GraphGenerator):
 
     def __init__(self, cols, rows):
