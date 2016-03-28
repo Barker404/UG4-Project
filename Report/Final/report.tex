@@ -14,7 +14,7 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.12}
 
-\usetikzlibrary{arrows.meta,calc,decorations.markings,math,arrows.meta}
+%\usetikzlibrary{arrows.meta,calc,decorations.markings,math,arrows.meta}
 
 \pgfplotsset{percentgraph/.style={%
         width=0.93\textwidth,
@@ -227,7 +227,7 @@ All of these aspects are formally defined within this section.
 
 \path (0,-2.9) node (shared)[draw, text width=8em, text centered, minimum height=1em, rounded corners] {Shared Set:\\ $S_{t}(u)$}; 
 
-\draw[-{Latex[scale=2.0]}] (shown.south) -- node[right] {User Model} (shared.north);
+\draw[-{latex}] (shown.south) -- node[right] {User Model} (shared.north);
 
 \begin{pgfonlayer}{background}
     \path (neighbour1.west |- possible.north)+(-0.5,0.3) node (a) {};
@@ -237,7 +237,7 @@ All of these aspects are formally defined within this section.
 \end{pgfonlayer}
 
 \path (shown.north |- rect)+(+0,+0.16) node (c) {};
-\draw[-{Latex[scale=2.0]}] (c) -- node[right] {Showing Algorithm} (shown.north);
+\draw[-{latex}] (c) -- node[right] {Showing Algorithm} (shown.north);
 
 \end{tikzpicture}
 \caption{The process of message spreading, where $v_{1}$ to $v_{n}$ are the neighbours of $u$. The \textbf{shown set} of $u$ is formed from a subset of their neighbours' shared sets from the previous round, using the \textbf{showing algorithm}. The \textbf{shared set} of $u$ is then formed from a subset of their shown set, using the \textbf{user model}}
@@ -918,7 +918,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
 \addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/AnyCloser.csv};
-\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/AnyCloser.csv};
+\addplot[mark=diamond*, color=green!90!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/AnyCloser.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 1}
@@ -929,7 +929,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count},legend pos=south east]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
 \addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
-\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FurtherProb_20.csv};
+\addplot[mark=diamond*, color=green!90!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FurtherProb_20.csv};
 \legend{$p_{further}=0.2$, $p_{further}=0.4$, $p_{further}=0.2$}
 \end{axis}
 \end{tikzpicture}
@@ -944,7 +944,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
 \addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/DistancePriority.csv};
-\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/DistancePriority.csv};
+\addplot[mark=diamond*, color=green!90!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/DistancePriority.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 4}
@@ -955,7 +955,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
 \addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_05.csv};
-\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FractionalDistancePriority_05.csv};
+\addplot[mark=diamond*, color=green!90!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FractionalDistancePriority_05.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 5 ($f=0.05$)}
@@ -968,7 +968,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}, legend style={at={(2.3,0.2)},anchor=east}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
 \addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_20.csv};
-\addplot[mark=diamond*, color=green!80!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FractionalDistancePriority_20.csv};
+\addplot[mark=diamond*, color=green!90!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FractionalDistancePriority_20.csv};
 \legend{Grid Distance, Graph Distance, Diffusion Distance}
 \end{axis}
 \end{tikzpicture}
