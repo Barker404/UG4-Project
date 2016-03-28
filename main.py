@@ -431,5 +431,48 @@ def test_diffusion_dist_t(vals, msg_count_start=200, msg_count_end=1000,
             #     store_data=True)
 
 
+def test_gplus():
+    graph_gen = graph.FileConnectedComponentGenerator(
+        "in/gplus_100129275726588145876.edges")
+    share_prob = 0.5
+    seen_limit = 20
+    repeats = 5
+
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    distance_measure = showing.GraphDistanceMeasure()
+
+    show_models = [
+        # showing.FractionalDistancePriorityShowModel(
+        #     seen_limit, 0.2, distance_measure),
+        # showing.FurtherProbShowModel(
+        #     seen_limit, 0.2, distance_measure),
+        showing.FurtherProbShowModel(
+            seen_limit, 0.4, distance_measure),
+    ]
+    subdirs = [
+        # "FractionalDistancePriority_20",
+        # "FurtherProb_20",
+        "FurtherProb_40",
+    ]
+
+    for i in range(0, len(subdirs)):
+        show_model = show_models[i]
+        for j in range(2000, 10000, 2000):
+            simulation = Simulation(show_model, share_model,
+                                    graph_gen, round_count=None,
+                                    message_count=j)
+
+            simulation.repeat_simulation(
+                repeats, as_percent=True,
+                output_path=os.path.join(
+                    "out/gplus", subdirs[i], str(j)),
+                store_data=False, store_less_data=True)
+
+        re_plot_results(
+            "Message count", True, as_percent=True,
+            output_path=os.path.join("out/gplus", subdirs[i]),
+            store_data=True)
+
+
 if __name__ == "__main__":
     main()
