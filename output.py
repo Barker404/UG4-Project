@@ -202,7 +202,7 @@ def plot_simulations(simulations, x_values, x_label, repeats, as_percent=True,
         new_output_path = os.path.join(output_path, str(x_values[i]))
         av, mi, ma = simulations[i].repeat_simulation(
             repeats, as_percent=as_percent, output_path=new_output_path,
-            store_data=store_data)
+            store_data=store_data, store_less_data=store_less_data)
         averages.append(av)
         mins.append(mi)
         maxs.append(ma)
