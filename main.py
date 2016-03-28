@@ -209,7 +209,8 @@ def compare_user_models(msg_count_start=25, msg_count_end=825,
 
 def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
                          msg_count_step=200, step=0.05, repeats=20,
-                         distance_measure=None, dir="not_closer_prob"):
+                         distance_measure=None, graph_generator=None,
+                         dir="not_closer_prob"):
     # Probabilistic user model
     if distance_measure is None:
         distance_measure = showing.GridDistanceMeasure()
@@ -217,7 +218,8 @@ def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
-    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    if graph_generator is None:
+        graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     for i in range(msg_count_start, msg_count_end, msg_count_step):
         xs = []
@@ -257,7 +259,8 @@ def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
 
 def test_distance_priority_fraction(
     msg_count_start=200, msg_count_end=1000, msg_count_step=200, step=0.05,
-        repeats=20, distance_measure=None, dir="distance_priority_fraction"):
+        repeats=20, distance_measure=None, graph_generator=None,
+        dir="distance_priority_fraction"):
     # Probabilistic user model
     if distance_measure is None:
         distance_measure = showing.GridDistanceMeasure()
@@ -265,7 +268,8 @@ def test_distance_priority_fraction(
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
-    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    if graph_generator is None:
+        graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     for i in range(msg_count_start, msg_count_end, msg_count_step):
         xs = []
@@ -425,6 +429,49 @@ def test_diffusion_dist_t(vals, msg_count_start=200, msg_count_end=1000,
             #     output_path=os.path.join(
             #         "out/diffusion_distance_t/fraction_distance", str(j)),
             #     store_data=True)
+
+
+def test_gplus():
+    graph_gen = graph.FileConnectedComponentGenerator(
+        "in/gplus_100129275726588145876.edges")
+    share_prob = 0.5
+    seen_limit = 20
+    repeats = 5
+
+    share_model = sharing.ProbShareModel(seen_limit, share_prob)
+    distance_measure = showing.GraphDistanceMeasure()
+
+    show_models = [
+        # showing.FractionalDistancePriorityShowModel(
+        #     seen_limit, 0.2, distance_measure),
+        # showing.FurtherProbShowModel(
+        #     seen_limit, 0.2, distance_measure),
+        showing.FurtherProbShowModel(
+            seen_limit, 0.4, distance_measure),
+    ]
+    subdirs = [
+        # "FractionalDistancePriority_20",
+        # "FurtherProb_20",
+        "FurtherProb_40",
+    ]
+
+    for i in range(0, len(subdirs)):
+        show_model = show_models[i]
+        for j in range(2000, 10000, 2000):
+            simulation = Simulation(show_model, share_model,
+                                    graph_gen, round_count=None,
+                                    message_count=j)
+
+            simulation.repeat_simulation(
+                repeats, as_percent=True,
+                output_path=os.path.join(
+                    "out/gplus", subdirs[i], str(j)),
+                store_data=False, store_less_data=True)
+
+        re_plot_results(
+            "Message count", True, as_percent=True,
+            output_path=os.path.join("out/gplus", subdirs[i]),
+            store_data=True)
 
 
 if __name__ == "__main__":
