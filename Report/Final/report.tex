@@ -14,6 +14,7 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.12}
 
+\usetikzlibrary{arrows.meta,calc,decorations.markings,math,arrows.meta}
 
 \pgfplotsset{percentgraph/.style={%
         width=0.93\textwidth,
@@ -208,6 +209,39 @@ With the problem itself clearly defined, we then look at the other aspects of th
 All of these aspects are formally defined within this section.
 
 \section{Problem Model}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\node (shown) [draw, text centered, minimum height=1em, text width=12em, rounded corners]  {Shown Set:\\ $T_{t}(u)$};
+
+\node[text width=4cm, text centered,font=\small] at (0,5) (possible) {Possible Set: $P_{t}(u)$};
+
+\path (-5.0,3.5) node (neighbour1) [draw, text width=8em, text centered, minimum height=2.5em, rounded corners] {Shared Set of $v_1$:\\ $S_{t-1}(v_{1})$};
+\path (-0.7,3.5) node (neighbour2)[draw, text width=8em, text centered, minimum height=2.5em, rounded corners] {Shared Set of $v_2$:\\ $S_{t-1}(v_{2})$};
+\path (2.15,3.3) node (dots)[above, text width=6em, text centered] {$\hdots$}; 
+\path (5.0,3.5) node (neighbour3)[draw, text width=8em, text centered, minimum height=2.5em, rounded corners] {Shared Set of $v_n$:\\ $S_{t-1}(v_{n})$}; 
+
+\path (0,-2.9) node (shared)[draw, text width=8em, text centered, minimum height=1em, rounded corners] {Shared Set:\\ $S_{t}(u)$}; 
+
+\draw[-{Latex[scale=2.0]}] (shown.south) -- node[right] {User Model} (shared.north);
+
+\begin{pgfonlayer}{background}
+    \path (neighbour1.west |- possible.north)+(-0.5,0.3) node (a) {};
+    \path (neighbour3.east |- neighbour3.south)+(+0.5,-0.5) node (b) {};
+          
+    \path[rounded corners, draw=black, dashed, line width=1.2] (a) rectangle (b) node (rect) {};
+\end{pgfonlayer}
+
+\path (shown.north |- rect)+(+0,+0.16) node (c) {};
+\draw[-{Latex[scale=2.0]}] (c) -- node[right] {Showing Algorithm} (shown.north);
+
+\end{tikzpicture}
+\caption{The process of message spreading, where $v_{1}$ to $v_{n}$ are the neighbours of $u$. The \textbf{shown set} of $u$ is formed from a subset of their neighbours' shared sets from the previous round, using the \textbf{showing algorithm}. The \textbf{shared set} of $u$ is then formed from a subset of their shown set, using the \textbf{user model}}
+\end{figure}
 
 Initially we are given a \textbf{graph} $G = (V, E \subseteq V \times V)$ and $k$ \textbf{messages} $ m_{1} ... m_{k}$, which have \textbf{sources} $s_{1} ... s_{k}$ and \textbf{destinations} $d_{1} ... d_{k}$. In our model, these messages are assigned sources and destinations randomly at the beginning of the process.
 
