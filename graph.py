@@ -326,7 +326,7 @@ def extract_subgraph_bfs(path, n):
     print "herewego"
     g_orig = nx.read_edgelist(path)
     print "read graph"
-    g_cc = max(nx.connected_components(g_orig), key=len)
+    g_cc = max(nx.connected_component_subgraphs(g_orig), key=len)
     g_orig.clear()
     g_new = nx.Graph()
 
