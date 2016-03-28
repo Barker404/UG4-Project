@@ -5,6 +5,8 @@ from random import uniform
 from math import floor, sqrt, pi
 import numpy as np
 
+from Queue import Queue
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -318,3 +320,33 @@ class GridGraphInfo(GraphInfo):
         # u, v must be 2-tuples of x, y coords in grid
         # Just take manhatten distance
         return abs(u[0] - v[0]) + abs(u[1] - v[1])
+
+
+def extract_subgraph_bfs(path, n):
+    print "herewego"
+    g_orig = nx.read_edgelist(path)
+    print "read graph"
+    g_cc = max(nx.connected_components(g_orig), key=len)
+    g_orig.clear()
+    g_new = nx.Graph()
+
+    q = Queue()
+    node = g_cc.nodes_iter()[0]
+
+    print "beginning"
+
+    while(g_new.number_of_nodes() < n and not q.empty()):
+        g_new.add_node(node)
+        for nbr in g_new[node]:
+            if nbr in g_new:
+                g_new.add_edge(node, nbr)
+            else:
+                q.put(nbr)
+        node = q.get()
+        print g_new.number_of_nodes()
+
+    return g_new
+
+
+def write_edgelist(g, path):
+    nx.write_edgelist(g, path)
