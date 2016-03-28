@@ -209,7 +209,8 @@ def compare_user_models(msg_count_start=25, msg_count_end=825,
 
 def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
                          msg_count_step=200, step=0.05, repeats=20,
-                         distance_measure=None, dir="not_closer_prob"):
+                         distance_measure=None, graph_generator=None,
+                         dir="not_closer_prob"):
     # Probabilistic user model
     if distance_measure is None:
         distance_measure = showing.GridDistanceMeasure()
@@ -217,7 +218,8 @@ def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
-    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    if graph_generator is None:
+        graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     for i in range(msg_count_start, msg_count_end, msg_count_step):
         xs = []
@@ -257,7 +259,8 @@ def test_not_closer_prob(msg_count_start=200, msg_count_end=1000,
 
 def test_distance_priority_fraction(
     msg_count_start=200, msg_count_end=1000, msg_count_step=200, step=0.05,
-        repeats=20, distance_measure=None, dir="distance_priority_fraction"):
+        repeats=20, distance_measure=None, graph_generator=None,
+        dir="distance_priority_fraction"):
     # Probabilistic user model
     if distance_measure is None:
         distance_measure = showing.GridDistanceMeasure()
@@ -265,7 +268,8 @@ def test_distance_priority_fraction(
     seen_limit = 20
     share_prob = 0.5
     share_model = sharing.ProbShareModel(seen_limit, share_prob)
-    graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
+    if graph_generator is None:
+        graph_generator = graph.KleinbergGenerator(COLUMNS, ROWS, K, Q)
 
     for i in range(msg_count_start, msg_count_end, msg_count_step):
         xs = []
