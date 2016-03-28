@@ -2,7 +2,7 @@
 
 import networkx as nx
 from random import uniform
-from math import floor, sqrt
+from math import floor, sqrt, pi
 import numpy as np
 
 from abc import ABCMeta, abstractmethod
@@ -64,13 +64,6 @@ class GridGenerator(GraphGenerator):
         self.rows = rows
 
     def generate_graph(self):
-        # Creates a grid of size rows * cols
-        # For each node in the grid, add k random edges
-        # Where the probability of an edge from u to v is proportional to:
-        # d(u, v)^q
-        # Where d(u, v) is grid distance
-
-        # Start with grid
         g = nx.grid_2d_graph(self.cols, self.rows)
         g_info = GridGraphInfo(g)
         return g, g_info
@@ -79,10 +72,81 @@ class GridGenerator(GraphGenerator):
         return dict(zip(g, g))
 
     def get_width(self, g):
-        return self.cols
+        return max(self.cols, 6)
 
     def get_height(self, g):
-        return self.rows
+        return max(self.rows, 6)
+
+
+class LineGenerator(GraphGenerator):
+    def __init__(self, n):
+        self.n = n
+
+    def generate_graph(self):
+        g = nx.path_graph(self.n)
+        g_info = GridGraphInfo(g)
+        return g, g_info
+
+    def generate_positions(self, g):
+        return {u: (u, 0) for u in g}
+
+    def get_width(self, g):
+        return self.n
+
+    def get_height(self, g):
+        return 8
+
+
+class RingGenerator(GraphGenerator):
+    def __init__(self, n):
+        self.n = n
+
+    def generate_graph(self):
+        g = nx.cycle_graph(self.n)
+        g_info = GridGraphInfo(g)
+        return g, g_info
+
+    def generate_positions(self, g):
+        return nx.circular_layout(g)
+
+    def get_width(self, g):
+        return max(self.n/pi, 6)
+
+    def get_height(self, g):
+        return max(self.n/pi, 6)
+
+
+class TreeGenerator(GraphGenerator):
+    def __init__(self, r, h):
+        self.r = r
+        self.h = h
+
+    def generate_graph(self):
+        g = nx.balanced_tree(self.r, self.h)
+        g_info = GridGraphInfo(g)
+        return g, g_info
+
+    def generate_positions(self, g):
+        pos = {}
+        h = self.h
+        w = self.get_width(g)
+
+        curr_w = 1
+
+        u = 0
+
+        for i in range(h+1):
+            for j in range(curr_w):
+                pos[u] = ((float(w)/float(curr_w+1))*(j+1), (h-1)-i)
+                u += 1
+            curr_w = curr_w*self.r
+        return pos
+
+    def get_width(self, g):
+        return max(self.r**self.h, 6)
+
+    def get_height(self, g):
+        return max(self.h, 6)
 
 
 class KleinbergGenerator(GridGenerator):
