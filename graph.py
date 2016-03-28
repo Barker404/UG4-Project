@@ -331,7 +331,7 @@ def extract_subgraph_bfs(path, n):
     g_new = nx.Graph()
 
     q = Queue()
-    node = g_cc.nodes_iter()[0]
+    node = g_cc.nodes()[0]
 
     print "beginning"
 
