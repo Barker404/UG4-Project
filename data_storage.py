@@ -62,8 +62,6 @@ def store_sim_info(path, sim):
         # height
         d = {
             "round_count": sim.round_count,
-            "width": sim.width,
-            "height": sim.height,
             "show_model": type(sim.show_model).__name__,
             "share_model": type(sim.share_model).__name__,
             "graph_generator": type(sim.graph_generator).__name__,
