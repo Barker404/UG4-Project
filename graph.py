@@ -348,5 +348,50 @@ def extract_subgraph_bfs(path, n):
     return g_new
 
 
+def extract_subgraph_bfs_2(path, n, start_label=None):
+    g = nx.Graph()
+    with open(path) as f:
+        if start_label is None:
+            first_line = f.readline().strip()
+            while first_line.startswith("#"):
+                first_line = f.readline().strip()
+
+            u, v = first_line.split()
+            g.add_edge(u, v)
+        else:
+            g.add_node(start_label)
+
+        while (g.number_of_nodes() < n):
+            # Copy of graph as it was before this iteration
+            g_copy = g.copy()
+            for line in f:
+                if line.startswith("#"):
+                    continue
+
+                u, v = line.strip().split()
+
+                # Check if one node was added in a previous iteration
+                # xor
+                if (u in g_copy) != (v in g_copy):
+                    g.add_edge(u, v)
+                    print "{} {}".format(u, v)
+
+                if (g.number_of_nodes() >= n):
+                    break
+            f.seek(0)
+
+        f.seek(0)
+        for line in f:
+            if line.startswith("#"):
+                continue
+
+            u, v = line.strip().split()
+            if u in g_copy and v in g_copy:
+                print "{} {}".format(u, v)
+                g.add_edge(u, v)
+
+    return g
+
+
 def write_edgelist(g, path):
     nx.write_edgelist(g, path)
