@@ -65,19 +65,47 @@
 
 \chapter{Introduction}
 
-This project looks at the problem of delivering messages across a social network to specific targets via users' interactions. This can be explained simply in terms of a real social network, such as Facebook. Initially some user has a message they wish to show to a another specific user. However if the target does not know the originating party  then showing it directly to them, such as in an advert, will probably result in it being ignored. On the other hand, if one of the target's friends on Facebook shares the message and they see it, then they are more likely to notice it. However first, the message must reach one of the target's friends. To do this, the message must be shared by a number of intermediary users.
+This project considers the problem of delivering messages across a social network to specific targets via users' interactions. For example, consider the social network Facebook. User \textit{A} has a message they wish to show to User \textit{B}, however the two are not friends on Facebook. User \textit{A} could pay to have the message shown directly to \textit{B} as an advert, however it has been shown that people are more receptive of messages which are received from others who know rather than from corporate entities - such as in viral and word-of-mouth marketing \cite{viralmarketing, wordofmouth}. Therefore it would be better for \textit{A} if they were able to send the message somehow to another user who \textit{is} friends with \textit{B}, and have them show it to \textit{B}. To achieve this \textit{A} \textbf{shares} the message, allowing their friends to potentially see it. From here, some of their friends may also share the message, and it may propagate through the social network like this, eventually reaching \textit{B}.
 
-This project aims to specify this problem in more detail, develop an algorithm which can deliver as many messages as possible, and test and analyse this algorithm.
+\begin{figure}
+\centering
+\includegraphics[width=0.45\textwidth]{pokec_4000}
+\caption{Part of a real social network. This graph was extracted from the SNAP Pokec dataset\cite{snapnets}, and used to evaluate the developed display algorithms.}
+\label{fig:pokec_4000_intro}
+\end{figure}
 
-\section{Applications}
-An effective algorithm which solves this problem has many applications. The most obvious way to use it is for targeted advertising. While this type of information spread in social networks is often used for general viral marketing, it may be the case that making a specific individual aware of some product is particularly advantageous. This method could then be used to direct it to them, without it seeming like they are being shown ``adverts". This is particularly useful when considering individuals with large amounts of influence, such as a celebrity. Significant research has gone into identifying these influential users within social networks\cite{InfluenceMaximisation1, InfluenceMaximisation2, LabelledInfluenceMaximisation}. These studies generally consider how a message spreads from an initial person or set of people, and try to find the people who maximise the amount the message will spread. In other words, if a message can be delivered to an influential user, they can cause a cascade allowing it to reach many others. This results of this project could be used to direct the message to those influential people.
+To improve the chances of the message reaching the destination, the social network's \textbf{display algorithm} can be utilised - this chooses which messages to show to each user from what their friends have shared. By considering destinations when making this choice, messages can be directed more efficiently, improving the number delivered.
+
+An algorithm capable of delivering such messages has many applications. The most obvious use is for targeted advertising. While this type of information spread in social networks is often used for general viral marketing, it may be the case that making a specific user aware of some product is particularly advantageous. This method could be used to direct it to them, without it seeming like they are being shown ``adverts". This is particularly useful when considering users with large amounts of influence, such as a celebrity. Significant research has gone into identifying these influential users\cite{InfluenceMaximisation1, InfluenceMaximisation2, LabelledInfluenceMaximisation}. These studies generally consider how a message spreads from an initial user or set of users, and try to find those who maximise the spread of the message. In other words, if a message can be delivered to an influential user they can cause a cascade, allowing it to reach many others. This results of this project could be used to direct the message to those influential users.
 
 A different approach could be to use this method in a more charitable way, such as raising awareness of a some cause. Again this can be done in a viral way using information spread in networks, and influential users could again be targeted to spread the message further. In addition however, certain individuals may be known to be at more risk of some condition, and so spreading awareness to them would be particularly effective. Alternatively, certain users in a social graph will be positioned in such a way that they have a high probability of detecting a ``contagion" spreading through it in early stages - identifying these users has been the subject of some research \cite{OutbreakDetection}. Spreading related information to these users may be an effective way to combat such contagions.
 
 Finally, it may be possible to combine this method with graph summarisation techniques\cite{GraphSummary}. These involve condensing a large graph into a smaller one, in which super-nodes represent sets of nodes which had similar connections in the original graph. Using a summarised graph to represent the social network would still retain the connectedness properties that allow the method to work, but have other advantages. Communities would be targeted rather than individuals - for example rather than targeting a certain at-risk user with an awareness message, a group who are similarly at-risk might be targeted. This would also reduce the size of the problem, potentially making complex algorithms more feasible for large networks.
 
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={fraction of messages chosen based on distance},width=0.55\textwidth,legend pos=outer north east]
+\addlegendimage{empty legend}
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/200messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/400messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/600messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/800messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/1000messages.csv};
+\legend{\hspace{-.6cm}\textbf{Message Count},200,400,600,800,1000}
+\end{axis}
+\end{tikzpicture}
+\caption{The fraction of messages shown to the user which are chosen based on which are closest to their destinations (with the remaining fraction picked randomly) is varied. The optimal value is found to be when 20\% of messages are picked based on distance and 80\% randomly. However even picking only one (5\%) based on distance gives almost as good results.}
+\label{fig:distance_priority_fraction_intro}
+\end{figure}
+
+In this project we defined this system of message propagation via user interaction. We proposed several display algorithms, both deterministic and probabilistic, which were tested in simulations of the social network. We found that combining random and deterministic gives the best results, delivering more messages than either alone. Figure \ref{fig:distance_priority_fraction_intro} shows the results for such an algorithm, when varying the fraction of message shown to the user which are chosen deterministically. In this case a fraction are chosen based on which are closest to their destination (and most likely to be delivered successfully), and the remainder are picked at random. The best ratio was found to involve only a very small number of messages chosen based on distance, and even taking only a single distance-based message and all others at random performs close to the optimal found.
+
+Additionally, the effect of different graph types on this process was investigated. Simple chains, trees and grids were considered, with the observation that the average degree of the nodes in the graph can play a more significant role in the ability of messages to spread and reach their targets than the delivery algorithm used can. Lastly, the algorithms developed were tested on a graph created from a part of a real social network. [results]
+
+
 \section{Challenges}
-When using social networks, users will not see everything that their friends share - they will likely only look at some of the top items on their ``news feed" before running out of attention. If there are a large number of messages shared by a user's friends then since not all of them will be seen, not all of them can be passed on. To ensure that as many messages reach their target as possible, the amount of ``noise" seen by a user must be reduced - in other words a message is only shown to them where it is beneficial to delivering that message. This is achievable by utilising the fact that in most social networks a user's ``news feed", rather than being random, is generated by some complex algorithm. By modifying this algorithm and deciding what to show to each user, messages can be directed towards their destinations.
+Even though we are able to choose what to show to each user to help deliver messages, there are several potential problems. When using social networks, users will not see everything that their friends share - they will likely only look at some of the top items on their ``news feed" before running out of attention. If there are a large number of messages shared by a user's friends then since not all of them will be seen, not all of them can be passed on. To ensure that as many messages reach their target as possible, the amount of ``noise" seen by a user must be reduced - in other words we only show a message  where it is beneficial to delivering that message, to avoid clogging up the network. This is achievable by utilising the fact that in most social networks a user's ``news feed", rather than being random, is generated by some complex algorithm. By modifying this algorithm and deciding what to show to each user, messages can be directed towards their destinations.
 
 Since each message only needs to reach the destination once, the best way to reduce noise might be to find the shortest path from source to destination, and show it only to the next user along this path at each step. The problem with this is that even among those messages seen by a user, they may not share them all for one reason or another. Over enough steps a single copy of a message will likely get lost, and so it must be duplicated to increase the chance of delivery as much as possible. The algorithm now has to balance duplication of messages to avoid loss and avoiding unnecessary noise due to duplication.
 
@@ -173,7 +201,7 @@ Since each message only needs to reach the destination once, the best way to red
 \label{fig:intro_example}
 \end{figure}
 
-This problem can be formalised using a graph to represent the social network, and having a number of messages at each node at any time in the process. The messages then move from one node to the next based on algorithms used to describe the actions of the user and the social network. Figure \ref{fig:intro_example} shows an example of this with a single message. Here red nodes have the message, blue nodes do not, and the yellow node is the target. The message moves through adjacent nodes until it reaches the target.
+This problem can be formalised using a graph to represent the social network, and having a number of messages at each node at any time in the process. The messages then move from one node to the next based on algorithms used to describe the actions of the user and the social network. Figure \ref{fig:intro_example} shows an example of this with a single message. Here red nodes have the message, blue nodes do not, and the yellow node is the target. The message moves through adjacent nodes until it reaches the target. We wish to choose which nodes to show the messages to at each step so as to maximise the overall number of messages delivered.
 
 
 \section{Related Literature}
@@ -576,16 +604,15 @@ These classes are brought together by the \texttt{Simulation} class, which is gi
 \chapter{Results}
 After development of the algorithms, experiments were run to compare their performance. Experiments were also run to ensure that the parameters chosen were reasonable and would give valid results. Unless otherwise stated all simulations were run until any action had completely stopped - that is, no messages were seen in some round by any node, either due them being delivered already or dying out before delivery. Also, unless otherwise stated, all simulations were run 20 times and the average result taken, to avoid random fluctuations.
 
-For a large number of experiments, Kleinberg's graph model, as described in Section \ref{sec:graph_def}, was used. In all of these experiments, $k=1$ and $q=2$ were used, where $k$ is the number of ``long links" created from each node and $q$ the ``clustering exponent", which is used alongside the grid distance between two nodes to calculate the probability of there being a long link between them. As is shown in \cite{Kleinberg00},  $q=2$ is the the ``sweet spot" for a graph based on a 2 dimensional lattice, at which decentralised routing can achieve delivery times polynomial in $\log n$. Additionally $k$ must be set to a small constant, so $k=1$ was chosen. A 20 by 20 grid was used to create the graph from, as this size was found to be large enough to provide good results, but not so large that the experiments took an excessively long time to run.
+For a large number of experiments, Kleinberg's graph model, as described in Section \ref{sec:graph_def}, was used. In all of these experiments, $k=1$ and $q=2$ were used, where $k$ is the number of ``long links" created from each node and $q$ the ``clustering exponent", which is used alongside the grid distance between two nodes to calculate the probability of there being a long link between them. As is shown in \cite{Kleinberg00},  $q=2$ is the the ``sweet spot" for a graph based on a 2 dimensional lattice, at which decentralised routing can achieve delivery times polynomial in $\log n$. Additionally $k$ must be set to a small constant, so $k=1$ was chosen. A 20 by 20 grid was used to create the graph from, as this size was found to be large enough to provide good results, but not so large that the experiments took an excessively long time to run. When using these parameters, the average diameter of the graph produced was found to be 9.7 - a low value, as expected from a small world graph.
 
 
 \section{User Model Comparison}
 The two models of message sharing by users, as described in Section \ref{sec:user_models}, were compared to each other experimentally to decide which was a better fit for future experiments. This was conducted by running separate simulations using showing algorithms 1, 2, and 3 as described in Section \ref{sec:showing_algorithms}. The purpose of these experiments was to document how the success of each user model changes as messages are spread more or less. It was hypothesised that since the basic user model shares all messages when there are very few shown to it, then limiting the spreading of messages to one copy per distinct message would give good results. However this would not match the expected result on real humans - somewhere along the chain a user would be expected to not share a message, due to not liking the contents or something similar.
 
-First, the basic user model was tested. This model uses two variables: $a$, the maximum messages that each user will ``see" or consider as candidates to share; and $b$, the maximum number of messages that the user will share (where $b \leq a$). If less than or equal to $b$ messages are shown then all will be shared, otherwise from the first $a$ messages, $b$ are randomly chosen to be shared. For these experiments the values $a = 20$ and $b = 5$ were used - they were chosen arbitrarily, as the purpose of these results is not to compare the different user models or parameters directly, but to see how the results for each model change as the amount of message spread changes. It was tested against four different showing algorithm setups: Algorithm 1, which potentially shows only messages to users closer to their destination (equivalent to Algorithm 2 with $p_{further}=0$); Algorithm 2 with $p_{further}=0.4$ (where $p_{further}$ is the probability of a message being a candidate to be shown to a user not closer to the destination); Algorithm 2 with $p_{further}=0.6$; and Algorithm 3 where each message is shown to exactly one other user each round. To determine whether nodes are ``closer" or not, the grid position based distance measure was used in all cases. These simulations all used distinct Kleinberg's model graphs.
-
 \begin{figure}
-\begin{subfigure}[]{0.45\textwidth}
+\centering
+\begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/user_model/BasicShare_Prob0.csv};
@@ -627,11 +654,14 @@ First, the basic user model was tested. This model uses two variables: $a$, the 
 \label{fig:basic_user_model}
 \end{figure}
 
+First, the basic user model was tested. This model uses two variables: $a$, the maximum messages that each user will ``see" or consider as candidates to share; and $b$, the maximum number of messages that the user will share (where $b \leq a$). If less than or equal to $b$ messages are shown then all will be shared, otherwise from the first $a$ messages, $b$ are randomly chosen to be shared. For these experiments the values $a = 20$ and $b = 5$ were used - they were chosen arbitrarily, as the purpose of these results is not to compare the different user models or parameters directly, but to see how the results for each model change as the amount of message spread changes. It was tested against four different showing algorithm setups: Algorithm 1, which potentially shows only messages to users closer to their destination (equivalent to Algorithm 2 with $p_{further}=0$); Algorithm 2 with $p_{further}=0.4$ (where $p_{further}$ is the probability of a message being a candidate to be shown to a user not closer to the destination); Algorithm 2 with $p_{further}=0.6$; and Algorithm 3 where each message is shown to exactly one other user each round. To determine whether nodes are ``closer" or not, the grid position based distance measure was used in all cases. These simulations all used distinct Kleinberg's model graphs.
+
 The results for the basic user model can be seen in Figure \ref{fig:basic_user_model}. Each graph shows the percentage of messages delivered as the initial message count is increased from 25 to 800, in steps of 25. The 4 subfigures show the performance of the different showing algorithms. From this we can see that as the probability of spreading messages away from the target increases (from 0, to 0.4, to 0.6), the number of messages delivered in general decreases. However if only one copy of each message is shown each round, as shown in  Subfigure \ref{subfig:basic_user_model_3}, the percentage of message delivered increases drastically.
 
 Next the probabilistic user model was tested. Again, $a=20$ was used for the maximum number of messages ``seen" by each user. For the probability of sharing each message seen, $p_{share}=0.5$ was used. The same showing algorithms, distance measure, and graph setup were used as for the basic user model.
 
 \begin{figure}
+\centering
 \begin{subfigure}[]{0.47\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
@@ -674,7 +704,7 @@ Next the probabilistic user model was tested. Again, $a=20$ was used for the max
 
 Figure \ref{fig:prob_user_model} shows the results for the probabilistic user model, again showing percentage delivered as message count increases for the 4 different showing algorithm configurations. This case shows an entirely different trend from the basic model - as the messages are spread away from the destination more, the number delivered increases. Also, the change in message count has less of an effect on the percent delivered than before. This suggest that in the basic model the main cause of failed delivery is being unable to show messages due to the users being at the attention limit - and so spreading messages more makes the situation worse. However in the probabilistic model, the main problem is messages not being passed on after the user sees them - and so spreading the messages further improves this.
 
-Of particular note is the performance of showing algorithm 3 when the probabilistic user model is used, as seen in \ref{subfig:prob_user_model_3}. In this case the amount delivered is very low, as you would expect if each message was shown to only one person. This suggest that when the number of messages in the system is low, the probabilistic model is more realistic. Based on these results, the probabilistic user model is used for the remaining experiments.
+Of particular note is the performance of showing algorithm 3 when the probabilistic user model is used, as seen in \ref{subfig:prob_user_model_3}. In this case the amount delivered is very low, as you would expect if each message was shown to only one person. This suggests that when the number of messages in the system is low, the probabilistic model is more realistic. Based on these results, the probabilistic user model is used for the remaining experiments.
 
 \section{Showing Algorithm Comparisons}
 
@@ -684,8 +714,10 @@ With the user model chosen, the developed showing algorithms were next compared 
 First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm selects candidates to show to each node by taking any message that would be made closer to its destination and also taking those which would not with a certain probability $p_{further}$. Experiments were run using this algorithm to find which value of $p_{further}$ gives the best results.
 
 \begin{figure}
+\centering
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$},width=0.7\textwidth,legend pos=outer north east]
+\addlegendimage{empty legend}
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/200messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/400messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/600messages.csv};
@@ -693,7 +725,7 @@ First, Algorithm 2 (and by extension Algorithm 1) was considered. This algorithm
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1000messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1200messages.csv};
 \addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/not_closer_prob/1400messages.csv};
-\legend{200 Messages,400 Messages,600 Messages,800 Messages,1000 Messages,1200 Messages,1400 Messages}
+\legend{\hspace{-.6cm}\textbf{Messages},200,400,600,800,1000,1200,1400}
 \end{axis}
 \end{tikzpicture}
 \caption{Delivery rates for Showing Algorithm 2 as $p_{further}$ increases, across different message counts. As the initial message count increases, the optimal value of $p_{further}$ moves towards 0.2.}
@@ -711,14 +743,16 @@ As the case where message count is high is of most interest, the value $p_{furth
 Next, Algorithm 5 was considered (and by extension Algorithm 4). This algorithm uses a fraction parameter $f$ to split the messages shown to each user between distance-prioritised (showing those which are closest to their destination) and picking randomly from the remainder of the possible messages. Experiments were run to determine the best value for the parameter $f$.
 
 \begin{figure}
+\centering
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$f$},width=0.7\textwidth,legend pos=outer north east]
+\addlegendimage{empty legend}
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/200messages.csv};
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/400messages.csv};
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/600messages.csv};
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/800messages.csv};
 \addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/distance_priority_fraction/1000messages.csv};
-\legend{200 Messages,400 Messages,600 Messages,800 Messages,1000 Messages}
+\legend{\hspace{-.6cm}\textbf{Messages},200,400,600,800,1000}
 \end{axis}
 \end{tikzpicture}
 \caption{Delivery rates for Showing Algorithm 5 as $f$ increases, across different message counts. Regardless of message count, the optimal value of $f$ is around 0.2.}
@@ -734,7 +768,7 @@ From these results it can be seen that generally low values of $f$ provide the b
 With the values parameters chosen where required, every showing algorithm was compared. Six different showing algorithm configurations were used - Algorithm 1 (Any Closer Node), Algorithm 2 (Further Nodes with Probability) with $p_{further}=0.2$, Algorithm 2 with $p_{further}=0.4$, Algorithm 4 (Distance Priority), Algorithm 5 (Fractional Distance Priority) with $f=0.05$ =, and Algorithm 5 with $f=0.2$ (Algorithm 3 was excluded as it has little value when using the probabilistic user model, always performing extremely poorly). Each was run with message counts ranging from 25 to 800 in steps of 25. The results for these experiments are shown in the subfigures within Figure \ref{fig:all_show_models}.
 
 \begin{figure}
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
@@ -743,7 +777,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \caption{Algorithm 1}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
@@ -754,7 +788,7 @@ With the values parameters chosen where required, every showing algorithm was co
 %
 \par\bigskip 
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_40.csv};
@@ -763,7 +797,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \caption{Algorithm 2 ($p_{further}=0.4$)}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
@@ -774,7 +808,7 @@ With the values parameters chosen where required, every showing algorithm was co
 %
 \par\bigskip 
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
@@ -783,7 +817,7 @@ With the values parameters chosen where required, every showing algorithm was co
 \caption{Algorithm 5 ($f=0.05$)}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
@@ -802,13 +836,13 @@ In the case of Algorithm 4, delivery rates start very high at low message counts
 Overall these results suggest that in the case Algorithm 2 (and Algorithm 1), there must be a balance between the number of messages and the amount messages are spread. For a low number of messages a high value of $p_{further}$ will perform well, but if high message counts are possible then a lower value of $p_{further}$ is necessary, giving more stable performance across message counts. In the case of Algorithm 5 (and Algorithm 4), the results show that an algorithm which has a large amount of randomness, with only some messages chosen in a non random way, is able to perform very well.
 
 \section{Distance Measure Comparisons}
-In addition to the showing algorithms, different distance measures were compared. These are different methods to calculate the distance between. Distances are used as part of the showing algorithms when trying to get messages closer to their destination. Aside from the grid-based Manhatten distance measure used in the previous section, two others were investigated: graph distance and the diffusion distance.
+In addition to the showing algorithms, different distance measures were compared. These are different methods to calculate the distances between nodes, which are used as part of the showing algorithms when trying to get messages closer to their destination. By changing this distance measure but keeping the showing algorithm used, although the overall strategy remains the same, the specific path taken by messages may change. Additionally, in the case of Algorithms 4 and 5, messages may be prioritised differently. In addition to the grid-based Manhatten distance measure that was already covered in the previous section, two others were investigated: graph distance and diffusion distance.
 
 \subsection{Graph Distance}
 Since messages may take shorter routes using long links, which are not considered by the grid distance measure, the distance given by it may not reflect how close messages actually are to their destination. The graph distance, as described in Subsection \ref{subsec:graph_dist}, takes into account any edge, using the shortest path between two nodes as their distance.
 
 \begin{figure}
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
@@ -818,12 +852,13 @@ Since messages may take shorter routes using long links, which are not considere
 \caption{Algorithm 1}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count},legend pos=south east]
+\addlegendimage{empty legend}
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
 \addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
-\legend{$p_{further}=0.2$, $p_{further}=0.4$}
+\legend{\hspace{-.6cm}$p_{further}$,0.2,0.4}
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 2}
@@ -832,7 +867,7 @@ Since messages may take shorter routes using long links, which are not considere
 %
 \par\bigskip
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
@@ -842,7 +877,7 @@ Since messages may take shorter routes using long links, which are not considere
 \caption{Algorithm 4}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
@@ -854,7 +889,7 @@ Since messages may take shorter routes using long links, which are not considere
 %
 \par\bigskip 
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}, legend style={at={(2.3,0.2)},anchor=east}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
@@ -880,7 +915,7 @@ Overall, using the graph distance as a distance measure improves the delivery ra
 A possible downside to the graph distance measure is that it may direct a message towards a very ``thin" path, where if a single user does not share it, the message will be lost. Diffusion distance, described in more detail in Subsection \ref{subsec:diffusion_dist}, uses the similarity of random walks starting at both nodes to determine distance, which results in nodes connected by many paths being ``closer" than those with only a single route between them. For this reason it was hypothesised that using diffusion distance could improve delivery rates by finding paths more resistant to message loss.
 
 \begin{figure}
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmax=128,xmode=log,log basis x={2},xlabel={$t$},legend pos=south east]
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/further_prob_200.csv};
@@ -893,15 +928,16 @@ A possible downside to the graph distance measure is that it may direct a messag
 \caption{Algorithm 2 ($p_{further}=0.4$)}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmax=128,xmode=log,log basis x={2},xlabel={$t$},legend pos=south east]
+\addlegendimage{empty legend}
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_200.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_400.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_600.csv};
 \addplot table [x=diffusion distance t, y=average delivered (percent), col sep=comma] {results/diffusion_distance/diffusion_distance_t/fractional_distance_800.csv};
 \addplot +[mark=none,color=black] coordinates {(6, 0) (6, 100)};
-\legend{200 Messages,400 Messages,600 Messages,800 Messages}
+\legend{\hspace{-.6cm}\textbf{Messages},200,400,600,800}
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 5 ($f=0.2$)}
@@ -910,10 +946,10 @@ A possible downside to the graph distance measure is that it may direct a messag
 \label{fig:diffusion_dist_t}
 \end{figure}
 
-Diffusion distance relies on a parameter $t$, the length of the random walks. If this parameter is too small then nodes which are far apart in terms of graph distance will never have their random walks meet - resulting in infinite diffusion distance between them. When $t$ is too large, the probabilities of the random walks ending at any node become very similar, reducing its usefulness. Experiments were run to determine the best value of $t$ in this case. Two versions were run - one using Algorithm 2 with $p_{further}=0.4$ and one using Algorithm 5 with $f=0.2$. Each were measured at 200, 400, 600 and 800 initial messages. Since $t$ could potentially be infinitely large and the ideal range was not known, the values of $t$ was initially set to powers of two, starting with 1 and increasing to 128. These results showed that the delivery rates for both algorithms began to drop after around $t=16$. Results were then taking with $t$ increasing from 2 to 16 in steps of 2. Both sets of results are shown in Figure \ref{fig:diffusion_dist_t}. Although there was not a large difference, the best delivery rates at the higher message counts were found to at around $t=6$, marked on the graphs with vertical lines. This is most likely related to the graph diameter, which for the graph parameters used was found to be around 10-11 [**How to present this?**]. Setting $t=6$ is just enough for two random walks starting at the furthest apart nodes to meet - leaving no nodes infinitely far apart.
+Diffusion distance relies on a parameter $t$, the length of the random walks. If this parameter is too small then nodes which are far apart in terms of graph distance will never have their random walks meet - resulting in infinite diffusion distance between them. When $t$ is too large, the probabilities of the random walks ending at any node become very similar, reducing its usefulness. Experiments were run to determine the best value of $t$ in this case. Two versions were run - one using Algorithm 2 with $p_{further}=0.4$ and one using Algorithm 5 with $f=0.2$. Each were measured at 200, 400, 600 and 800 initial messages. Since $t$ could potentially be infinitely large and the ideal range was not known, the values of $t$ was initially set to powers of two, starting with 1 and increasing to 128. These results showed that the delivery rates for both algorithms began to drop after around $t=16$. Results were then taking with $t$ increasing from 2 to 16 in steps of 2. Both sets of results are shown in Figure \ref{fig:diffusion_dist_t}. Although there was not a large difference, the best delivery rates at the higher message counts were found to at around $t=6$, marked on the graphs with vertical lines. This is most likely related to the graph diameter, which for the graph parameters used was found to be 9.7. Setting $t=6$ is just enough for two random walks starting at the furthest apart nodes to have some chance of meeting - leaving no nodes infinitely far apart in this distance measure.
 
 \begin{figure}
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/AnyCloser.csv};
@@ -924,13 +960,14 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \caption{Algorithm 1}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count},legend pos=south east]
+\addlegendimage{empty legend}
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FurtherProb_20.csv};
 \addplot[mark=*, color=red!90!black] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
 \addplot[mark=diamond*, color=green!90!black] table [x=Message count, y=average delivered (percent), col sep=comma] {results/diffusion_distance/all_show_models/FurtherProb_20.csv};
-\legend{$p_{further}=0.2$, $p_{further}=0.4$, $p_{further}=0.2$}
+\legend{\hspace{-.6cm}$p_{further}$,0.2,0.4,0.2}
 \end{axis}
 \end{tikzpicture}
 \caption{Algorithm 2}
@@ -939,7 +976,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 %
 \par\bigskip
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/DistancePriority.csv};
@@ -950,7 +987,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 \caption{Algorithm 4}
 \end{subfigure}
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_05.csv};
@@ -963,7 +1000,7 @@ Diffusion distance relies on a parameter $t$, the length of the random walks. If
 %
 \par\bigskip 
 %
-\begin{subfigure}[]{0.47\textwidth}
+\begin{subfigure}[]{0.49\textwidth}
 \begin{tikzpicture}
 \begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}, legend style={at={(2.3,0.2)},anchor=east}]
 \addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/all_show_models/FractionalDistancePriority_20.csv};
@@ -988,11 +1025,256 @@ In the case of the other algorithms, it is less clear why performance is general
 
 \section{Other Graph Types}
 
+While our main interest is in seeing how these algorithms perform on graphs resembling social networks, there is also value in testing them on other types of graphs. Although this will not necessarily give any indication of how the algorithms would perform in real situations, the performance of these algorithms on basic, more consistent graph types can help to understand the algorithms better. For this reason, the more interesting algorithms were tested on several simple graphs types. These graphs types involve no random elements, unlike the Kleinberg model graph.
 
+Aside from the change in the graphs used, the experiments run in this section were conducted in the same way as previously. Simulations were run until all message activity had stopped, and each was repeated 20 times. The probabilistic user model was used, with $a=20$ (the maximum number of messages shown to each user) and $p_{share}=0.5$ (the probability of a user sharing each message shown to them).
+
+\subsection{Chains}
+The most simple graph type investigated was the chain graph - simply a number of nodes connected in a single line. In this graph, messages trying to get from one end of the chain to the other have no choice but to pass every other node on the way. The chain graphs used for these experiments consisted of 100 nodes. Since the nodes are arranged linearly, whether graph distance or diffusion distance is used as the distance measure would have little effect. Graph distance was therefore used in all cases.
+
+\begin{figure}
+\begin{subfigure}[]{0.40\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,ymax=10,xlabel={$p_{further}$},legend pos=outer north east]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/line/not_closer_prob/50messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/line/not_closer_prob/100messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/line/not_closer_prob/150messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/line/not_closer_prob/200messages.csv};
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\begin{subfigure}[]{0.40\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,ymax=10,xlabel={$f$},legend pos=outer north east]
+\addlegendimage{empty legend}
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/line/distance_priority_fraction/50messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/line/distance_priority_fraction/100messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/line/distance_priority_fraction/150messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/line/distance_priority_fraction/200messages.csv};
+\legend{\hspace{-.6cm}\textbf{Messages},50,100,150,200}
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\caption{}
+\label{fig:chain_params}
+\end{figure}
+
+\begin{figure}
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=10,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/line/all_show_models/AnyCloser.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 1}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=10,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/line/all_show_models/FurtherProb_100.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 2 ($p_{further}=1.0$)}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=10,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/line/all_show_models/DistancePriority.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 4}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=10,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/line/all_show_models/FractionDistancePriority_50.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.5$)}
+\end{subfigure}
+\caption{}
+\label{fig:chain_show_models}
+\end{figure}
+
+Figure \ref{fig:chain_params} shows results for varying values of the Algorithm 2 and 5 parameters, $p_{further}$ and $f$. As in previous sections, both of the variable are increased from 0 to 1 in steps of 0.05. Results were taken using message counts of 50 (half of the node count), 100, 150, and 200 (double the node count). Of note is the fact that for both algorithm parameters, the number of messages in consideration has no noticeable effect. For Algorithm 2, the delivery rate increases as $p_{further}$ does, all the way to $p_{further}=1.0$. The value of $f$ in Algorithm 5 however has no significant effect on the delivery rate. This includes $f=0$, where messages to show are chosen completely at random, and $f=1$, where messages are chosen entirely based on which is closer to its destination.
+
+Experiments were then run using the various showing algorithms, increasing the message count from 25 to 800 in steps of 25. Based of the previous results, $p_{further}=1$ was chosen for Algorithm 2. Since the value of $f$ was found to have no effect, $f=0.5$ was chosen arbitrarily for Algorithm 5. Additionally, Algorithm 1 and Algorithm 2 were tested. Figure \ref{fig:chain_show_models} shows the results for the experiments. Overall, the delivery rates are very low in all cases - never more than 10\%. Varying the message count has no obvious effect, even in the cases where the message count is many times greater than the number of nodes. Algorithm 1 achieved around 4\% delivery rates, as was seen for $p_{further}=0$ in the previous results. All other algorithms achieved around 6\%.
+
+While it would seem that the chain would result in significant bottlenecks around the middle nodes, which many messages will need to pass through to reach their destinations, taken together these results suggest that this isn't the main limiting factor - a bottleneck such as this would only allow a constant number of messages through, and so would effect higher message counts more seriously (in terms of percentage). What is more likely to be causing poor delivery rates is the low \textit{degree} of the nodes in the graph. Since each node has only two neighbours (or one in the case of the end two nodes), any message they share can only possibly be seen by two nodes. Even if both of these nodes are shown the message, they each have a 50\% chance of not sharing it - resulting in a 25\% chance overall of neither sharing it, and the message being lost (unless there were other copies elsewhere in the graph). Additionally, if a node is shown $x$ messages, the expected number for them to share is $x/2$. If both of a node's neighbours are shown $x$ messages, then expected size of the middle node's possible set (the messages that can possibly be shown to them) will be $2 \times (x/2) = x$, the same amount that each neighbour was shown initially.
+
+As a result of this, it would be expected that the total number of ``copies" of messages in the system will stay the same, disregarding messages being delivered or lost completely. Since there is initially only one copy of each message, this means that they are unlikely to spread significantly. However over the course of a message's entire journey, it is likely that at some point no node will share any copy of it - at which point it is completely lost.
+
+Based on this observation, the results found can be explained. Lower values of $p_{further}$ than 1 perform worse as this will sometimes result in a message not being shown to a user even if they are not at their attention limit - making the problem of messages not spreading worse. When $p_{further}=1$ in Algorithm 2, or when using Algorithms 4 or 5, as many messages as possible will always be shown to each user. If the number of potential messages never reaches the user's attention limit, then these algorithms will act identically, explaining the similar results.
+
+Overall, these results show that the degree of the nodes in the network can play a huge role in the success of delivering messages - more than the showing algorithm used.
 
 \subsection{Trees}
+After chains, tree graphs were considered. In particular, complete, balanced binary trees were used. For these experiments, trees with 255 nodes were used. As with chain graphs, there would be little difference between the distance measures, and so graph distance was used.
+
+\begin{figure}
+\begin{subfigure}[]{0.40\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,ymax=40,xlabel={$p_{further}$},legend pos=outer north east]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/tree/not_closer_prob/100messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/tree/not_closer_prob/200messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/tree/not_closer_prob/300messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/tree/not_closer_prob/400messages.csv};
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\begin{subfigure}[]{0.40\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,ymax=40,xlabel={$f$},legend pos=outer north east]
+\addlegendimage{empty legend}
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/tree/distance_priority_fraction/100messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/tree/distance_priority_fraction/200messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/tree/distance_priority_fraction/300messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/tree/distance_priority_fraction/400messages.csv};
+\legend{\hspace{-.6cm}\textbf{Messages},100,200,300,400}
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\caption{}
+\label{fig:tree_params}
+\end{figure}
+
+\begin{figure}
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=40,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/tree/all_show_models/AnyCloser.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 1}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=40,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/tree/all_show_models/FurtherProb_100.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 2 ($p_{further}=1.0$)}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=40,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/tree/all_show_models/DistancePriority.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 4}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,ymax=40,xlabel={Message Count}]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/tree/all_show_models/FractionalDistancePriority_50.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.5$)}
+\end{subfigure}
+\caption{}
+\label{fig:tree_show_models}
+\end{figure}
+
+Again, experiments were first run to determine the best values of $p_{further}$ for Algorithm 2 and $f$ for Algorithm 5. These were run for the initial message counts 100 (approximately half of the node count), 200, 300, and 400 (approximately double the node count). The results for these are shown in \ref{fig:tree_params}. Again Algorithm 2 performs better for higher values of $p_{further}$, however in this case the difference is more significant, with delivery rates reaching up to 20-30\% at $p_{further}=1$. In the case of Algorithm 5, the value of $f$ once again had no effect on the performance.
+
+Based on these results, values of $p_{further}=1$ and $f=0.5$ were once again chosen. Further experiments were then run using on the different algorithms, increasing the message count from 25 to 800 in steps of 25. The results from these experiments are shown in Figure \ref{fig:tree_show_models}. In the case of algorithm 1, delivery rates are consistently very low. In all of the other cases, delivery rates decreased linearly from around 30\% at 25 messages to slightly below 20\% at 800 messages - with the choice of algorithm having seemingly no effect.
+
+Like in chain graphs, node in trees also have low degrees. However some of the nodes will have a degree of 3, which will be high enough to allow messages to spread at least a small amount. Since this is only just enough for the messages to spread, $p_{further}$ must be high to take advantage of this fully - low values will run into the same problem as found for the chain graph. The fact that the tree graph has this similar property to the chain may explain why the choice of showing algorithm (as long as the algorithm always shows as many messages as possible) and value of $f$ have no effect on the delivery rate. However unlike the chain, the initial number of message does have an effect. This may be a result of some nodes being able to utilise their full attention. It is unclear why algorithm choice has no effect but message count does - more investigation may be required to determine the exact behaviour of this graph type.
+
 
 \subsection{Grids}
+Finally, grid graphs were considered. Since grids are used to construct the Kleinberg model graphs that are used in other experiments, investigating the performance of algorithms on them may reveal how well the long links in the Kleinberg graphs are utilised. For these experiments, 20 by 20 grids were used - the same size as the Kleinberg graphs used previously. In this case the grid distance and graph distance between any two nodes are identical, as only grid edges exists. Additionally, while there is potentially multiple shortest paths between nodes, since the graph follows a regular pattern and has no potential shortcuts or bottlenecks, using diffusion distance would have little effect. Because of this the grid distance measure was used in all cases.
+
+\begin{figure}
+\begin{subfigure}[]{0.40\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$},legend pos=outer north east]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/200messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/400messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/600messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/800messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/1000messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/1200messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/graph_types/grid/not_closer_prob/1400messages.csv};
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\begin{subfigure}[]{0.40\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$f$},legend pos=outer north east,legend image post style={sharp plot},]
+\addlegendimage{empty legend}
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/grid/distance_priority_fraction/200messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/grid/distance_priority_fraction/400messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/grid/distance_priority_fraction/600messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/graph_types/grid/distance_priority_fraction/800messages.csv};
+\legend{\hspace{-.6cm}\textbf{Messages},200,400,600,800,1000,1200,1400}
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\caption{}
+\label{fig:grid_params}
+\end{figure}
+
+\begin{figure}
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/AnyCloser.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/grid/all_show_models/AnyCloser.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 1}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FurtherProb_40.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/grid/all_show_models/FurtherProb_50.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 2 ($p_{further}=0.5$)}
+\end{subfigure}
+%
+\par\bigskip 
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/DistancePriority.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/grid/all_show_models/DistancePriority.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 4}
+\end{subfigure}
+%
+\begin{subfigure}[]{0.49\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=800,xlabel={Message Count}]
+\addplot[mark=*, color=red] table [x=Message Count, y=average delivered (percent), col sep=comma] {results/graph_dist/FractionalDistancePriority_20.csv};
+\addplot[mark=square*, mark size=1.5, color=blue] table [x=Message count, y=average delivered (percent), col sep=comma] {results/graph_types/grid/all_show_models/FractionalDistancePriority_20.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Algorithm 5 ($f=0.2$)}
+\end{subfigure}
+\caption{}
+\label{fig:grid_show_models}
+\end{figure}
+
+Again, experiments were run to find optimal values of $p_{further}$ for Algorithm 2 and $f$ for Algorithm 5. For $f$, message counts of 200, 400, 600 and 800 were used. For $p_{further}$ these message counts were not enough, and so additional experiments were done using 1000, 1200, and 1400 messages. These results are shown in Figure \ref{fig:grid_params}. These results are quite similar to those found when doing similar experiments on Kleinberg's graphs. For Algorithm 2, the delivery rate was found to have a peak in the middle in each case, with very high or very low values of $p_{further}$ being worse (except for 200 initial messages, which peaks at $p_{further=1}$). The location of the peak moves lower as the number of messages increases, converging to around $p_{further}=0.5$. For Algorithm 5 the best value was found to be around $f=0.2$ - the same value found when using Kleinberg's graph.
+
+Figure \ref{fig:grid_show_models} shows the performance of Algorithms 1, 2 (with $p_{further}=0.5$), 4, and 5 (with $f=0.2$) as the initial message count is increased from 25 to 800 in steps of 25. This is shown alongside the same results when using Kleinberg's graph (with the graph distance measure, which in most cases performed the best out of the distance measures). The results for the grid graph here are overall quite similar to those for the Kleinberg graphs, but somewhat lower. As with the experiments run on Kleinberg's graphs, Algorithm 5 achieves the highest delivery rate, at 62.5\% for 800 messages in this case. The fact that results for Kleinberg graphs are consistently better show that the algorithms used go make good use of the long links present in that case.
+
 
 \chapter{Conclusion}
 
