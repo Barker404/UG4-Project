@@ -214,15 +214,16 @@ An aspect of this project which is less common in literature is considering the 
 Another less common aspect is targeting users within the social network. In \cite{TargetedSignedNetworks} this idea of sending a message from source to target is investigated, but in the context of signed networks. Here each connection in the social graph is either ``positive" or ``negative" - signifying the type of relationship between the two individuals. If a message is passed to a user via someone they have a negative relationship with, then it will cause the recipient to lean towards the opposite view - and then that opposite view may be passed across another negative relationship, returning to the original. The paper looks at algorithms to create a path from the source to destination which minimises the distance while resulting in a positive influence on the target. While this contains the targeting aspect of this project's problem, the users in this paper are assumed to act in the optimal way which the algorithm wants them to - there is no random interactions. In this sense, while the algorithm may still be useful in some cases, it is a less realistic approach.
 
 \section{Overview}
-%In the remainder of this report, the work done up to this point in the project is presented, along with what work is to be done next. In Chapter 2 the formal definitions formulated for this project are covered in detail.
-%
-%Section 2.1 looks at the problem model itself, as it is used in later definitions and experiments. Section 2.2 describes the Kleinberg small world graph that was used to model the social network for this project. Secctions 2.3 and 2.4 then describe the user models used to define the sharing process, and the display algorithms for deciding which messages to show each user - one of the main focuses of this project.
-%
-%Chapter 3 looks at the experiments carried out, first describing the simulation program used to carry these out in section 3.1, followed by presenting and discussing the results received in section 3.2.
+In Chapter \ref{chapter2} we present a formal definition of the problem model used. We then describe the graph types used, and define the user models, display algorithms, and distance measures.
+
+Chapter \ref{chapter3} we describe the implementation of the model simulation which is used to run our experiments.
+
+Chapter \ref{chapter4} covers the various experiments we carried out and their results. Section \ref{sec:user_model_comparison} compares the two user models described, and we discuss why the probabilistic model is more appropriate. In Section \ref{sec:display_alg_comparisons} we present experiments comparing the various display algorithms, and in Section \ref{sec:distance_measure_comparisons} we build on this by also considering different distance measures that can combined with display algorithms. In Section \ref{sec:other_graph_types} we investigate how these algorithms perform on simpler graphs - chains, trees, and grids - and what this suggest about them and the model used. In section \ref{sec:real_social_network} we describe how a subgraph was extracted from a real social network, and the results of running our algorithms on this network.
+
+Finally Chapter \ref{chapter5} concludes this report and suggests some possibilities for future work on this subject.
 
 
-
-\chapter{Formal Definitions}
+\chapter{Formal Definitions} \label{chapter2}
 
 Before any algorithms can be developed, we need to define the problem formally. This describes the process by which messages are spread through the graph, and how the user model and display algorithms (the algorithms which decides on messages to show each user) affect this.
 
@@ -591,7 +592,7 @@ D(u, v) = \sum_{w=1}^{|V|} (\textbf{Z}^{t}[u, w] - \textbf{Z}^{t}[v, w])^{2}
 
 Where $|V|$ is the number of nodes in the graph.
 
-\chapter{Implementation}
+\chapter{Implementation} \label{chapter3}
 For the purpose of evaluating the developed algorithms, a program was written which allowed various simulations to be run, giving the desired results. The program was written in Python, using the NetworkX library\cite{NetworkX} to represent and manipulate network graphs. The program is split into classes, many of which have abstract base classes, to allow for easily creating and substituting different versions.
 
 For most cases the network graph used was randomly generated from certain parameters, which remained constant. To allow for easy generation of these graphs each time a simulation was run, the \texttt{GraphGenerator} abstract base class was used. Subclasses encapsulate the knowledge specific to the graph model being used - including how to create instances, and how nodes should be positioned if visualised (for example if the network is based on a grid layout, it should be positioned as such). The rest of the program is totally independent from this knowledge, meaning using a different subclass allows a completely different graph generation process. Some instances that were used include creating Kleinberg graphs based on the parameters, creating copies of non-random graphs, and loading specific graphs from files.
@@ -618,13 +619,13 @@ These classes are brought together by the \texttt{Simulation} class, which is gi
 The simulation class can also create visualisations as outputs. Either images of the state at each round of the simulation or a single video of the entire simulation can be produced. In these visualisations, a single message is highlighted as it spreads through the network, while the other vertices are coloured based on their level of traffic. This allows for seeing how a message moves through the graph and how far it spreads, as well as where potential bottlenecks occur and how busy the network is as a whole. An example of this output is shown in Figure \ref{fig:visualisation}.
 
 
-\chapter{Results}
+\chapter{Results} \label{chapter4}
 After development of the algorithms, experiments were run to compare their performance. Experiments were also run to ensure that the parameters chosen were reasonable and would give valid results. Unless otherwise stated all simulations were run until any action had completely stopped - that is, no messages were seen in some round by any node, either due them being delivered already or dying out before delivery. Also, unless otherwise stated, all simulations were run 20 times and the average result taken, to avoid random fluctuations.
 
 For a large number of experiments, Kleinberg's graph model, as described in Section \ref{sec:graph_def}, was used. In all of these experiments, $k=1$ and $q=2$ were used, where $k$ is the number of ``long links" created from each node and $q$ the ``clustering exponent", which is used alongside the grid distance between two nodes to calculate the probability of there being a long link between them. As is shown in \cite{Kleinberg00},  $q=2$ is the the ``sweet spot" for a graph based on a 2 dimensional lattice, at which decentralised routing can achieve delivery times polynomial in $\log n$. Additionally $k$ must be set to a small constant, so $k=1$ was chosen. A 20 by 20 grid was used to create the graph from, as this size was found to be large enough to provide good results, but not so large that the experiments took an excessively long time to run. When using these parameters, the average diameter of the graph produced was found to be 9.7 - a low value, as expected from a small world graph.
 
 
-\section{User Model Comparison}
+\section{User Model Comparison} \label{sec:user_model_comparison}
 The two models of message sharing by users, as described in Section \ref{sec:user_models}, were compared to each other experimentally to decide which was a better fit for future experiments. This was conducted by running separate simulations using display algorithms 1, 2, and 3 as described in Section \ref{sec:display_algorithms}. The purpose of these experiments was to document how the success of each user model changes as messages are spread more or less. It was hypothesised that since the basic user model shares all messages when there are very few shown to it, then limiting the spreading of messages to one copy per distinct message would give good results. However this would not match the expected result on real humans - somewhere along the chain a user would be expected to not share a message, due to not liking the contents or something similar.
 
 \begin{figure}
@@ -723,7 +724,7 @@ Figure \ref{fig:prob_user_model} shows the results for the probabilistic user mo
 
 Of particular note is the performance of display algorithm 3 when the probabilistic user model is used, as seen in \ref{subfig:prob_user_model_3}. In this case the amount delivered is very low, as you would expect if each message was shown to only one person. This suggests that when the number of messages in the system is low, the probabilistic model is more realistic. Based on these results, the probabilistic user model is used for the remaining experiments.
 
-\section{Display Algorithm Comparisons}
+\section{Display Algorithm Comparisons} \label{sec:display_alg_comparisons}
 
 With the user model chosen, the developed display algorithms were next compared to each other. This involved doing additional experiments to compare different values for some of the algorithms' variables. For all of these experiments, the probabilistic user model was used with $a = 20$ and $p_{share} = 0.5$. Kleinberg model graphs and the grid-based distance measure were used.
 
@@ -852,7 +853,7 @@ In the case of Algorithm 4, delivery rates start very high at low message counts
 
 Overall these results suggest that in the case Algorithm 2 (and Algorithm 1), there must be a balance between the number of messages and the amount messages are spread. For a low number of messages a high value of $p_{further}$ will perform well, but if high message counts are possible then a lower value of $p_{further}$ is necessary, giving more stable performance across message counts. In the case of Algorithm 5 (and Algorithm 4), the results show that an algorithm which has a large amount of randomness, with only some messages chosen in a non random way, is able to perform very well.
 
-\section{Distance Measure Comparisons}
+\section{Distance Measure Comparisons} \label{sec:distance_measure_comparisons}
 In addition to the display algorithms, different distance measures were compared. These are different methods to calculate the distances between nodes, which are used as part of the display algorithms when trying to get messages closer to their destination. By changing this distance measure but keeping the display algorithm used, although the overall strategy remains the same, the specific path taken by messages may change. Additionally, in the case of Algorithms 4 and 5, messages may be prioritised differently. In addition to the grid-based Manhatten distance measure that was already covered in the previous section, two others were investigated: graph distance and diffusion distance.
 
 \subsection{Graph Distance}
@@ -1040,7 +1041,7 @@ In algorithm 4, diffusion distance's slightly worse performance than graph dista
 
 In the case of the other algorithms, it is less clear why performance is generally than or similar to the other distance measures. More detailed analysis may be required to discover the reasoning, which may in turn help find more suitable distance measures.
 
-\section{Other Graph Types}
+\section{Other Graph Types} \label{sec:other_graph_types}
 
 While our main interest is in seeing how these algorithms perform on graphs resembling social networks, there is also value in testing them on other types of graphs. Although this will not necessarily give any indication of how the algorithms would perform in real situations, the performance of these algorithms on basic, more consistent graph types can help to understand the algorithms better. For this reason, the more interesting algorithms were tested on several simple graphs types. These graphs types involve no random elements, unlike the Kleinberg model graph.
 
@@ -1292,7 +1293,7 @@ Again, experiments were run to find optimal values of $p_{further}$ for Algorith
 
 Figure \ref{fig:grid_show_models} shows the performance of Algorithms 1, 2 (with $p_{further}=0.5$), 4, and 5 (with $f=0.2$) as the initial message count is increased from 25 to 800 in steps of 25. This is shown alongside the same results when using Kleinberg's graph (with the graph distance measure, which in most cases performed the best out of the distance measures). The results for the grid graph here are overall quite similar to those for the Kleinberg graphs, but somewhat lower. As with the experiments run on Kleinberg's graphs, Algorithm 5 achieves the highest delivery rate, at 62.5\% for 800 messages in this case. The fact that results for Kleinberg graphs are consistently better show that the algorithms used go make good use of the long links present in that case.
 
-\section{Real Social Network}
+\section{Real Social Network} \label{sec:real_social_network}
 In addition to experiments done on generated social-network-like graphs, real social network data was considered. For this, the Slovakian social network \textbf{Pokec} was used, data for which was taken from the Stanford Network Analysis Project\cite{snapnets}. Detail about the collection of the data can be found in the original paper\cite{pokecsource}.
 
 \begin{figure}
@@ -1350,7 +1351,7 @@ With the parameters set, experiments were run using Algorithm 2 and Algorithm 5 
 
 As noted before, the new graph was found to contain many nearly-disconnected nodes connected only to single other ``gateway" nodes. If these nodes are a result of the process of creating the subgraph then this may contribute to the lower than expected delivery rates. However it is also possible that these cases do exist within the social network. In that case the results found would suggest that the Kleinberg model of social networks lacks certain aspects which have an effect on these algorithms.
 
-\chapter{Conclusion}
+\chapter{Conclusion} \label{chapter5}
 We have defined our model of message sharing and selection, and described several display algorithms. Our results from conducting simulations of this message sharing process on Kleinberg's network model have shown that algorithms combining deterministic choice (to deliver messages quickly) with randomised aspects (to spread and keep messages alive) achieve the highest delivery rates. In particular, Algorithm 5 which chooses a fraction of messages based on which is closest to the destination, and a the remainder at random, was found to perform best out of those tested. In most cases we found that setting the fraction of messages picked based on distance to 0.2 provides the best results, suggesting that only small amounts deterministic choices are required for optimal throughput.
 
 In addition to Kleinberg's model, we considered other graph types - chains, trees, and grids. In the case of chains, and to a lesser degree trees, we found that the low degree of the nodes severely limits the ability to spread messages, and as a result makes the choice of display algorithm almost irrelevant. We also ran simulations using a portion of a real social network. We found that performance on this network was lower than had been seen when using Kleinberg's model, however it was not clear if this was due to the fact that only part of the social network was used or differences between the model and real social networks.
