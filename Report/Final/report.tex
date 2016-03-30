@@ -53,7 +53,7 @@
 \date{\today}
 
 \abstract{
-We consider the problem of trying to deliver messages to specific targets in a social network via passing through other users, with the use of a display algorithm which decides what messages each user is shown. We define the process of this message propagation, and develop several such display algorithms. These algorithms are evaluated on various graph types, primarily Kleinberg's social network model. We find that algorithms which combine small deterministic choices with larger amounts of randomisation perform well. Additionally, the algorithms are run on a portion of a real social network. Performance on this network is found to be lower than using the model, however it is unclear whether this is caused by the method of extracting the portion or differences between the model and real networks.
+We consider the problem of trying to deliver messages to specific targets in a social network via re-sharing by other users. The problem is constrained by the limited attention span users, who can only process a small number of messages and share some of these each round. We design display algorithms which select messages to show to each user, with the goal of maximising the number of messages delivered. These algorithms are evaluated on various graph types, primarily Kleinberg's social network model. We find that algorithms which combine small deterministic choices with larger amounts of randomisation perform well. Additionally, the algorithms are run on a portion of a real social network. Performance on this network is found to be lower than using the model, however it is unclear whether this is caused by the social network being incomplete or differences between the model and real networks.
 }
 
 \maketitle
