@@ -1292,6 +1292,63 @@ Again, experiments were run to find optimal values of $p_{further}$ for Algorith
 
 Figure \ref{fig:grid_show_models} shows the performance of Algorithms 1, 2 (with $p_{further}=0.5$), 4, and 5 (with $f=0.2$) as the initial message count is increased from 25 to 800 in steps of 25. This is shown alongside the same results when using Kleinberg's graph (with the graph distance measure, which in most cases performed the best out of the distance measures). The results for the grid graph here are overall quite similar to those for the Kleinberg graphs, but somewhat lower. As with the experiments run on Kleinberg's graphs, Algorithm 5 achieves the highest delivery rate, at 62.5\% for 800 messages in this case. The fact that results for Kleinberg graphs are consistently better show that the algorithms used go make good use of the long links present in that case.
 
+\section{Real Social Network}
+In addition to experiments done on generated social-network-like graphs, real social network data was considered. For this, the Slovakian social network \textbf{Pokec} was used, data for which was taken from the Stanford Network Analysis Project\cite{snapnets}. Detail about the collection of the data can be found in the original paper\cite{pokecsource}.
+
+\begin{figure}
+  \centering
+    \includegraphics[width=0.7\textwidth]{pokec_4000}
+  \caption{The subgraph constructed from the Pokec social network, using a breadth-first search limited to 4000 nodes. This network was used in place of a full real social network.}
+  \label{fig:pokec_4000}
+\end{figure}
+
+Due to the size of the dataset, using the entire network was not feasible. To solve this, a subgraph was constructed. This was achieved by setting a limit on the number of nodes to include in the subgraph, in this case 4000, and then crawling the network in a breadth first manner, using the first node included in the dataset as a starting point. While the original data was directed, in this case it was treated as undirected - edges to or from nodes were considered to be undirected connections. The network created using the crawling process is shown in Figure \ref{fig:pokec_4000}. Of note is the fact that there are many nodes which are nearly disconnected from the rest of the graph, being only connected to single ``gateway" nodes. Interestingly, these ``gateway'' nodes tend to be connected to many such nearly-disconnected nodes. It is unclear whether this is an aspect of the original network or a result of the creation process. Since nodes added to the subgraph in the last step of the search would not have had all of their neighbours included, it is possible that these nearly-disconnected nodes have other connections which are not included in the subgraph. However these nodes must still have no mutual friends with their ``gateway'' node, which would be unusual. It is possible that the disconnected nodes represent ``abnormal" user accounts, such as those which do not represent real people. Alternatively, the it may be the ``gateway" nodes which are ``abnormal" - for example famous people who have many otherwise unconnected friends. Further work on the topic may be able to investigate this aspect in detail.
+
+\begin{figure}
+\begin{subfigure}[]{0.41\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$p_{further}$},legend pos=outer north east]
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/pokec4000/further_prob/1250messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/pokec4000/further_prob/2500messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/pokec4000/further_prob/3750messages.csv};
+\addplot table [x=Not Closer Show Probability, y=average delivered (percent), col sep=comma] {results/pokec4000/further_prob/5000messages.csv};
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\begin{subfigure}[]{0.41\textwidth}
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=1,xlabel={$f$},legend pos=outer north east,legend image post style={sharp plot},]
+\addlegendimage{empty legend}
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/pokec4000/distance_priority_fraction/1250messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/pokec4000/distance_priority_fraction/2500messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/pokec4000/distance_priority_fraction/3750messages.csv};
+\addplot table [x=Distance Priority Fraction, y=average delivered (percent), col sep=comma] {results/pokec4000/distance_priority_fraction/5000messages.csv};
+\legend{\hspace{-.6cm}\textbf{Messages},1250,2500,3750,5000}
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\caption{Message delivery rates on the social network subgraph as the parameters for Algorithm 2 and Algorithm 5 are varied. For both $p_{further}$ and $f$, the optimal values were found to be 0.3.}
+\label{fig:pokec_4000_params}
+\end{figure}
+
+As in previous cases, experiments were run to determine the best value of the parameters for Algorithm 2 and Algorithm 5, the results of which are shown in Figure \ref{fig:pokec_4000_params}. Simulations were run increased the values of $p_{further}$ for Algorithm 2 and $f$ for Algorithm 5 from 0 to in steps of 0.1. In this case, due to the size of the graph and long runtime resulting from this, experiments could only be repeated 5 times rather than the usual 20. These experiments were repeated and message counts of 1250, 2500, 3750, and 5000. It was found that the best values were $p_{further}=0.3$ and $f=0.3$. These values are different from what was found in previous cases - this is particularly interesting for $f$, which was found to be either optimal at 0.2 or make no difference in every other case considered. However the differences in delivery rates between $f=0.2$ and $f=0.2$ in this case were minimal, and may be effected by random fluctuation.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[percentgraph,xmin=0,xmax=5000,xlabel={Message Count},width=0.7\textwidth,legend pos=north east]
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/pokec4000/FurtherProb_30.csv};
+\addplot table [x=Message count, y=average delivered (percent), col sep=comma] {results/pokec4000/FractionalDistancePriority_30.csv};
+\legend{Algorithm 2, Algorithm 5}
+\end{axis}
+\end{tikzpicture}
+\caption{Delivery rates of Algorithm 2 and Algorithm 5 on the social network subgraph as message count is varied. Overall the performance on this graph was found to be lower than in similar experiments run using Kleinberg's graph model.}
+\label{fig:pokec_4000_results}
+\end{figure}
+
+With the parameters set, experiments were run using Algorithm 2 and Algorithm 5 to measure their performance, the results of which are shown in Figure \ref{fig:pokec_4000_results}. These were conducted using message counts ranging from 500 to 5000, with intervals of 500. Again, it was only possible to repeat each experiment 5 times. As seen in other cases, Algorithm 5 outperformed Algorithm 2 significantly. However delivery rates for this graph were found to be significantly lower than those for Kleinberg's graph, even at low message counts. The delivery rates for Algorithm 2 ranged from 48.1\% to 9.0\%, and for Algorithm 5 from 58.8\% to 16.4\%.
+
+As noted before, the new graph was found to contain many nearly-disconnected nodes connected only to single other ``gateway" nodes. If these nodes are a result of the process of creating the subgraph then this may contribute to the lower than expected delivery rates. However it is also possible that these cases do exist within the social network. In that case the results found would suggest that the Kleinberg model of social networks lacks certain aspects which have an effect on these algorithms.
 
 \chapter{Conclusion}
 
